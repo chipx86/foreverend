@@ -221,7 +221,7 @@ class Player(Sprite):
 
 
 class Level(object):
-    def __init__(self, engine):
+    def __init__(self, engine, num):
         self.engine = engine
         self.layers = []
         self.group = pygame.sprite.LayeredDirty()
@@ -233,9 +233,10 @@ class Level(object):
         self.main_layer.add(ground)
         ground.move_to(0, screen.get_height() - ground.rect.height)
 
-        ground = TiledSprite('ground', 40, 1)
-        self.main_layer.add(ground)
-        ground.move_to(60, screen.get_height() - 2 * ground.rect.height)
+        if num == 2:
+            ground = TiledSprite('ground', 40, 1)
+            self.main_layer.add(ground)
+            ground.move_to(60, screen.get_height() - 2 * ground.rect.height)
 
     def new_layer(self):
         layer = Layer(len(self.layers), self)
@@ -253,6 +254,26 @@ class Level(object):
             sprite.tick()
 
 
+class LevelSet(object):
+    def __init__(self, engine):
+        self.engine = engine
+        self.levels = []
+        self.active_level = None
+
+    def add(self, level):
+        self.levels.append(level)
+        level.levelset = self
+
+        if not self.active_level:
+            self.active_level = level
+
+    def switch_level(self, level_num):
+        player = self.engine.player
+        self.active_level.main_layer.remove(player)
+        self.active_level = self.levels[level_num - 1]
+        self.active_level.main_layer.add(player)
+
+
 class ForeverEndEngine(object):
     def __init__(self, screen):
         self.screen = screen
@@ -266,10 +287,20 @@ class ForeverEndEngine(object):
 
     def _setup_game(self):
         self.bg.fill((255, 255, 255))
-        self.level = Level(self)
+
+        self.levelsets = []
+
+        levelset = LevelSet(self)
+        level = Level(self, 1)
+        levelset.add(level)
+
+        level = Level(self, 2)
+        levelset.add(level)
+
+        self.active_levelset = levelset
 
         self.player = Player()
-        self.level.main_layer.add(self.player)
+        self.active_levelset.active_level.main_layer.add(self.player)
         self.player.move_to(10, self.screen.get_height() - 32 -
                             self.player.rect.height)
         self.player.show()
