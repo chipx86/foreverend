@@ -1,87 +1,8 @@
 import pygame
 from pygame.locals import *
 
+from foreverend.levels import get_levels
 from foreverend.sprites import Player, TiledSprite
-
-
-class Layer(object):
-    def __init__(self, index, level):
-        self.level = level
-        self.index = index
-        self.objs = set()
-
-    def add(self, *objs):
-        for obj in objs:
-            obj.layer = self
-            obj.update_image()
-            self.level.group.add(obj, layer=self.index)
-            self.objs.add(obj)
-
-    def remove(self, *objs):
-        for obj in objs:
-            obj.update_image()
-            self.level.group.remove(obj)
-            self.objs.discard(obj)
-
-    def __iter__(self):
-        return iter(self.objs)
-
-    def handle_event(self, event):
-        pass
-
-
-class Level(object):
-    def __init__(self, engine, num):
-        self.engine = engine
-        self.layers = []
-        self.group = pygame.sprite.LayeredDirty()
-        self.default_layer = self.new_layer()
-        self.main_layer = self.new_layer()
-
-        screen = engine.screen
-        ground = TiledSprite('ground', 40, 1)
-        self.main_layer.add(ground)
-        ground.move_to(0, screen.get_height() - ground.rect.height)
-
-        if num == 2:
-            ground = TiledSprite('ground', 40, 1)
-            self.main_layer.add(ground)
-            ground.move_to(60, screen.get_height() - 2 * ground.rect.height)
-
-    def new_layer(self):
-        layer = Layer(len(self.layers), self)
-        layer.level = self
-        self.layers.append(layer)
-        return layer
-
-    def draw(self, screen):
-        self.group.draw(screen)
-
-    def tick(self):
-        self.group.update()
-
-        for sprite in self.group:
-            sprite.tick()
-
-
-class LevelSet(object):
-    def __init__(self, engine):
-        self.engine = engine
-        self.levels = []
-        self.active_level = None
-
-    def add(self, level):
-        self.levels.append(level)
-        level.levelset = self
-
-        if not self.active_level:
-            self.active_level = level
-
-    def switch_level(self, level_num):
-        player = self.engine.player
-        self.active_level.main_layer.remove(player)
-        self.active_level = self.levels[level_num - 1]
-        self.active_level.main_layer.add(player)
 
 
 class ForeverEndEngine(object):
@@ -100,19 +21,11 @@ class ForeverEndEngine(object):
     def _setup_game(self):
         self.bg.fill((255, 255, 255))
 
-        self.levelsets = []
-
-        levelset = LevelSet(self)
-        level = Level(self, 1)
-        levelset.add(level)
-
-        level = Level(self, 2)
-        levelset.add(level)
-
-        self.active_levelset = levelset
+        self.levels = [level(self) for level in get_levels()]
+        self.active_level = self.levels[0]
 
         self.player = Player(self)
-        self.active_levelset.active_level.main_layer.add(self.player)
+        self.active_level.switch_time_period(0)
         self.player.move_to(10, self.screen.get_height() - 32 -
                             self.player.rect.height)
         self.player.show()
@@ -142,11 +55,11 @@ class ForeverEndEngine(object):
                 self._pause()
         # XXX
         elif event.type == KEYDOWN and event.key == K_1:
-            self.active_levelset.switch_level(1)
+            self.active_level.switch_time_period(0)
         elif event.type == KEYDOWN and event.key == K_2:
-            self.active_levelset.switch_level(2)
+            self.active_level.switch_time_period(1)
         elif event.type == KEYDOWN and event.key == K_3:
-            self.active_levelset.switch_level(3)
+            self.active_level.switch_time_period(2)
         else:
             self.player.handle_event(event)
 
@@ -163,12 +76,12 @@ class ForeverEndEngine(object):
 
     def _paint(self):
         self.screen.blit(self.bg, (0, 0))
-        self.active_levelset.active_level.draw(self.screen)
+        self.active_level.draw(self.screen)
         pygame.display.flip()
 
     def _tick(self):
         if not self.paused:
-            self.active_levelset.active_level.tick()
+            self.active_level.tick()
 
             for sprite in [self.player]:
                 if sprite.velocity != (0, 0):
