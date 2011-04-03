@@ -37,9 +37,7 @@ class Level(object):
         self.engine = engine
         self.time_periods = []
         self.active_time_period = None
-
-    def get_size(self):
-        raise NotImplemented
+        self.size = None
 
     def add(self, time_period):
         self.time_periods.append(time_period)
@@ -97,7 +95,7 @@ class TimePeriod1999AD(TimePeriod):
         super(TimePeriod1999AD, self).__init__(*args, **kwargs)
         self.bg.fill((255, 255, 255))
 
-        tiles_x = self.level.get_size()[0] / 32
+        tiles_x = self.level.size[0] / 32
         screen = self.engine.screen
         ground = TiledSprite('ground', tiles_x, 1)
         self.main_layer.add(ground)
@@ -113,7 +111,7 @@ class TimePeriod65000000BC(TimePeriod):
         super(TimePeriod65000000BC, self).__init__(*args, **kwargs)
 
         screen = self.engine.screen
-        ground = TiledSprite('ground', self.level.get_size()[0] / 32, 1)
+        ground = TiledSprite('ground', self.level.size[0] / 32, 1)
         self.main_layer.add(ground)
         ground.move_to(0, screen.get_height() - ground.rect.height)
 
@@ -121,11 +119,11 @@ class TimePeriod65000000BC(TimePeriod):
 class Level1(Level):
     def __init__(self, *args, **kwargs):
         super(Level1, self).__init__(*args, **kwargs)
+        self.size = (10000, 600)
+        self.start_pos = (10,
+                          self.size[1] - 32 - self.engine.player.rect.height)
         self.add(TimePeriod1999AD(self))
         self.add(TimePeriod65000000BC(self))
-
-    def get_size(self):
-        return (10000, 600)
 
 
 def get_levels():

@@ -33,8 +33,7 @@ class Camera(object):
             self.rect.centery = player_rect.centery + self.SCREEN_PAD
 
         if old_rect != self.rect:
-            self.rect.clamp_ip(
-                pygame.Rect(0, 0, *self.engine.active_level.get_size()))
+            self.rect.clamp_ip(pygame.Rect(0, 0, *self.engine.active_level.size))
 
 
 class ForeverEndEngine(object):
@@ -52,20 +51,17 @@ class ForeverEndEngine(object):
 
     def _setup_game(self):
         self.player = Player(self)
-
+        self.player.update_image()
         self.levels = [level(self) for level in get_levels()]
         self.switch_level(0)
-
-        self.active_level.switch_time_period(0)
-        self.player.move_to(10, self.screen.get_height() - 32 -
-                            self.player.rect.height)
-        self.player.show()
 
     def switch_level(self, num):
         assert num < len(self.levels)
         self.active_level = self.levels[num]
         self.active_level.switch_time_period(0)
-        self.surface = pygame.Surface(self.active_level.get_size())
+        self.surface = pygame.Surface(self.active_level.size)
+        self.player.move_to(*self.active_level.start_pos)
+        self.player.show()
 
     def _mainloop(self):
         while 1:
