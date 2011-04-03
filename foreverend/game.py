@@ -25,7 +25,7 @@ class Layer(object):
     def remove(self, *objs):
         for obj in objs:
             obj.update_image()
-            self.map.group.remove(obj)
+            self.level.group.remove(obj)
             self.objs.discard(obj)
 
     def __iter__(self):
