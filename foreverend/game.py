@@ -68,9 +68,17 @@ class Sprite(pygame.sprite.DirtySprite):
 
     def move_to(self, x, y):
         self.rect.move_ip(x - self.rect.x, y - self.rect.y)
+        self.on_moved()
 
     def move_by(self, dx, dy):
         self.rect.move_ip(dx, dy)
+        self.on_moved()
+
+    def on_moved(self):
+        pass
+
+    def on_collided(self, obj):
+        pass
 
 
 class TiledSprite(Sprite):
@@ -104,9 +112,13 @@ class Player(Sprite):
     MOVE_SPEED = 2
     JUMP_SPEED = 4
     FALL_SPEED = 4
+    MAX_JUMP_HEIGHT = 64
 
     def __init__(self):
         super(Player, self).__init__('player')
+        self.jumping = False
+        self.falling = False
+        self.jump_origin = None
 
     def handle_event(self, event):
         if event.type == KEYDOWN:
@@ -115,7 +127,7 @@ class Player(Sprite):
             elif event.key == K_LEFT:
                 self.velocity = (-self.MOVE_SPEED, self.velocity[1])
             elif event.key == K_SPACE:
-                self.velocity = (self.velocity[0], -self.JUMP_SPEED)
+                self.jump()
         elif event.type == KEYUP:
             if event.key == K_LEFT:
                 if self.velocity[0] < 0:
@@ -124,7 +136,35 @@ class Player(Sprite):
                 if self.velocity[0] > 0:
                     self.velocity = (0, self.velocity[1])
             elif event.key == K_SPACE:
-                self.velocity = (self.velocity[0], self.FALL_SPEED)
+                self.fall()
+
+    def jump(self):
+        if self.falling or self.jumping:
+            return
+
+        self.jump_origin = (self.rect.left, self.rect.top)
+        self.jumping = True
+        self.velocity = (self.velocity[0], -self.JUMP_SPEED)
+
+    def fall(self):
+        if self.falling:
+            return
+
+        self.jumping = False
+        self.falling = True
+        self.velocity = (self.velocity[0], self.FALL_SPEED)
+
+    def on_moved(self):
+        if (self.jumping and
+            self.jump_origin[1] - self.rect.top >= self.MAX_JUMP_HEIGHT):
+            self.fall()
+
+    def on_collided(self, obj):
+        if self.velocity[1] == 0:
+            if self.jumping:
+                self.fall()
+            elif self.falling:
+                self.falling = False
 
 
 class Level(object):
@@ -182,6 +222,8 @@ class Level(object):
                 elif obj.rect.right >= player.rect.left:
                     player.velocity = (0, player.velocity[1])
                     player.move_to(obj.rect.right, player.rect.top)
+
+            player.on_collided(obj)
 
 
 class ForeverEndEngine(object):
