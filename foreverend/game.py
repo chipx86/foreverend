@@ -46,6 +46,11 @@ class Sprite(pygame.sprite.DirtySprite):
         self.dirty = 2
         self.velocity = (0, 0)
 
+    def __repr__(self):
+        return 'Sprite %s (%s, %s, %s, %s)' % \
+               (self.name, self.rect.left, self.rect.top,
+                self.rect.width, self.rect.height)
+
     def show(self):
         if not self.visible:
             self.visible = 1
@@ -66,13 +71,39 @@ class Sprite(pygame.sprite.DirtySprite):
     def generate_image(self):
         return load_image(self.name)
 
-    def move_to(self, x, y):
-        self.rect.move_ip(x - self.rect.x, y - self.rect.y)
+    def move_to(self, x, y, check_collisions=False):
+        self.move_by(x - self.rect.x, y - self.rect.y, check_collisions)
+
+    def move_by(self, dx, dy, check_collisions=True):
+        if check_collisions:
+            if dx:
+                self._move(dx=dx)
+
+            if dy:
+                self._move(dy=dy)
+        else:
+            self.rect.move_ip(dx, dy)
+
         self.on_moved()
 
-    def move_by(self, dx, dy):
+    def _move(self, dx=0, dy=0):
         self.rect.move_ip(dx, dy)
-        self.on_moved()
+
+        for obj in pygame.sprite.spritecollide(self, self.layer.level.group,
+                                               False):
+            if obj == self or obj.layer != self.layer:
+                continue
+
+            if dy < 0:
+                self.rect.top = obj.rect.bottom
+            elif dy > 0:
+                self.rect.bottom = obj.rect.top
+            elif dx < 0:
+                self.rect.left = obj.rect.right
+            elif dx > 0:
+                self.rect.right = obj.rect.left
+
+            self.on_collision(dx, dy, obj)
 
     def tick(self):
         pass
@@ -80,7 +111,7 @@ class Sprite(pygame.sprite.DirtySprite):
     def on_moved(self):
         pass
 
-    def on_collided(self, obj):
+    def on_collision(self, dx, dy, obj):
         pass
 
 
@@ -182,12 +213,11 @@ class Player(Sprite):
             self.jump_origin[1] - self.rect.top >= self.MAX_JUMP_HEIGHT):
             self.hover()
 
-    def on_collided(self, obj):
-        if self.velocity[1] == 0:
-            if self.jumping:
-                self.fall()
-            elif self.falling:
-                self.falling = False
+    def on_collision(self, dx, dy, obj):
+        if self.jumping and dy < 0:
+            self.fall()
+        elif self.falling:
+            self.falling = False
 
 
 class Level(object):
@@ -197,13 +227,15 @@ class Level(object):
         self.group = pygame.sprite.LayeredDirty()
         self.default_layer = self.new_layer()
         self.main_layer = self.new_layer()
-        self.collision_rects = []
 
         screen = engine.screen
-        self.ground = TiledSprite('ground', 40, 1)
-        self.main_layer.add(self.ground)
-        self.ground.move_to(0, screen.get_height() - self.ground.rect.height)
-        self.collision_rects.append(self.ground.rect)
+        ground = TiledSprite('ground', 40, 1)
+        self.main_layer.add(ground)
+        ground.move_to(0, screen.get_height() - ground.rect.height)
+
+        ground = TiledSprite('ground', 40, 1)
+        self.main_layer.add(ground)
+        ground.move_to(60, screen.get_height() - 2 * ground.rect.height)
 
     def new_layer(self):
         layer = Layer(len(self.layers), self)
@@ -216,40 +248,9 @@ class Level(object):
 
     def tick(self):
         self.group.update()
-        self.check_collisions()
 
         for sprite in self.group:
             sprite.tick()
-
-    def check_collisions(self):
-        player = self.engine.player
-
-        for obj in pygame.sprite.spritecollide(player, self.group, False):
-            if obj == player or obj.layer != player.layer:
-                continue
-
-            print 'collide - %s -- %s' % (obj.rect, player.rect)
-            if (player.rect.left >= obj.rect.left and
-                player.rect.right <= obj.rect.right):
-                if obj.rect.top <= player.rect.bottom:
-                    player.velocity = (player.velocity[0], 0)
-                    player.move_to(player.rect.left,
-                                   obj.rect.top - player.rect.height)
-                elif obj.rect.bottom >= player.rect.top:
-                    player.velocity = (player.velocity[0], 0)
-                    player.move_to(player.rect.left, obj.rect.bottom)
-
-            if (player.rect.top >= obj.rect.top and
-                player.rect.bottom <= obj.rect.bottom):
-                if obj.rect.left <= player.rect.right:
-                    player.velocity = (0, player.velocity[1])
-                    player.move_to(obj.rect.left - player.rect.width,
-                                   player.rect.top)
-                elif obj.rect.right >= player.rect.left:
-                    player.velocity = (0, player.velocity[1])
-                    player.move_to(obj.rect.right, player.rect.top)
-
-            player.on_collided(obj)
 
 
 class ForeverEndEngine(object):
@@ -298,11 +299,11 @@ class ForeverEndEngine(object):
         pygame.display.flip()
 
     def _tick(self):
+        self.level.tick()
+
         for sprite in [self.player]:
             if sprite.velocity != (0, 0):
                 sprite.move_by(*sprite.velocity)
-
-        self.level.tick()
 
 
 def main():
