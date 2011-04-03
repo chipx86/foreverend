@@ -5,6 +5,38 @@ from foreverend.levels import get_levels
 from foreverend.sprites import Player, TiledSprite
 
 
+class Camera(object):
+    SCREEN_PAD = 64
+
+    def __init__(self, engine):
+        self.engine = engine
+        self.rect = self.engine.screen.get_rect()
+        self.old_player_rect = None
+
+    def update(self):
+        player_rect = self.engine.player.rect
+
+        if player_rect == self.old_player_rect:
+            return
+
+        self.old_player_rect = player_rect.copy()
+        old_rect = self.rect.copy()
+
+        if player_rect.centerx > self.rect.centerx + self.SCREEN_PAD:
+            self.rect.centerx = player_rect.centerx - self.SCREEN_PAD
+        elif player_rect.centerx < self.rect.centerx - self.SCREEN_PAD:
+            self.rect.centerx = player_rect.centerx + self.SCREEN_PAD
+
+        if player_rect.centery > self.rect.centery + self.SCREEN_PAD:
+            self.rect.centery = player_rect.centery - self.SCREEN_PAD
+        elif player_rect.centery < self.rect.centery - self.SCREEN_PAD:
+            self.rect.centery = player_rect.centery + self.SCREEN_PAD
+
+        if old_rect != self.rect:
+            self.rect.clamp_ip(
+                pygame.Rect(0, 0, *self.engine.active_level.get_size()))
+
+
 class ForeverEndEngine(object):
     FPS = 30
 
@@ -12,23 +44,28 @@ class ForeverEndEngine(object):
         self.screen = screen
         self.clock = pygame.time.Clock()
         self.paused = False
+        self.camera = Camera(self)
 
     def run(self):
-        self.bg = pygame.Surface(self.screen.get_size()).convert()
         self._setup_game()
         self._mainloop()
 
     def _setup_game(self):
-        self.bg.fill((255, 255, 255))
+        self.player = Player(self)
 
         self.levels = [level(self) for level in get_levels()]
-        self.active_level = self.levels[0]
+        self.switch_level(0)
 
-        self.player = Player(self)
         self.active_level.switch_time_period(0)
         self.player.move_to(10, self.screen.get_height() - 32 -
                             self.player.rect.height)
         self.player.show()
+
+    def switch_level(self, num):
+        assert num < len(self.levels)
+        self.active_level = self.levels[num]
+        self.active_level.switch_time_period(0)
+        self.surface = pygame.Surface(self.active_level.get_size())
 
     def _mainloop(self):
         while 1:
@@ -75,8 +112,11 @@ class ForeverEndEngine(object):
         self._pause()
 
     def _paint(self):
-        self.screen.blit(self.bg, (0, 0))
-        self.active_level.draw(self.screen)
+        self.active_level.draw(self.surface)
+        self.screen.blit(self.surface.subsurface(
+            pygame.Rect(self.camera.rect.left, self.camera.rect.top,
+                        self.screen.get_width(), self.screen.get_height())),
+            (0, 0))
         pygame.display.flip()
 
     def _tick(self):
@@ -86,3 +126,5 @@ class ForeverEndEngine(object):
             for sprite in [self.player]:
                 if sprite.velocity != (0, 0):
                     sprite.move_by(*sprite.velocity)
+
+            self.camera.update()

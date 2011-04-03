@@ -38,6 +38,9 @@ class Level(object):
         self.time_periods = []
         self.active_time_period = None
 
+    def get_size(self):
+        raise NotImplemented
+
     def add(self, time_period):
         self.time_periods.append(time_period)
         time_period.time_periodset = self
@@ -70,6 +73,7 @@ class TimePeriod(object):
         self.group = pygame.sprite.LayeredDirty()
         self.default_layer = self.new_layer()
         self.main_layer = self.new_layer()
+        self.bg = pygame.Surface(self.engine.screen.get_size()).convert()
 
     def new_layer(self):
         layer = Layer(len(self.layers), self)
@@ -78,6 +82,7 @@ class TimePeriod(object):
         return layer
 
     def draw(self, screen):
+        screen.blit(self.bg, self.engine.camera.rect.topleft)
         self.group.draw(screen)
 
     def tick(self):
@@ -90,13 +95,15 @@ class TimePeriod(object):
 class TimePeriod1999AD(TimePeriod):
     def __init__(self, *args, **kwargs):
         super(TimePeriod1999AD, self).__init__(*args, **kwargs)
+        self.bg.fill((255, 255, 255))
 
+        tiles_x = self.level.get_size()[0] / 32
         screen = self.engine.screen
-        ground = TiledSprite('ground', 40, 1)
+        ground = TiledSprite('ground', tiles_x, 1)
         self.main_layer.add(ground)
         ground.move_to(0, screen.get_height() - ground.rect.height)
 
-        ground = TiledSprite('ground', 40, 1)
+        ground = TiledSprite('ground', tiles_x, 1)
         self.main_layer.add(ground)
         ground.move_to(60, screen.get_height() - 2 * ground.rect.height)
 
@@ -106,7 +113,7 @@ class TimePeriod65000000BC(TimePeriod):
         super(TimePeriod65000000BC, self).__init__(*args, **kwargs)
 
         screen = self.engine.screen
-        ground = TiledSprite('ground', 40, 1)
+        ground = TiledSprite('ground', self.level.get_size()[0] / 32, 1)
         self.main_layer.add(ground)
         ground.move_to(0, screen.get_height() - ground.rect.height)
 
@@ -116,6 +123,9 @@ class Level1(Level):
         super(Level1, self).__init__(*args, **kwargs)
         self.add(TimePeriod1999AD(self))
         self.add(TimePeriod65000000BC(self))
+
+    def get_size(self):
+        return (10000, 600)
 
 
 def get_levels():
