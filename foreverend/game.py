@@ -163,9 +163,25 @@ class Level(object):
                 continue
 
             print 'collide - %s -- %s' % (obj.rect, player.rect)
-            if obj.rect.top <= player.rect.bottom:
-                player.velocity = (player.velocity[0], 0)
-                player.move_to(player.rect.left, obj.rect.top - player.rect.height)
+            if (player.rect.left >= obj.rect.left and
+                player.rect.right <= obj.rect.right):
+                if obj.rect.top <= player.rect.bottom:
+                    player.velocity = (player.velocity[0], 0)
+                    player.move_to(player.rect.left,
+                                   obj.rect.top - player.rect.height)
+                elif obj.rect.bottom >= player.rect.top:
+                    player.velocity = (player.velocity[0], 0)
+                    player.move_to(player.rect.left, obj.rect.bottom)
+
+            if (player.rect.top >= obj.rect.top and
+                player.rect.bottom <= obj.rect.bottom):
+                if obj.rect.left <= player.rect.right:
+                    player.velocity = (0, player.velocity[1])
+                    player.move_to(obj.rect.left - player.rect.width,
+                                   player.rect.top)
+                elif obj.rect.right >= player.rect.left:
+                    player.velocity = (0, player.velocity[1])
+                    player.move_to(obj.rect.right, player.rect.top)
 
 
 class ForeverEndEngine(object):
