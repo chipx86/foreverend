@@ -16,12 +16,14 @@ class Layer(object):
             obj.update_image()
             self.level.group.add(obj, layer=self.index)
             self.objs.add(obj)
+            obj.on_added(self)
 
     def remove(self, *objs):
         for obj in objs:
             obj.update_image()
             self.level.group.remove(obj)
             self.objs.discard(obj)
+            obj.on_removed(self)
 
     def __iter__(self):
         return iter(self.objs)

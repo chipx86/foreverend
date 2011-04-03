@@ -14,6 +14,7 @@ class Sprite(pygame.sprite.DirtySprite):
         self.visible = 1
         self.dirty = 2
         self.velocity = (0, 0)
+        self.collidable = True
 
     def __repr__(self):
         return 'Sprite %s (%s, %s, %s, %s)' % \
@@ -23,7 +24,7 @@ class Sprite(pygame.sprite.DirtySprite):
     def show(self):
         if not self.visible:
             self.visible = 1
-            self.dirty = 1
+            self.dirty = 2
             self.layer.add(self)
 
     def hide(self):
@@ -60,7 +61,7 @@ class Sprite(pygame.sprite.DirtySprite):
 
         for obj in pygame.sprite.spritecollide(self, self.layer.level.group,
                                                False):
-            if obj == self or obj.layer != self.layer:
+            if obj == self or obj.layer != self.layer or not obj.collidable:
                 continue
 
             if dy < 0:
@@ -81,6 +82,12 @@ class Sprite(pygame.sprite.DirtySprite):
         pass
 
     def on_collision(self, dx, dy, obj):
+        pass
+
+    def on_added(self, layer):
+        pass
+
+    def on_removed(self, layer):
         pass
 
 
@@ -126,6 +133,8 @@ class Player(Sprite):
         self.hovering = False
         self.hover_time_ms = 0
         self.jump_origin = None
+        self.propulsion_below = Sprite("propulsion_below")
+        self.propulsion_below.collidable = False
 
     def handle_event(self, event):
         if event.type == KEYDOWN:
@@ -152,11 +161,13 @@ class Player(Sprite):
         self.jump_origin = (self.rect.left, self.rect.top)
         self.jumping = True
         self.velocity = (self.velocity[0], -self.JUMP_SPEED)
+        self.propulsion_below.show()
 
     def fall(self):
         if self.falling:
             return
 
+        self.propulsion_below.hide()
         self.jumping = False
         self.hovering = False
         self.falling = True
@@ -166,6 +177,7 @@ class Player(Sprite):
         if self.hovering:
             return
 
+        self.propulsion_below.show()
         self.jumping = False
         self.hovering = True
         self.hover_time_ms = 0
@@ -178,10 +190,20 @@ class Player(Sprite):
             if self.hover_time_ms >= self.HOVER_TIME_MS:
                 self.fall()
 
+    def on_added(self, layer):
+        layer.add(self.propulsion_below)
+        self.propulsion_below.hide()
+
+    def on_removed(self, layer):
+        layer.remove(self.propulsion_below)
+
     def on_moved(self):
         if (self.jumping and
             self.jump_origin[1] - self.rect.top >= self.MAX_JUMP_HEIGHT):
             self.hover()
+
+        if self.propulsion_below.visible:
+            self.propulsion_below.move_to(self.rect.left, self.rect.bottom)
 
     def on_collision(self, dx, dy, obj):
         if self.jumping and dy < 0:
