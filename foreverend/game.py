@@ -74,6 +74,9 @@ class Sprite(pygame.sprite.DirtySprite):
         self.rect.move_ip(dx, dy)
         self.on_moved()
 
+    def tick(self):
+        pass
+
     def on_moved(self):
         pass
 
@@ -113,11 +116,14 @@ class Player(Sprite):
     JUMP_SPEED = 4
     FALL_SPEED = 4
     MAX_JUMP_HEIGHT = 64
+    HOVER_TIME_MS = 1000
 
     def __init__(self):
         super(Player, self).__init__('player')
         self.jumping = False
         self.falling = False
+        self.hovering = False
+        self.hover_time_ms = 0
         self.jump_origin = None
 
     def handle_event(self, event):
@@ -151,13 +157,30 @@ class Player(Sprite):
             return
 
         self.jumping = False
+        self.hovering = False
         self.falling = True
         self.velocity = (self.velocity[0], self.FALL_SPEED)
+
+    def hover(self):
+        if self.hovering:
+            return
+
+        self.jumping = False
+        self.hovering = True
+        self.hover_time_ms = 0
+        self.velocity = (self.velocity[0], 0)
+
+    def tick(self):
+        if self.hovering:
+            self.hover_time_ms += 1.0 / FPS * 1000
+
+            if self.hover_time_ms >= self.HOVER_TIME_MS:
+                self.fall()
 
     def on_moved(self):
         if (self.jumping and
             self.jump_origin[1] - self.rect.top >= self.MAX_JUMP_HEIGHT):
-            self.fall()
+            self.hover()
 
     def on_collided(self, obj):
         if self.velocity[1] == 0:
@@ -194,6 +217,9 @@ class Level(object):
     def tick(self):
         self.group.update()
         self.check_collisions()
+
+        for sprite in self.group:
+            sprite.tick()
 
     def check_collisions(self):
         player = self.engine.player
