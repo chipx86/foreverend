@@ -82,23 +82,24 @@ class ForeverEndEngine(object):
             (event.type == KEYDOWN and event.key == K_ESCAPE)):
             pygame.quit()
             return False
-        elif event.type == KEYDOWN and event.key == K_TAB:
-            # Switch time periods
-            self._show_time_periods()
         elif event.type == KEYDOWN and event.key == K_RETURN:
             if self.paused:
                 self._unpause()
             else:
                 self._pause()
-        # XXX
-        elif event.type == KEYDOWN and event.key == K_1:
-            self.active_level.switch_time_period(0)
-        elif event.type == KEYDOWN and event.key == K_2:
-            self.active_level.switch_time_period(1)
-        elif event.type == KEYDOWN and event.key == K_3:
-            self.active_level.switch_time_period(2)
-        else:
-            self.player.handle_event(event)
+        elif not self.paused:
+            if event.type == KEYDOWN and event.key == K_TAB:
+                # Switch time periods
+                self._show_time_periods()
+            # XXX
+            elif event.type == KEYDOWN and event.key == K_1:
+                self.active_level.switch_time_period(0)
+            elif event.type == KEYDOWN and event.key == K_2:
+                self.active_level.switch_time_period(1)
+            elif event.type == KEYDOWN and event.key == K_3:
+                self.active_level.switch_time_period(2)
+            else:
+                self.player.handle_event(event)
 
         return True
 
