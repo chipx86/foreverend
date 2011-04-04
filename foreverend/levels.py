@@ -1,8 +1,8 @@
 import pygame
 from pygame.locals import *
 
-from foreverend.sprites import Box, Elevator, Mountain600AD, Mountain1999AD, \
-                               Sprite, TiledSprite, Volcano
+from foreverend.sprites import Box, Dynamite, Elevator, Mountain600AD, \
+                               Mountain1999AD, Sprite, TiledSprite, Volcano
 
 
 class Layer(object):
@@ -209,6 +209,16 @@ class TimePeriod1999AD(TimePeriod):
         # Link up the elevators
         elevator1.destination = elevator2
         elevator2.destination = elevator1
+
+        # Dynamite box
+        box = Box(20, 10)
+        self.main_layer.add(box)
+        box.move_to(200, ground.rect.top - box.rect.height)
+
+        # Dynamite
+        dynamite = Dynamite()
+        self.main_layer.add(dynamite)
+        dynamite.move_to(200, ground.rect.top - dynamite.rect.height)
 
         # Mountain
         mountain = Mountain1999AD()

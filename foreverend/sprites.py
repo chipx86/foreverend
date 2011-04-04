@@ -109,7 +109,7 @@ class Sprite(pygame.sprite.DirtySprite):
             obj.handle_stop_colliding(self)
 
     def get_collisions(self, group=None, ignore_collidable_flag=False):
-        if not self.check_collisions:
+        if not self.check_collisions and not ignore_collidable_flag:
             raise StopIteration
 
         if group is None:
@@ -133,8 +133,8 @@ class Sprite(pygame.sprite.DirtySprite):
         if (left == right or
             (compare_layers and left.layer != right.layer) or
             (not ignore_collidable_flag and
-             (not left.collidable or not right.collidable)) or
-            (not left.check_collisions and not right.check_collisions)):
+             ((not left.collidable or not right.collidable) or
+              (not left.check_collisions and not right.check_collisions)))):
             return None, None
 
         left_rects = left.collision_rects or [left.rect]
@@ -197,6 +197,54 @@ class TiledSprite(Sprite):
         self.image = new_image
 
 
+class Item(Sprite):
+    def __init__(self, *args, **kwargs):
+        super(Item, self).__init__(*args, **kwargs)
+
+
+class Dynamite(Item):
+    def __init__(self):
+        super(Dynamite, self).__init__('1999ad/dynamite')
+
+
+class TractorBeam(Sprite):
+    ITEM_OFFSET = -5
+
+    def __init__(self, name='tractor_beam'):
+        super(TractorBeam, self).__init__(name, flip_image=True)
+        self.ungrab()
+
+    def check_for_items(self):
+        if self.item:
+            return
+
+        for obj, _, _ in self.get_collisions(ignore_collidable_flag=True):
+            if isinstance(obj, Item):
+                self.grab(obj)
+
+    def grab(self, item):
+        assert item
+        print 'Got item'
+        self.item = item
+        self.name = 'tractor_beam'
+        self.update_image()
+
+    def ungrab(self):
+        self.item = None
+        self.name = 'tractor_beam_wide'
+        self.update_image()
+
+    def on_moved(self):
+        if self.item:
+            y = self.rect.top + (self.rect.height - self.item.rect.height) / 2
+
+            if self.direction == Direction.RIGHT:
+                self.item.move_to(self.rect.right + self.ITEM_OFFSET, y)
+            elif self.direction == Direction.LEFT:
+                self.item.move_to(self.rect.left - self.item.rect.width -
+                                  self.ITEM_OFFSET, y)
+
+
 class Player(Sprite):
     MOVE_SPEED = 6
     JUMP_SPEED = 6
@@ -218,7 +266,7 @@ class Player(Sprite):
         self.jump_origin = None
         self.propulsion_below = Sprite("propulsion_below")
         self.propulsion_below.collidable = False
-        self.tractor_beam = Sprite('tractor_beam', flip_image=True)
+        self.tractor_beam = TractorBeam()
         self.tractor_beam.collidable = False
 
     def handle_event(self, event):
@@ -272,8 +320,10 @@ class Player(Sprite):
 
     def start_tractor_beam(self):
         self.tractor_beam.show()
+        self.tractor_beam.check_for_items()
 
     def stop_tractor_beam(self):
+        self.tractor_beam.ungrab()
         self.tractor_beam.hide()
 
     def jump(self):
@@ -338,13 +388,15 @@ class Player(Sprite):
                                           self.rect.bottom)
 
         if self.tractor_beam.visible:
+            y = self.rect.top + \
+                (self.rect.height - self.tractor_beam.rect.height) / 2
             if self.direction == Direction.RIGHT:
-                self.tractor_beam.move_to(
-                    self.rect.right, self.rect.top + self.TRACTOR_BEAM_OFFSET)
+                self.tractor_beam.move_to(self.rect.right, y)
             elif self.direction == Direction.LEFT:
                 self.tractor_beam.move_to(
-                    self.rect.left - self.tractor_beam.rect.width,
-                    self.rect.top + self.TRACTOR_BEAM_OFFSET)
+                    self.rect.left - self.tractor_beam.rect.width, y)
+
+            self.tractor_beam.check_for_items()
 
 
     def on_collision(self, dx, dy, obj):
