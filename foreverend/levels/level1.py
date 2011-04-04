@@ -1,5 +1,6 @@
 import pygame
 
+from foreverend.timer import Timer
 from foreverend.levels.base import EventBox, Level, TimePeriod
 from foreverend.sprites import Box, Dynamite, Elevator, Mountain600AD, \
                                Mountain1999AD, Sprite, TiledSprite, Volcano
@@ -139,6 +140,8 @@ class TimePeriod1999AD(TimePeriod):
 class TimePeriod65000000BC(TimePeriod):
     def __init__(self, *args, **kwargs):
         super(TimePeriod65000000BC, self).__init__(*args, **kwargs)
+        self.exploding = False
+        self.exploded = False
 
         ground = TiledSprite('ground', self.level.size[0] / 32, 1)
         self.main_layer.add(ground)
@@ -149,13 +152,37 @@ class TimePeriod65000000BC(TimePeriod):
         volcano.move_to(1400, ground.rect.top - volcano.rect.height)
 
         # Dynamite explosion trigger
-        explosion_box = EventBox(self, 1934, 1540, 16, 16)
+        explosion_box = EventBox(self, 1948, 1554, 3, 3)
         explosion_box.watch_object_moves(self.level.dynamite)
         explosion_box.object_moved.connect(self.on_dynamite_placed)
 
+        self.explosion = None
+
     def on_dynamite_placed(self, obj):
         assert obj == self.level.dynamite
-        print 'boom'
+
+        if self.exploding or self.exploded:
+            return
+
+        self.level.dynamite.hide()
+        self.level.dynamite = None
+
+        self.explosion = Sprite('big_explosion')
+        self.main_layer.add(self.explosion)
+        self.explosion.move_to(1900, 1400)
+        self.exploding = True
+
+        self.explosion_timer = Timer(self.engine, self, 350,
+                                     self.on_explosion_done)
+        self.explosion_timer.start()
+
+    def on_explosion_done(self):
+        self.explosion.hide()
+        self.explosion = None
+        self.explosion_timer.stop()
+        self.explosion_timer = None
+        self.exploding = False
+        self.exploded = True
 
 
 class Level1(Level):
