@@ -1,7 +1,7 @@
 import pygame
 from pygame.locals import *
 
-from foreverend.sprites import Mountain, TiledSprite, Volcano
+from foreverend.sprites import Box, Mountain, Sprite, TiledSprite, Volcano
 
 
 DEBUG_COLLISION_RECTS = True
@@ -108,14 +108,49 @@ class TimePeriod600AD(TimePeriod):
         self.bg.fill((255, 255, 255))
 
         tiles_x = self.level.size[0] / 32
-        screen = self.engine.screen
         ground = TiledSprite('ground', tiles_x, 1)
         self.main_layer.add(ground)
-        ground.move_to(0, screen.get_height() - ground.rect.height)
+        ground.move_to(0, self.level.size[1] - ground.rect.height)
 
-        mountain = Mountain()
+        mountain = Mountain('600ad/mountain')
         self.main_layer.add(mountain)
         mountain.move_to(1345, ground.rect.top - mountain.rect.height)
+
+        # Mountain platforms
+        platform = Sprite('600ad/platform')
+        self.main_layer.add(platform)
+        platform.move_to(1740,
+                         mountain.rect.bottom - platform.rect.height - 10)
+
+        platform = Sprite('600ad/platform')
+        self.main_layer.add(platform)
+        platform.move_to(1990,
+                         mountain.rect.bottom - platform.rect.height - 100)
+
+        platform = Sprite('600ad/platform')
+        self.main_layer.add(platform)
+        platform.move_to(2240,
+                         mountain.rect.bottom - platform.rect.height - 180)
+
+        platform = Sprite('600ad/platform')
+        self.main_layer.add(platform)
+        platform.move_to(1990,
+                         mountain.rect.bottom - platform.rect.height - 260)
+
+        platform = Sprite('600ad/platform')
+        self.main_layer.add(platform)
+        platform.move_to(2240,
+                         mountain.rect.bottom - platform.rect.height - 340)
+
+        platform = Sprite('600ad/platform')
+        self.main_layer.add(platform)
+        platform.move_to(1990,
+                         mountain.rect.bottom - platform.rect.height - 420)
+
+        platform = Sprite('600ad/platform')
+        self.main_layer.add(platform)
+        platform.move_to(2240,
+                         mountain.rect.bottom - platform.rect.height - 500)
 
 
 class TimePeriod1999AD(TimePeriod):
@@ -124,24 +159,45 @@ class TimePeriod1999AD(TimePeriod):
         self.bg.fill((255, 255, 255))
 
         tiles_x = self.level.size[0] / 32
-        screen = self.engine.screen
-        ground = TiledSprite('ground', tiles_x, 1)
-        self.main_layer.add(ground)
-        ground.move_to(0, screen.get_height() - ground.rect.height)
 
-        ground = TiledSprite('ground', tiles_x, 1)
+        # Ground
+        ground = Box(self.level.size[0], 32)
         self.main_layer.add(ground)
-        ground.move_to(60, screen.get_height() - 2 * ground.rect.height)
+        ground.move_to(0, self.level.size[1] - ground.rect.height)
+
+        # Left wall of building
+        box = Box(15, 730, (211, 215, 207))
+        self.main_layer.add(box)
+        box.move_to(0, self.level.size[1] - box.rect.height)
+
+        # Right wall of the building
+        box = Box(15, 730, (211, 215, 207))
+        self.main_layer.add(box)
+        box.move_to(1300, self.level.size[1] - box.rect.height)
+
+        # Mountain
+        mountain = Mountain('600ad/mountain')
+        self.main_layer.add(mountain)
+        mountain.move_to(1345, ground.rect.top - mountain.rect.height)
+
+        platform = Sprite('1999ad/lavamatics_platform')
+        self.main_layer.add(platform)
+        platform.move_to(1841,
+                         mountain.rect.bottom - platform.rect.height - 500)
+
+        platform = Sprite('1999ad/l_tube')
+        self.main_layer.add(platform)
+        platform.move_to(2140,
+                         mountain.rect.bottom - platform.rect.height - 450)
 
 
 class TimePeriod65000000BC(TimePeriod):
     def __init__(self, *args, **kwargs):
         super(TimePeriod65000000BC, self).__init__(*args, **kwargs)
 
-        screen = self.engine.screen
         ground = TiledSprite('ground', self.level.size[0] / 32, 1)
         self.main_layer.add(ground)
-        ground.move_to(0, screen.get_height() - ground.rect.height)
+        ground.move_to(0, self.level.size[1] - ground.rect.height)
 
         volcano = Volcano()
         self.main_layer.add(volcano)
@@ -151,7 +207,7 @@ class TimePeriod65000000BC(TimePeriod):
 class Level1(Level):
     def __init__(self, *args, **kwargs):
         super(Level1, self).__init__(*args, **kwargs)
-        self.size = (10000, 600)
+        self.size = (10000, 1600)
         self.start_pos = (10,
                           self.size[1] - 32 - self.engine.player.rect.height)
         self.add(TimePeriod600AD(self))
