@@ -24,7 +24,7 @@ class Sprite(pygame.sprite.DirtySprite):
         self.obey_gravity = obey_gravity
         self.falling = False
         self.collidable = True
-        self.check_collisions = False
+        self.should_check_collisions = False
         self.flip_image = flip_image
         self.collision_rects = []
         self._colliding_objects = set()
@@ -104,29 +104,32 @@ class Sprite(pygame.sprite.DirtySprite):
 
     def _move(self, dx=0, dy=0):
         self.rect.move_ip(dx, dy)
+        self.check_collisions(dx, dy)
 
+    def check_collisions(self, dx=0, dy=0):
         old_colliding_objects = set(self._colliding_objects)
         self._colliding_objects = set()
 
         for obj, self_rect, obj_rect in self.get_collisions():
-            if dy < 0:
-                self.rect.top = obj_rect.bottom
-            elif dy > 0:
-                self.rect.bottom = obj_rect.top
-            elif dx < 0:
-                self.rect.left = obj_rect.right
-            elif dx > 0:
-                self.rect.right = obj_rect.left
+            if self_rect == self.rect:
+                if dy < 0:
+                    self.rect.top = obj_rect.bottom
+                elif dy > 0:
+                    self.rect.bottom = obj_rect.top
+                elif dx < 0:
+                    self.rect.left = obj_rect.right
+                elif dx > 0:
+                    self.rect.right = obj_rect.left
 
             obj.handle_collision(self, obj_rect, dx, dy)
-            self.on_collision(dx, dy, obj)
+            self.on_collision(dx, dy, obj, self_rect)
             self._colliding_objects.add(obj)
 
         for obj in old_colliding_objects.difference(self._colliding_objects):
             obj.handle_stop_colliding(self)
 
     def get_collisions(self, group=None, ignore_collidable_flag=False):
-        if not self.check_collisions and not ignore_collidable_flag:
+        if not self.should_check_collisions and not ignore_collidable_flag:
             raise StopIteration
 
         if group is None:
@@ -151,7 +154,8 @@ class Sprite(pygame.sprite.DirtySprite):
             (compare_layers and left.layer != right.layer) or
             (not ignore_collidable_flag and
              ((not left.collidable or not right.collidable) or
-              (not left.check_collisions and not right.check_collisions)))):
+              (not left.should_check_collisions and
+               not right.should_check_collisions)))):
             return None, None
 
         left_rects = left.collision_rects or [left.rect]
@@ -178,7 +182,7 @@ class Sprite(pygame.sprite.DirtySprite):
     def on_moved(self):
         pass
 
-    def on_collision(self, dx, dy, obj):
+    def on_collision(self, dx, dy, obj, self_rect):
         if self.obey_gravity and self.falling:
             self.falling = False
 
@@ -219,7 +223,7 @@ class TiledSprite(Sprite):
 class Item(Sprite):
     def __init__(self, *args, **kwargs):
         super(Item, self).__init__(obey_gravity=True, *args, **kwargs)
-        self.check_collisions = True
+        self.should_check_collisions = True
 
 
 class Dynamite(Item):
@@ -305,7 +309,7 @@ class Player(Sprite):
         self.engine = engine
         self.jumping = False
         self.hovering = False
-        self.check_collisions = True
+        self.should_check_collisions = True
         self.hover_time_ms = 0
         self.jump_origin = None
         self.propulsion_below = Sprite("propulsion_below")
@@ -367,10 +371,12 @@ class Player(Sprite):
     def start_tractor_beam(self):
         self.tractor_beam.show()
         self.tractor_beam.update_position(self)
+        self.calculate_collision_rects()
 
     def stop_tractor_beam(self):
         self.tractor_beam.ungrab()
         self.tractor_beam.hide()
+        self.calculate_collision_rects()
 
     def jump(self):
         if self.falling or self.jumping:
@@ -400,6 +406,21 @@ class Player(Sprite):
         self.hover_time_ms = 0
         self.velocity = (self.velocity[0], 0)
 
+    def calculate_collision_rects(self):
+        if self.tractor_beam.item:
+            self.collision_rects = [
+                self.rect,
+                self.tractor_beam.item.rect
+            ]
+        else:
+            self.collision_rects = []
+
+    def check_collisions(self, *args, **kwargs):
+        if self.tractor_beam.item:
+            self.tractor_beam.update_position(self)
+
+        super(Player, self).check_collisions(*args, **kwargs)
+
     def tick(self):
         if self.hovering:
             self.hover_time_ms += 1.0 / self.engine.FPS * 1000
@@ -410,7 +431,6 @@ class Player(Sprite):
         super(Player, self).tick()
 
     def on_added(self, layer):
-        print 'on_add'
         for obj in (self.propulsion_below, self.tractor_beam):
             layer.add(obj)
 
@@ -437,12 +457,25 @@ class Player(Sprite):
         if self.tractor_beam.visible:
             self.tractor_beam.update_position(self)
 
+        self.calculate_collision_rects()
 
-    def on_collision(self, dx, dy, obj):
+    def on_collision(self, dx, dy, obj, self_rect):
+        if self.tractor_beam.item and self_rect == self.tractor_beam.item.rect:
+            if self.direction == Direction.LEFT:
+                self.move_to(obj.rect.right +
+                             (self.rect.left -
+                              self.tractor_beam.item.rect.left),
+                             self.rect.top)
+            elif self.direction == Direction.RIGHT:
+                self.move_to(obj.rect.left -
+                             (self.tractor_beam.item.rect.right -
+                              self.rect.left),
+                             self.rect.top)
+
         if self.jumping and dy < 0:
             self.fall()
         else:
-            super(Player, self).on_collision(dx, dy, obj)
+            super(Player, self).on_collision(dx, dy, obj, self_rect)
 
 
 class Box(Sprite):
