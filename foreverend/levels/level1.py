@@ -115,15 +115,10 @@ class TimePeriod1999AD(TimePeriod):
         elevator1.destination = elevator2
         elevator2.destination = elevator1
 
-        # Dynamite box
-        box = Box(20, 10)
-        self.main_layer.add(box)
-        box.move_to(200, ground.rect.top - box.rect.height)
-
         # Dynamite
-        dynamite = Dynamite()
-        self.main_layer.add(dynamite)
-        dynamite.move_to(200, ground.rect.top - dynamite.rect.height)
+        self.main_layer.add(self.level.dynamite)
+        self.level.dynamite.move_to(
+            200, ground.rect.top - self.level.dynamite.rect.height)
 
         # Mountain
         mountain = Mountain1999AD()
@@ -155,6 +150,12 @@ class TimePeriod65000000BC(TimePeriod):
 
         # Dynamite explosion trigger
         explosion_box = EventBox(self, 1934, 1540, 16, 16)
+        explosion_box.watch_object_moves(self.level.dynamite)
+        explosion_box.object_moved.connect(self.on_dynamite_placed)
+
+    def on_dynamite_placed(self, obj):
+        assert obj == self.level.dynamite
+        print 'boom'
 
 
 class Level1(Level):
@@ -163,6 +164,10 @@ class Level1(Level):
         self.size = (10000, 1600)
         self.start_pos = (10,
                           self.size[1] - 32 - self.engine.player.rect.height)
+
+        # Items that we'll make use of.
+        self.dynamite = Dynamite()
+
         self.add(TimePeriod600AD(self))
         self.add(TimePeriod1999AD(self))
         self.add(TimePeriod65000000BC(self))
