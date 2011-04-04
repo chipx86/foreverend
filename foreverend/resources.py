@@ -16,11 +16,15 @@ def get_cached_image(name, create_func):
 
 def load_image(name):
     def _load_image_file():
-        path = os.path.join(os.path.dirname(__file__), 'data', name + '.png')
+        filename = name + '.png'
+
+        path = os.path.join(os.path.dirname(__file__), 'data',
+                            *filename.split('/'))
 
         try:
             return pygame.image.load(path)
         except pygame.error, message:
+            print 'Unable to load image %s' % path
             assert False
 
     return get_cached_image(name, _load_image_file)
