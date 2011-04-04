@@ -205,6 +205,7 @@ class Player(Sprite):
     HOVER_TIME_MS = 1000
 
     PROPULSION_BELOW_OFFSET = 8
+    TRACTOR_BEAM_OFFSET = 13
 
     def __init__(self, engine):
         super(Player, self).__init__('player', flip_image=True)
@@ -217,6 +218,8 @@ class Player(Sprite):
         self.jump_origin = None
         self.propulsion_below = Sprite("propulsion_below")
         self.propulsion_below.collidable = False
+        self.tractor_beam = Sprite('tractor_beam', flip_image=True)
+        self.tractor_beam.collidable = False
 
     def handle_event(self, event):
         if event.type == KEYDOWN:
@@ -226,6 +229,8 @@ class Player(Sprite):
                 self.move_left()
             elif event.key == K_SPACE:
                 self.jump()
+            elif event.key in (K_LSHIFT, K_RSHIFT):
+                self.start_tractor_beam()
             elif event.key == K_UP or event.key == K_DOWN:
                 self.trigger_object()
         elif event.type == KEYUP:
@@ -237,12 +242,15 @@ class Player(Sprite):
                     self.velocity = (0, self.velocity[1])
             elif event.key == K_SPACE:
                 self.fall()
+            elif event.key in (K_LSHIFT, K_RSHIFT):
+                self.stop_tractor_beam()
 
     def move_right(self):
         self.velocity = (self.MOVE_SPEED, self.velocity[1])
 
         if self.direction != Direction.RIGHT:
             self.direction = Direction.RIGHT
+            self.tractor_beam.direction = Direction.RIGHT
             self.update_image()
 
     def move_left(self):
@@ -250,6 +258,7 @@ class Player(Sprite):
 
         if self.direction != Direction.LEFT:
             self.direction = Direction.LEFT
+            self.tractor_beam.direction = Direction.LEFT
             self.update_image()
 
     def trigger_object(self):
@@ -260,6 +269,12 @@ class Player(Sprite):
 
             if self.rect != old_rect:
                 break
+
+    def start_tractor_beam(self):
+        self.tractor_beam.show()
+
+    def stop_tractor_beam(self):
+        self.tractor_beam.hide()
 
     def jump(self):
         if self.falling or self.jumping:
@@ -298,11 +313,13 @@ class Player(Sprite):
                 self.fall()
 
     def on_added(self, layer):
-        layer.add(self.propulsion_below)
-        self.propulsion_below.hide()
+        for obj in (self.propulsion_below, self.tractor_beam):
+            layer.add(obj)
+            obj.hide()
 
     def on_removed(self, layer):
-        layer.remove(self.propulsion_below)
+        for obj in (self.propulsion_below, self.tractor_beam):
+            layer.remove(obj)
 
     def on_moved(self):
         if (self.jumping and
@@ -319,6 +336,16 @@ class Player(Sprite):
 
             self.propulsion_below.move_to(self.rect.left + offset,
                                           self.rect.bottom)
+
+        if self.tractor_beam.visible:
+            if self.direction == Direction.RIGHT:
+                self.tractor_beam.move_to(
+                    self.rect.right, self.rect.top + self.TRACTOR_BEAM_OFFSET)
+            elif self.direction == Direction.LEFT:
+                self.tractor_beam.move_to(
+                    self.rect.left - self.tractor_beam.rect.width,
+                    self.rect.top + self.TRACTOR_BEAM_OFFSET)
+
 
     def on_collision(self, dx, dy, obj):
         if self.jumping and dy < 0:
