@@ -60,29 +60,6 @@ class Sprite(pygame.sprite.DirtySprite):
         self.on_moved()
 
     def _move(self, dx=0, dy=0):
-        matched = {}
-
-        def _check_collision(left, right):
-            if (left == right or left.layer != right.layer or
-                not left.collidable or not right.collidable or
-                (not left.check_collisions and not right.check_collisions)):
-                return False
-
-            left_rects = left.collision_rects or [left.rect]
-            right_rects = right.collision_rects or [right.rect]
-
-            for left_rect in left_rects:
-                index = left_rect.collidelist(right_rects)
-
-                if index != -1:
-                    matched['left_rect'] = left_rect
-                    matched['right_rect'] = right_rects[index]
-                    matched['left_obj'] = left
-                    matched['right_obj'] = right
-                    return True
-
-            return False
-
         self.rect.move_ip(dx, dy)
 
         if not self.check_collisions:
@@ -91,36 +68,47 @@ class Sprite(pygame.sprite.DirtySprite):
         old_colliding_objects = set(self._colliding_objects)
         self._colliding_objects = set()
 
-        for obj in pygame.sprite.spritecollide(self, self.layer.level.group,
-                                               False,
-                                               _check_collision):
-            if matched['left_obj'] == obj:
-                matched_rect = matched['left_rect']
-            else:
-                matched_rect = matched['right_rect']
+        # We want more detailed collision info, so we use our own logic
+        # instead of calling spritecollide.
+        for obj in self.layer.level.group:
+            self_rect, obj_rect = self._check_collision(self, obj)
 
-                if matched['right_obj'] != obj:
-                    print '*** %s, %s' % (matched['right_obj'], obj)
-                    assert False
+            if not self_rect and not obj_rect:
+                continue
 
             if dy < 0:
-                self.rect.top = matched_rect.bottom
+                self.rect.top = obj_rect.bottom
             elif dy > 0:
-                self.rect.bottom = matched_rect.top
+                self.rect.bottom = obj_rect.top
             elif dx < 0:
-                self.rect.left = matched_rect.right
+                self.rect.left = obj_rect.right
             elif dx > 0:
-                self.rect.right = matched_rect.left
+                self.rect.right = obj_rect.left
 
-            matched = {}
-
-            obj.handle_collision(self, matched_rect, dx, dy)
+            obj.handle_collision(self, obj_rect, dx, dy)
             self.on_collision(dx, dy, obj)
 
             self._colliding_objects.add(obj)
 
         for obj in old_colliding_objects.difference(self._colliding_objects):
             obj.handle_stop_colliding(self)
+
+    def _check_collision(self, left, right):
+        if (left == right or left.layer != right.layer or
+            not left.collidable or not right.collidable or
+            (not left.check_collisions and not right.check_collisions)):
+            return None, None
+
+        left_rects = left.collision_rects or [left.rect]
+        right_rects = right.collision_rects or [right.rect]
+
+        for left_rect in left_rects:
+            index = left_rect.collidelist(right_rects)
+
+            if index != -1:
+                return left_rect, right_rects[index]
+
+        return None, None
 
     def handle_collision(self, obj, rect, dx, dy):
         pass
