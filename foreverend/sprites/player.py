@@ -7,11 +7,16 @@ from foreverend.sprites.items import Item
 
 class TractorBeam(Sprite):
     ITEM_OFFSET = -5
+    VERT_OFFSET_ALLOWANCE = 6
 
-    def __init__(self, name='tractor_beam'):
+    def __init__(self, player, name='tractor_beam'):
         super(TractorBeam, self).__init__(name, flip_image=True)
+        self.player = player
         self.item = None
         self.ungrab()
+        self.freeze_item_y = 0
+        self.collidable = False
+        self.visible = 0
 
     def _check_for_items(self):
         if self.item:
@@ -20,6 +25,7 @@ class TractorBeam(Sprite):
         for obj, _, _ in self.get_collisions(ignore_collidable_flag=True):
             if isinstance(obj, Item):
                 self.grab(obj)
+                return
 
     def grab(self, item):
         assert item
@@ -29,6 +35,7 @@ class TractorBeam(Sprite):
         self.item.stop_falling()
         self.item.obey_gravity = False
         self.item.collidable = False
+        self.freeze_item_y = False
         self.name = 'tractor_beam'
         self.update_image()
 
@@ -52,15 +59,40 @@ class TractorBeam(Sprite):
 
         self._check_for_items()
 
+    def adjust_item_position(self, collide_rect):
+        """Adjusts the position of the held item to not touch the rect."""
+        assert self.item
+
+        if (collide_rect.top <= self.item.rect.bottom and
+            collide_rect.top - self.item.rect.height >=
+            self.item.rect.top - self.VERT_OFFSET_ALLOWANCE):
+            self.freeze_item_y = True
+            self.item.move_to(self.item.rect.left,
+                              collide_rect.top - self.item.rect.height - 1)
+            return True
+
+        return False
+
     def on_moved(self):
         if self.item:
-            y = self.rect.top + (self.rect.height - self.item.rect.height) / 2
+            mid_y = self.rect.top + \
+                    (self.rect.height - self.item.rect.height) / 2 - 1
+            if self.freeze_item_y:
+                y = self.item.rect.top
+            else:
+                y = mid_y
+
+            if y <= mid_y:
+                self.freeze_item_y = False
+                y = mid_y
 
             if self.direction == Direction.RIGHT:
                 self.item.move_to(self.rect.right + self.ITEM_OFFSET, y)
             elif self.direction == Direction.LEFT:
                 self.item.move_to(self.rect.left - self.item.rect.width -
                                   self.ITEM_OFFSET, y)
+
+        super(TractorBeam, self).on_moved()
 
     def on_added(self, layer):
         if self.item:
@@ -91,9 +123,7 @@ class Player(Sprite):
         self.propulsion_below = Sprite("propulsion_below")
         self.propulsion_below.collidable = False
         self.propulsion_below.visible = 0
-        self.tractor_beam = TractorBeam()
-        self.tractor_beam.collidable = False
-        self.tractor_beam.visible = 0
+        self.tractor_beam = TractorBeam(self)
 
     def handle_event(self, event):
         if event.type == KEYDOWN:
@@ -224,20 +254,29 @@ class Player(Sprite):
 
         self.calculate_collision_rects()
 
-    def on_collision(self, dx, dy, obj, self_rect):
+        super(Player, self).on_moved()
+
+    def on_collision(self, dx, dy, obj, self_rect, obj_rect):
         if self.tractor_beam.item and self_rect == self.tractor_beam.item.rect:
-            if self.direction == Direction.LEFT:
-                self.move_to(obj.rect.right +
-                             (self.rect.left -
-                              self.tractor_beam.item.rect.left),
-                             self.rect.top)
-            elif self.direction == Direction.RIGHT:
-                self.move_to(obj.rect.left -
-                             (self.tractor_beam.item.rect.right -
-                              self.rect.left),
-                             self.rect.top)
+            move_player = True
+
+            if dy != 0:
+                if self.tractor_beam.adjust_item_position(obj_rect):
+                    move_player = False
+
+            if move_player:
+                if self.direction == Direction.LEFT:
+                    self.move_to(obj_rect.right +
+                                 (self.rect.left -
+                                  self.tractor_beam.item.rect.left),
+                                 self.rect.top)
+                elif self.direction == Direction.RIGHT:
+                    self.move_to(obj_rect.left -
+                                 (self.tractor_beam.item.rect.right -
+                                  self.rect.left),
+                                 self.rect.top)
 
         if self.jumping and dy < 0:
             self.fall()
         else:
-            super(Player, self).on_collision(dx, dy, obj, self_rect)
+            super(Player, self).on_collision(dx, dy, obj, self_rect, obj_rect)

@@ -114,21 +114,24 @@ class Sprite(pygame.sprite.DirtySprite):
 
         for obj, self_rect, obj_rect in self.get_collisions():
             if self_rect == self.rect:
-                if dy < 0:
-                    self.rect.top = obj_rect.bottom
-                elif dy > 0:
-                    self.rect.bottom = obj_rect.top
-                elif dx < 0:
-                    self.rect.left = obj_rect.right
-                elif dx > 0:
-                    self.rect.right = obj_rect.left
+                self.position_beside(obj_rect, dx, dy)
 
             obj.handle_collision(self, obj_rect, dx, dy)
-            self.on_collision(dx, dy, obj, self_rect)
+            self.on_collision(dx, dy, obj, self_rect, obj_rect)
             self._colliding_objects.add(obj)
 
         for obj in old_colliding_objects.difference(self._colliding_objects):
             obj.handle_stop_colliding(self)
+
+    def position_beside(self, rect, dx, dy):
+        if dy < 0:
+            self.rect.top = rect.bottom
+        elif dy > 0:
+            self.rect.bottom = rect.top
+        elif dx < 0:
+            self.rect.left = rect.right
+        elif dx > 0:
+            self.rect.right = rect.left
 
     def get_collisions(self, group=None, ignore_collidable_flag=False):
         if not self.should_check_collisions and not ignore_collidable_flag:
@@ -184,7 +187,7 @@ class Sprite(pygame.sprite.DirtySprite):
     def on_moved(self):
         self.moved.emit()
 
-    def on_collision(self, dx, dy, obj, self_rect):
+    def on_collision(self, dx, dy, obj, self_rect, obj_rect):
         if self.obey_gravity and self.falling:
             self.falling = False
 
