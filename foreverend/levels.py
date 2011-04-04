@@ -1,7 +1,7 @@
 import pygame
 from pygame.locals import *
 
-from foreverend.sprites import TiledSprite
+from foreverend.sprites import TiledSprite, Volcano
 
 
 DEBUG_COLLISION_RECTS = True
@@ -126,6 +126,10 @@ class TimePeriod65000000BC(TimePeriod):
         ground = TiledSprite('ground', self.level.size[0] / 32, 1)
         self.main_layer.add(ground)
         ground.move_to(0, screen.get_height() - ground.rect.height)
+
+        volcano = Volcano()
+        self.main_layer.add(volcano)
+        volcano.move_to(1400, ground.rect.top - volcano.rect.height)
 
 
 class Level1(Level):

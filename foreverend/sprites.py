@@ -242,3 +242,30 @@ class Player(Sprite):
             self.fall()
         elif self.falling:
             self.falling = False
+
+
+class Elevator(Sprite):
+    def __init__(self):
+        super(Elevator, self).__init__('elevator')
+
+
+class Volcano(Sprite):
+    BASE_CAVERN_RECT = pygame.Rect(0, 310, 100, 55)
+
+    def __init__(self):
+        super(Volcano, self).__init__('volcano')
+        self.cavern_rect = self.BASE_CAVERN_RECT
+
+    def on_moved(self):
+        self.cavern_rect.left = self.rect.left + self.BASE_CAVERN_RECT.left
+        self.cavern_rect.top = self.rect.top + self.BASE_CAVERN_RECT.top
+        self.collision_rects = [
+            pygame.Rect(self.rect.left, self.rect.top, self.rect.width,
+                        self.cavern_rect.top - self.rect.top),
+            pygame.Rect(self.cavern_rect.right,
+                        self.cavern_rect.top,
+                        self.rect.width - self.cavern_rect.width,
+                        self.cavern_rect.height),
+            pygame.Rect(self.rect.left, self.cavern_rect.bottom,
+                        self.rect.width, self.rect.width),
+        ]
