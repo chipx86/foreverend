@@ -70,6 +70,7 @@ class TimePeriod(object):
         self.default_layer = self.new_layer()
         self.main_layer = self.new_layer()
         self.bg = pygame.Surface(self.engine.screen.get_size()).convert()
+        self.event_handlers = []
 
     def new_layer(self):
         layer = Layer(len(self.layers), self)
@@ -89,6 +90,11 @@ class TimePeriod(object):
                     for rect in rects:
                         pygame.draw.rect(screen, (0, 0, 255), rect, 1)
 
+    def register_for_events(self, obj):
+        self.event_handlers.append(obj)
+
+    def unregister_for_events(self, obj):
+        self.event_handlers.remove(obj)
 
     def tick(self):
         self.group.update()

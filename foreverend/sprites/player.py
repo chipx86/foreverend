@@ -105,8 +105,6 @@ class Player(Sprite):
                 self.jump()
             elif event.key in (K_LSHIFT, K_RSHIFT):
                 self.start_tractor_beam()
-            elif event.key == K_UP or event.key == K_DOWN:
-                self.trigger_object()
         elif event.type == KEYUP:
             if event.key == K_LEFT:
                 if self.velocity[0] < 0:
@@ -134,15 +132,6 @@ class Player(Sprite):
             self.direction = Direction.LEFT
             self.tractor_beam.direction = Direction.LEFT
             self.update_image()
-
-    def trigger_object(self):
-        old_rect = self.rect.copy()
-
-        for obj, _, _ in self.get_collisions(ignore_collidable_flag=True):
-            obj.trigger()
-
-            if self.rect != old_rect:
-                break
 
     def start_tractor_beam(self):
         self.tractor_beam.show()

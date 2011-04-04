@@ -102,7 +102,13 @@ class ForeverEndEngine(object):
             elif event.type == KEYDOWN and event.key == K_3:
                 self.active_level.switch_time_period(2)
             else:
-                self.player.handle_event(event)
+                if not self.player.handle_event(event):
+                    time_period = self.active_level.active_time_period
+
+                    for box in time_period.event_handlers:
+                        if (box.rect.colliderect(self.player.rect) and
+                            box.handle_event(event)):
+                            break
 
         return True
 

@@ -84,9 +84,6 @@ class Sprite(pygame.sprite.DirtySprite):
 
         return image
 
-    def trigger(self):
-        pass
-
     def move_to(self, x, y, check_collisions=False):
         self.move_by(x - self.rect.x, y - self.rect.y, check_collisions)
 
