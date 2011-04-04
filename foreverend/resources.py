@@ -4,6 +4,13 @@ import pygame
 
 image_cache = {}
 
+DATA_PY = os.path.abspath(os.path.dirname(__file__))
+DATA_DIR = os.path.normpath(os.path.join(DATA_PY, '..', 'data'))
+
+# Try to find it in the exe.
+if not os.path.exists(DATA_DIR):
+    DATA_DIR = os.path.normpath(os.path.join(DATA_PY, '..', '..', 'data'))
+
 
 def get_cached_image(name, create_func):
     assert name
@@ -18,8 +25,7 @@ def load_image(name):
     def _load_image_file():
         filename = name + '.png'
 
-        path = os.path.join(os.path.dirname(__file__), 'data',
-                            *filename.split('/'))
+        path = os.path.join(DATA_DIR, *filename.split('/'))
 
         try:
             return pygame.image.load(path)
