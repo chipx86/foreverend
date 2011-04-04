@@ -28,12 +28,14 @@ class TractorBeam(Sprite):
         self.item = item
         self.item.stop_falling()
         self.item.obey_gravity = False
+        self.item.collidable = False
         self.name = 'tractor_beam'
         self.update_image()
 
     def ungrab(self):
         if self.item:
             self.item.obey_gravity = True
+            self.item.collidable = True
             self.item.fall()
             self.item = None
 
