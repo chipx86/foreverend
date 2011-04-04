@@ -84,13 +84,17 @@ class TimePeriod(object):
         screen.blit(self.bg, self.engine.camera.rect.topleft)
         self.group.draw(screen)
 
-        if self.engine.debug_collision_rects:
+        if self.engine.debug_rects:
             for sprite in self.group:
                 if sprite.visible:
                     rects = sprite.collision_rects or [sprite.rect]
 
                     for rect in rects:
                         pygame.draw.rect(screen, (0, 0, 255), rect, 1)
+
+            for eventbox in self.event_handlers:
+                if isinstance(eventbox, EventBox):
+                    pygame.draw.rect(screen, (255, 0, 0), eventbox.rect, 1)
 
     def register_for_events(self, obj):
         self.event_handlers.append(obj)

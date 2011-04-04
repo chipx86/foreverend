@@ -47,7 +47,7 @@ class ForeverEndEngine(object):
         self.camera = Camera(self)
 
         # Debug flags
-        self.debug_collision_rects = False
+        self.debug_rects = False
         self.god_mode = False
         self.show_debug_info = False
 
@@ -101,7 +101,7 @@ class ForeverEndEngine(object):
             elif event.type == KEYDOWN and event.key == K_F2:
                 self.show_debug_info = not self.show_debug_info
             elif event.type == KEYDOWN and event.key == K_F3:
-                self.debug_collision_rects = not self.debug_collision_rects
+                self.debug_rects = not self.debug_rects
             elif event.type == KEYDOWN and event.key == K_F4:
                 self.god_mode = not self.god_mode
             elif event.type == KEYDOWN and event.key == K_1:
