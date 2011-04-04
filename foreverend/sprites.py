@@ -175,7 +175,7 @@ class TiledSprite(Sprite):
 
 
 class Player(Sprite):
-    MOVE_SPEED = 4
+    MOVE_SPEED = 6
     JUMP_SPEED = 6
     FALL_SPEED = 6
     MAX_JUMP_HEIGHT = 100
