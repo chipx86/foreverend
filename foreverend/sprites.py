@@ -215,7 +215,7 @@ class TractorBeam(Sprite):
         super(TractorBeam, self).__init__(name, flip_image=True)
         self.ungrab()
 
-    def check_for_items(self):
+    def _check_for_items(self):
         if self.item:
             return
 
@@ -234,6 +234,16 @@ class TractorBeam(Sprite):
         self.item = None
         self.name = 'tractor_beam_wide'
         self.update_image()
+
+    def update_position(self, player):
+        y = player.rect.top + \
+            (player.rect.height - self.rect.height) / 2
+        if self.direction == Direction.RIGHT:
+            self.move_to(player.rect.right, y)
+        elif self.direction == Direction.LEFT:
+            self.move_to(player.rect.left - self.rect.width, y)
+
+        self._check_for_items()
 
     def on_moved(self):
         if self.item:
@@ -254,7 +264,6 @@ class Player(Sprite):
     HOVER_TIME_MS = 1000
 
     PROPULSION_BELOW_OFFSET = 8
-    TRACTOR_BEAM_OFFSET = 13
 
     def __init__(self, engine):
         super(Player, self).__init__('player', flip_image=True)
@@ -321,7 +330,7 @@ class Player(Sprite):
 
     def start_tractor_beam(self):
         self.tractor_beam.show()
-        self.tractor_beam.check_for_items()
+        self.tractor_beam.update_position(self)
 
     def stop_tractor_beam(self):
         self.tractor_beam.ungrab()
@@ -389,15 +398,7 @@ class Player(Sprite):
                                           self.rect.bottom)
 
         if self.tractor_beam.visible:
-            y = self.rect.top + \
-                (self.rect.height - self.tractor_beam.rect.height) / 2
-            if self.direction == Direction.RIGHT:
-                self.tractor_beam.move_to(self.rect.right, y)
-            elif self.direction == Direction.LEFT:
-                self.tractor_beam.move_to(
-                    self.rect.left - self.tractor_beam.rect.width, y)
-
-            self.tractor_beam.check_for_items()
+            self.tractor_beam.update_position(self)
 
 
     def on_collision(self, dx, dy, obj):
