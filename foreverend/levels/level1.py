@@ -91,9 +91,10 @@ class TimePeriod1999AD(TimePeriod):
         box.move_to(building_rect.left, building_rect.top)
 
         # Right wall of the building
-        box = Box(self.WALL_WIDTH, building_rect.height, self.WALL_COLOR)
-        self.main_layer.add(box)
-        box.move_to(building_rect.right - self.WALL_WIDTH, building_rect.top)
+        right_wall = Box(self.WALL_WIDTH, building_rect.height, self.WALL_COLOR)
+        self.main_layer.add(right_wall)
+        right_wall.move_to(building_rect.right - self.WALL_WIDTH,
+                           building_rect.top)
 
         # Ceiling
         box = Box(building_rect.width, self.GROUND_HEIGHT)
@@ -119,7 +120,10 @@ class TimePeriod1999AD(TimePeriod):
         # Dynamite
         self.main_layer.add(self.level.dynamite)
         self.level.dynamite.move_to(
-            200, ground.rect.top - self.level.dynamite.rect.height)
+            right_wall.rect.left - self.level.dynamite.rect.width - 20,
+            floor2.rect.top - self.level.dynamite.rect.height)
+        #self.level.dynamite.move_to(
+        #    200, ground.rect.top - self.level.dynamite.rect.height)
 
         # Mountain
         mountain = Mountain1999AD()
