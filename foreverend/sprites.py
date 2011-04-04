@@ -163,7 +163,7 @@ class Player(Sprite):
     MOVE_SPEED = 4
     JUMP_SPEED = 6
     FALL_SPEED = 6
-    MAX_JUMP_HEIGHT = 64
+    MAX_JUMP_HEIGHT = 100
     HOVER_TIME_MS = 1000
 
     def __init__(self, engine):
