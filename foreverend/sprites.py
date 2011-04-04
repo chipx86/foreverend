@@ -25,7 +25,7 @@ class Sprite(pygame.sprite.DirtySprite):
         self.collision_rects = []
         self._colliding_objects = set()
         self._direction = Direction.RIGHT
-        self._flipped_image = None
+        self._flipped_images = {}
 
     def __repr__(self):
         return 'Sprite %s (%s, %s, %s, %s)' % \
@@ -60,10 +60,11 @@ class Sprite(pygame.sprite.DirtySprite):
         image = load_image(self.name)
 
         if self.flip_image and self._direction == Direction.LEFT:
-            if not self._flipped_image:
-                self._flipped_image = pygame.transform.flip(image, True, False)
+            if self.name not in self._flipped_images:
+                self._flipped_images[self.name] = \
+                    pygame.transform.flip(image, True, False)
 
-            image = self._flipped_image
+            image = self._flipped_images[self.name]
 
         return image
 
