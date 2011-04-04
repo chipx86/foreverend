@@ -73,6 +73,7 @@ class TimePeriod(object):
         self.main_layer = self.new_layer()
         self.bg = pygame.Surface(self.engine.screen.get_size()).convert()
         self.event_handlers = []
+        self.timers = []
 
     def new_layer(self):
         layer = Layer(len(self.layers), self)
@@ -107,6 +108,9 @@ class TimePeriod(object):
 
         for sprite in self.group:
             sprite.tick()
+
+        for timer in self.timers:
+            timer.tick()
 
 
 class EventBox(object):
