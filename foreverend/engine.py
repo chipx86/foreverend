@@ -44,6 +44,8 @@ class ForeverEndEngine(object):
         self.screen = screen
         self.clock = pygame.time.Clock()
         self.paused = False
+        self.debug_collision_rects = False
+        self.god_mode = False
         self.camera = Camera(self)
 
     def run(self):
@@ -89,6 +91,10 @@ class ForeverEndEngine(object):
                 # Switch time periods
                 self._show_time_periods()
             # XXX
+            elif event.type == KEYDOWN and event.key == K_F3:
+                self.debug_collision_rects = not self.debug_collision_rects
+            elif event.type == KEYDOWN and event.key == K_F4:
+                self.god_mode = not self.god_mode
             elif event.type == KEYDOWN and event.key == K_1:
                 self.active_level.switch_time_period(0)
             elif event.type == KEYDOWN and event.key == K_2:

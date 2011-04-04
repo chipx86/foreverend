@@ -3,7 +3,6 @@ from pygame.locals import *
 
 from foreverend.sprites import Box, Mountain600AD, Mountain1999AD, \
                                Sprite, TiledSprite, Volcano
-DEBUG_COLLISION_RECTS = True
 
 
 class Layer(object):
@@ -85,7 +84,7 @@ class TimePeriod(object):
         screen.blit(self.bg, self.engine.camera.rect.topleft)
         self.group.draw(screen)
 
-        if DEBUG_COLLISION_RECTS:
+        if self.engine.debug_collision_rects:
             for sprite in self.group:
                 if sprite.visible:
                     rects = sprite.collision_rects or [sprite.rect]

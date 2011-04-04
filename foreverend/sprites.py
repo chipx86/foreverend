@@ -281,6 +281,7 @@ class Player(Sprite):
 
     def on_moved(self):
         if (self.jumping and
+            not self.engine.god_mode and
             self.jump_origin[1] - self.rect.top >= self.MAX_JUMP_HEIGHT):
             self.hover()
 
