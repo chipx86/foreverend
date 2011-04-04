@@ -16,6 +16,7 @@ class Sprite(pygame.sprite.DirtySprite):
         self.velocity = (0, 0)
         self.collidable = True
         self.collision_rects = []
+        self._colliding_objects = set()
 
     def __repr__(self):
         return 'Sprite %s (%s, %s, %s, %s)' % \
@@ -61,7 +62,8 @@ class Sprite(pygame.sprite.DirtySprite):
         matched = {}
 
         def _check_collision(left, right):
-            if left == right:
+            if (left == right or left.layer != right.layer or
+                not left.collidable or not right.collidable):
                 return False
 
             left_rects = left.collision_rects or [left.rect]
@@ -81,18 +83,20 @@ class Sprite(pygame.sprite.DirtySprite):
 
         self.rect.move_ip(dx, dy)
 
+        old_colliding_objects = set(self._colliding_objects)
+        self._colliding_objects = set()
+
         for obj in pygame.sprite.spritecollide(self, self.layer.level.group,
                                                False,
                                                _check_collision):
-            if obj == self or obj.layer != self.layer or not obj.collidable:
-                matched = {}
-                continue
-
             if matched['left_obj'] == obj:
                 matched_rect = matched['left_rect']
             else:
                 matched_rect = matched['right_rect']
-                assert matched['right_obj'] == obj
+
+                if matched['right_obj'] != obj:
+                    print '*** %s, %s' % (matched['right_obj'], obj)
+                    assert False
 
             if dy < 0:
                 self.rect.top = matched_rect.bottom
@@ -105,7 +109,19 @@ class Sprite(pygame.sprite.DirtySprite):
 
             matched = {}
 
+            obj.handle_collision(self, matched_rect, dx, dy)
             self.on_collision(dx, dy, obj)
+
+            self._colliding_objects.add(obj)
+
+        for obj in old_colliding_objects.difference(self._colliding_objects):
+            obj.handle_stop_colliding(self)
+
+    def handle_collision(self, obj, rect, dx, dy):
+        pass
+
+    def handle_stop_colliding(self, obj):
+        pass
 
     def tick(self):
         pass
@@ -250,7 +266,7 @@ class Elevator(Sprite):
 
 
 class Volcano(Sprite):
-    BASE_CAVERN_RECT = pygame.Rect(0, 310, 100, 55)
+    BASE_CAVERN_RECT = pygame.Rect(0, 310, 550, 55)
 
     def __init__(self):
         super(Volcano, self).__init__('volcano')
@@ -259,6 +275,8 @@ class Volcano(Sprite):
     def on_moved(self):
         self.cavern_rect.left = self.rect.left + self.BASE_CAVERN_RECT.left
         self.cavern_rect.top = self.rect.top + self.BASE_CAVERN_RECT.top
+        self.ground_rect = pygame.Rect(self.rect.left, self.cavern_rect.bottom,
+                                       self.rect.width, self.rect.width)
         self.collision_rects = [
             pygame.Rect(self.rect.left, self.rect.top, self.rect.width,
                         self.cavern_rect.top - self.rect.top),
@@ -266,6 +284,17 @@ class Volcano(Sprite):
                         self.cavern_rect.top,
                         self.rect.width - self.cavern_rect.width,
                         self.cavern_rect.height),
-            pygame.Rect(self.rect.left, self.cavern_rect.bottom,
-                        self.rect.width, self.rect.width),
+            self.ground_rect,
         ]
+
+    def handle_collision(self, obj, matched_rect, dx, dy):
+        if (isinstance(obj, Player) and dy > 0 and
+            matched_rect == self.ground_rect):
+            self.name = 'volcano_inside'
+            self.update_image()
+
+    def handle_stop_colliding(self, obj):
+        if (self.name == 'volcano_inside' and isinstance(obj, Player) and
+            not obj.rect.colliderect(self.rect)):
+            self.name = 'volcano'
+            self.update_image()
