@@ -55,6 +55,13 @@ class ForeverEndEngine(object):
         self._setup_game()
         self._mainloop()
 
+    def dead(self):
+        print 'You died'
+        self.player.move_to(*self.active_level.start_pos)
+        self.player.show()
+        self.active_level.reset()
+        self.active_level.switch_time_period(0)
+
     def _setup_game(self):
         pygame.font.init()
 

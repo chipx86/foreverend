@@ -27,6 +27,7 @@ class Sprite(pygame.sprite.DirtySprite):
         self.dirty = 2
         self.velocity = (0, 0)
         self.obey_gravity = obey_gravity
+        self.lethal = False
         self.falling = False
         self.collidable = True
         self.should_check_collisions = False

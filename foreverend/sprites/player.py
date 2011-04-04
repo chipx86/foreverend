@@ -257,6 +257,10 @@ class Player(Sprite):
         super(Player, self).on_moved()
 
     def on_collision(self, dx, dy, obj, self_rect, obj_rect):
+        if obj.lethal and self_rect == self.rect:
+            self.engine.dead()
+            return
+
         if self.tractor_beam.item and self_rect == self.tractor_beam.item.rect:
             move_player = True
 

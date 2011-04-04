@@ -182,6 +182,7 @@ class TimePeriod65000000BC(TimePeriod):
         self.level.dynamite = None
 
         self.explosion = Sprite('big_explosion')
+        self.explosion.lethal = True
         self.main_layer.add(self.explosion)
         self.explosion.move_to(1980, 1400)
 
@@ -205,7 +206,9 @@ class Level1(Level):
         self.size = (10000, 1600)
         self.start_pos = (10,
                           self.size[1] - 32 - self.engine.player.rect.height)
+        self.setup()
 
+    def setup(self):
         # Items that we'll make use of.
         self.dynamite = Dynamite()
 

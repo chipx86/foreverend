@@ -42,6 +42,14 @@ class Level(object):
     def add(self, time_period):
         self.time_periods.append(time_period)
 
+    def reset(self):
+        self.active_time_period = None
+        self.time_periods = []
+        self.setup()
+
+    def setup(self):
+        pass
+
     def switch_time_period(self, time_period_num):
         player = self.engine.player
         time_period = self.time_periods[time_period_num]
