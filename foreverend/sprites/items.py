@@ -8,6 +8,7 @@ class Item(Sprite):
     def __init__(self, *args, **kwargs):
         super(Item, self).__init__(obey_gravity=True, *args, **kwargs)
         self.should_check_collisions = True
+        self.grabbable = True
 
 
 class Dynamite(Item):

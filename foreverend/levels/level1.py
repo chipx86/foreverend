@@ -147,12 +147,12 @@ class TimePeriod65000000BC(TimePeriod):
         self.main_layer.add(ground)
         ground.move_to(0, self.level.size[1] - ground.rect.height)
 
-        volcano = Volcano()
-        self.main_layer.add(volcano)
-        volcano.move_to(1400, ground.rect.top - volcano.rect.height)
+        self.volcano = Volcano()
+        self.main_layer.add(self.volcano)
+        self.volcano.move_to(1400, ground.rect.top - self.volcano.rect.height)
 
         # Dynamite explosion trigger
-        explosion_box = EventBox(self, 1948, 1554, 3, 3)
+        explosion_box = EventBox(self, 1990, 1554, 3, 3)
         explosion_box.watch_object_moves(self.level.dynamite)
         explosion_box.object_moved.connect(self.on_dynamite_placed)
 
@@ -164,13 +164,22 @@ class TimePeriod65000000BC(TimePeriod):
         if self.exploding or self.exploded:
             return
 
+        self.level.dynamite.grabbable = False
+        self.exploding = True
+
+        self.detonate_timer = Timer(self.engine, self, 1000,
+                                    self.start_explosion)
+
+    def start_explosion(self):
+        self.detonate_timer.stop()
+        self.detonate_timer = None
+
         self.level.dynamite.hide()
         self.level.dynamite = None
 
         self.explosion = Sprite('big_explosion')
         self.main_layer.add(self.explosion)
-        self.explosion.move_to(1900, 1400)
-        self.exploding = True
+        self.explosion.move_to(1980, 1400)
 
         self.explosion_timer = Timer(self.engine, self, 350,
                                      self.on_explosion_done)
@@ -183,6 +192,7 @@ class TimePeriod65000000BC(TimePeriod):
         self.explosion_timer = None
         self.exploding = False
         self.exploded = True
+        self.volcano.clear_passage()
 
 
 class Level1(Level):

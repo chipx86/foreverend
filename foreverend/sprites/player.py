@@ -23,7 +23,7 @@ class TractorBeam(Sprite):
             return
 
         for obj, _, _ in self.get_collisions(ignore_collidable_flag=True):
-            if isinstance(obj, Item):
+            if isinstance(obj, Item) and obj.grabbable:
                 self.grab(obj)
                 return
 
