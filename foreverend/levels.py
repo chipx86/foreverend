@@ -4,6 +4,9 @@ from pygame.locals import *
 from foreverend.sprites import TiledSprite
 
 
+DEBUG_COLLISION_RECTS = True
+
+
 class Layer(object):
     def __init__(self, index, level):
         self.level = level
@@ -82,6 +85,15 @@ class TimePeriod(object):
     def draw(self, screen):
         screen.blit(self.bg, self.engine.camera.rect.topleft)
         self.group.draw(screen)
+
+        if DEBUG_COLLISION_RECTS:
+            for sprite in self.group:
+                    if sprite.visible:
+                    rects = sprite.collision_rects or [sprite.rect]
+
+                    for rect in rects:
+                        pygame.draw.rect(screen, (0, 0, 255), rect, 1)
+
 
     def tick(self):
         self.group.update()
