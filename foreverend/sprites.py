@@ -175,6 +175,12 @@ class Player(Sprite):
     MAX_JUMP_HEIGHT = 100
     HOVER_TIME_MS = 1000
 
+    PROPULSION_BELOW_OFFSET = 8
+
+    # Directions
+    LEFT = 0
+    RIGHT = 1
+
     def __init__(self, engine):
         super(Player, self).__init__('player')
         self.engine = engine
@@ -186,13 +192,14 @@ class Player(Sprite):
         self.jump_origin = None
         self.propulsion_below = Sprite("propulsion_below")
         self.propulsion_below.collidable = False
+        self.direction = self.RIGHT
 
     def handle_event(self, event):
         if event.type == KEYDOWN:
             if event.key == K_RIGHT:
-                self.velocity = (self.MOVE_SPEED, self.velocity[1])
+                self.move_right()
             elif event.key == K_LEFT:
-                self.velocity = (-self.MOVE_SPEED, self.velocity[1])
+                self.move_left()
             elif event.key == K_SPACE:
                 self.jump()
         elif event.type == KEYUP:
@@ -204,6 +211,30 @@ class Player(Sprite):
                     self.velocity = (0, self.velocity[1])
             elif event.key == K_SPACE:
                 self.fall()
+
+    def generate_image(self):
+        if self.direction == self.LEFT:
+            name = self.name + '-left'
+        elif self.direction == self.RIGHT:
+            name = self.name + '-right'
+        else:
+            assert False
+
+        return load_image(name)
+
+    def move_right(self):
+        self.velocity = (self.MOVE_SPEED, self.velocity[1])
+
+        if self.direction != self.RIGHT:
+            self.direction = self.RIGHT
+            self.update_image()
+
+    def move_left(self):
+        self.velocity = (-self.MOVE_SPEED, self.velocity[1])
+
+        if self.direction != self.LEFT:
+            self.direction = self.LEFT
+            self.update_image()
 
     def jump(self):
         if self.falling or self.jumping:
@@ -254,7 +285,14 @@ class Player(Sprite):
             self.hover()
 
         if self.propulsion_below.visible:
-            self.propulsion_below.move_to(self.rect.left, self.rect.bottom)
+            if self.direction == self.RIGHT:
+                offset = self.PROPULSION_BELOW_OFFSET
+            if self.direction == self.LEFT:
+                offset = self.rect.width - self.propulsion_below.rect.width - \
+                         self.PROPULSION_BELOW_OFFSET
+
+            self.propulsion_below.move_to(self.rect.left + offset,
+                                          self.rect.bottom)
 
     def on_collision(self, dx, dy, obj):
         if self.jumping and dy < 0:
