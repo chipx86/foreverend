@@ -88,7 +88,7 @@ class TimePeriod(object):
 
         if DEBUG_COLLISION_RECTS:
             for sprite in self.group:
-                    if sprite.visible:
+                if sprite.visible:
                     rects = sprite.collision_rects or [sprite.rect]
 
                     for rect in rects:
