@@ -15,6 +15,7 @@ class Sprite(pygame.sprite.DirtySprite):
         self.dirty = 2
         self.velocity = (0, 0)
         self.collidable = True
+        self.check_collisions = False
         self.collision_rects = []
         self._colliding_objects = set()
 
@@ -63,7 +64,8 @@ class Sprite(pygame.sprite.DirtySprite):
 
         def _check_collision(left, right):
             if (left == right or left.layer != right.layer or
-                not left.collidable or not right.collidable):
+                not left.collidable or not right.collidable or
+                (not left.check_collisions and not right.check_collisions)):
                 return False
 
             left_rects = left.collision_rects or [left.rect]
@@ -82,6 +84,9 @@ class Sprite(pygame.sprite.DirtySprite):
             return False
 
         self.rect.move_ip(dx, dy)
+
+        if not self.check_collisions:
+            return
 
         old_colliding_objects = set(self._colliding_objects)
         self._colliding_objects = set()
@@ -179,6 +184,7 @@ class Player(Sprite):
         self.jumping = False
         self.falling = False
         self.hovering = False
+        self.check_collisions = True
         self.hover_time_ms = 0
         self.jump_origin = None
         self.propulsion_below = Sprite("propulsion_below")
