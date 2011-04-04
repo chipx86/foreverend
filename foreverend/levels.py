@@ -1,7 +1,7 @@
 import pygame
 from pygame.locals import *
 
-from foreverend.sprites import Box, Mountain600AD, Mountain1999AD, \
+from foreverend.sprites import Box, Elevator, Mountain600AD, Mountain1999AD, \
                                Sprite, TiledSprite, Volcano
 
 
@@ -152,26 +152,58 @@ class TimePeriod600AD(TimePeriod):
 
 
 class TimePeriod1999AD(TimePeriod):
+    BUILDING_RECT = pygame.Rect(0, 0, 1300, 700)
+    WALL_WIDTH = 15
+    GROUND_HEIGHT = 32
+    WALL_COLOR = (211, 215, 207)
+    FLOOR_COLOR = (211, 215, 207)
+
     def __init__(self, *args, **kwargs):
         super(TimePeriod1999AD, self).__init__(*args, **kwargs)
         self.bg.fill((255, 255, 255))
 
-        tiles_x = self.level.size[0] / 32
+        level_width, level_height = self.level.size
 
         # Ground
-        ground = Box(self.level.size[0], 32)
+        ground = Box(level_width, self.GROUND_HEIGHT)
         self.main_layer.add(ground)
-        ground.move_to(0, self.level.size[1] - ground.rect.height)
+        ground.move_to(0, level_height - ground.rect.height)
+
+        building_rect = self.BUILDING_RECT.move(
+            0, ground.rect.top - self.BUILDING_RECT.height)
+
+        # Second floor
+        floor2 = Box(building_rect.width, self.GROUND_HEIGHT)
+        self.main_layer.add(floor2)
+        floor2.move_to(building_rect.left,
+                       building_rect.top +
+                       (building_rect.height - floor2.rect.height) / 2)
 
         # Left wall of building
-        box = Box(15, 730, (211, 215, 207))
+        box = Box(self.WALL_WIDTH, building_rect.height, self.WALL_COLOR)
         self.main_layer.add(box)
-        box.move_to(0, self.level.size[1] - box.rect.height)
+        box.move_to(building_rect.left, building_rect.top)
 
         # Right wall of the building
-        box = Box(15, 730, (211, 215, 207))
+        box = Box(self.WALL_WIDTH, building_rect.height, self.WALL_COLOR)
         self.main_layer.add(box)
-        box.move_to(1300, self.level.size[1] - box.rect.height)
+        box.move_to(building_rect.right - self.WALL_WIDTH, building_rect.top)
+
+        # Ceiling
+        box = Box(building_rect.width, self.GROUND_HEIGHT)
+        self.main_layer.add(box)
+        box.move_to(building_rect.left, building_rect.top)
+
+        # Top elevator
+        elevator1 = Elevator()
+        self.main_layer.add(elevator1)
+        elevator1.move_to(building_rect.left + 100,
+                          building_rect.top - elevator1.rect.height)
+
+        elevator2 = Elevator()
+        self.main_layer.add(elevator2)
+        elevator2.move_to(elevator1.rect.left,
+                          floor2.rect.top - elevator2.rect.height)
 
         # Mountain
         mountain = Mountain1999AD()

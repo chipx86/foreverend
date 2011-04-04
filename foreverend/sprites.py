@@ -318,7 +318,8 @@ class Box(Sprite):
 
 class Elevator(Sprite):
     def __init__(self):
-        super(Elevator, self).__init__('elevator')
+        super(Elevator, self).__init__('1999ad/elevator')
+        self.collidable = False
 
 
 class Volcano(Sprite):
@@ -368,6 +369,7 @@ class Mountain(Sprite):
         (1450, 922, 96, 15),
         (1428, 878, 96, 22),
         (443, 219, 93, 40),
+        (350, 230, 93, 100),
     ]
 
     def __init__(self, name):
