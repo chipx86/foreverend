@@ -1,7 +1,7 @@
 import pygame
 from pygame.locals import *
 
-from foreverend.sprites import TiledSprite, Volcano
+from foreverend.sprites import Mountain, TiledSprite, Volcano
 
 
 DEBUG_COLLISION_RECTS = True
@@ -102,6 +102,22 @@ class TimePeriod(object):
             sprite.tick()
 
 
+class TimePeriod600AD(TimePeriod):
+    def __init__(self, *args, **kwargs):
+        super(TimePeriod600AD, self).__init__(*args, **kwargs)
+        self.bg.fill((255, 255, 255))
+
+        tiles_x = self.level.size[0] / 32
+        screen = self.engine.screen
+        ground = TiledSprite('ground', tiles_x, 1)
+        self.main_layer.add(ground)
+        ground.move_to(0, screen.get_height() - ground.rect.height)
+
+        mountain = Mountain()
+        self.main_layer.add(mountain)
+        mountain.move_to(1345, ground.rect.top - mountain.rect.height)
+
+
 class TimePeriod1999AD(TimePeriod):
     def __init__(self, *args, **kwargs):
         super(TimePeriod1999AD, self).__init__(*args, **kwargs)
@@ -138,6 +154,7 @@ class Level1(Level):
         self.size = (10000, 600)
         self.start_pos = (10,
                           self.size[1] - 32 - self.engine.player.rect.height)
+        self.add(TimePeriod600AD(self))
         self.add(TimePeriod1999AD(self))
         self.add(TimePeriod65000000BC(self))
 

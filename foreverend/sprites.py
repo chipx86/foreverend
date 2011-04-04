@@ -298,3 +298,20 @@ class Volcano(Sprite):
             not obj.rect.colliderect(self.rect)):
             self.name = 'volcano'
             self.update_image()
+
+
+class Mountain(Sprite):
+    BASE_COLLISION_RECTS = [
+        (0, 991, 1565, 11),
+        (0, 954, 140, 37),
+        (0, 900, 140, 54),
+    ]
+
+    def __init__(self):
+        super(Mountain, self).__init__('mountain_interior')
+
+    def on_moved(self):
+        self.collision_rects = [
+            pygame.Rect(self.rect.left + x, self.rect.top + y, w, h)
+            for x, y, w, h in self.BASE_COLLISION_RECTS
+        ]
