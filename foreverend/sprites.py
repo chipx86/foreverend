@@ -10,7 +10,9 @@ class Direction(object):
 
 
 class Sprite(pygame.sprite.DirtySprite):
-    def __init__(self, name, flip_image=False):
+    FALL_SPEED = 6
+
+    def __init__(self, name, flip_image=False, obey_gravity=False):
         super(Sprite, self).__init__()
 
         self.rect = pygame.Rect(0, 0, 0, 0)
@@ -19,6 +21,8 @@ class Sprite(pygame.sprite.DirtySprite):
         self.visible = 1
         self.dirty = 2
         self.velocity = (0, 0)
+        self.obey_gravity = obey_gravity
+        self.falling = False
         self.collidable = True
         self.check_collisions = False
         self.flip_image = flip_image
@@ -50,6 +54,18 @@ class Sprite(pygame.sprite.DirtySprite):
             self.visible = 0
             self.dirty = 1
             self.layer.remove(self)
+
+    def fall(self):
+        if self.falling or not self.obey_gravity:
+            return
+
+        self.falling = True
+        self.velocity = (self.velocity[0], self.FALL_SPEED)
+
+    def stop_falling(self):
+        if self.obey_gravity:
+            self.falling = False
+            self.velocity = (self.velocity[0], 0)
 
     def update_image(self):
         self.image = self.generate_image()
@@ -156,13 +172,15 @@ class Sprite(pygame.sprite.DirtySprite):
         pass
 
     def tick(self):
-        pass
+        if self.velocity != (0, 0):
+            self.move_by(*self.velocity)
 
     def on_moved(self):
         pass
 
     def on_collision(self, dx, dy, obj):
-        pass
+        if self.obey_gravity and self.falling:
+            self.falling = False
 
     def on_added(self, layer):
         pass
@@ -200,7 +218,8 @@ class TiledSprite(Sprite):
 
 class Item(Sprite):
     def __init__(self, *args, **kwargs):
-        super(Item, self).__init__(*args, **kwargs)
+        super(Item, self).__init__(obey_gravity=True, *args, **kwargs)
+        self.check_collisions = True
 
 
 class Dynamite(Item):
@@ -213,6 +232,7 @@ class TractorBeam(Sprite):
 
     def __init__(self, name='tractor_beam'):
         super(TractorBeam, self).__init__(name, flip_image=True)
+        self.item = None
         self.ungrab()
 
     def _check_for_items(self):
@@ -225,13 +245,20 @@ class TractorBeam(Sprite):
 
     def grab(self, item):
         assert item
+        assert not self.item
         print 'Got item'
         self.item = item
+        self.item.stop_falling()
+        self.item.obey_gravity = False
         self.name = 'tractor_beam'
         self.update_image()
 
     def ungrab(self):
-        self.item = None
+        if self.item:
+            self.item.obey_gravity = True
+            self.item.fall()
+            self.item = None
+
         self.name = 'tractor_beam_wide'
         self.update_image()
 
@@ -255,29 +282,38 @@ class TractorBeam(Sprite):
                 self.item.move_to(self.rect.left - self.item.rect.width -
                                   self.ITEM_OFFSET, y)
 
+    def on_added(self, layer):
+        if self.item:
+            layer.add(self.item)
+
+    def on_removed(self, layer):
+        if self.item:
+            layer.remove(self.item)
+
 
 class Player(Sprite):
     MOVE_SPEED = 6
     JUMP_SPEED = 6
-    FALL_SPEED = 6
     MAX_JUMP_HEIGHT = 100
     HOVER_TIME_MS = 1000
 
     PROPULSION_BELOW_OFFSET = 8
 
     def __init__(self, engine):
-        super(Player, self).__init__('player', flip_image=True)
+        super(Player, self).__init__('player', flip_image=True,
+                                     obey_gravity=True)
         self.engine = engine
         self.jumping = False
-        self.falling = False
         self.hovering = False
         self.check_collisions = True
         self.hover_time_ms = 0
         self.jump_origin = None
         self.propulsion_below = Sprite("propulsion_below")
         self.propulsion_below.collidable = False
+        self.propulsion_below.visible = 0
         self.tractor_beam = TractorBeam()
         self.tractor_beam.collidable = False
+        self.tractor_beam.visible = 0
 
     def handle_event(self, event):
         if event.type == KEYDOWN:
@@ -352,8 +388,7 @@ class Player(Sprite):
         self.propulsion_below.hide()
         self.jumping = False
         self.hovering = False
-        self.falling = True
-        self.velocity = (self.velocity[0], self.FALL_SPEED)
+        super(Player, self).fall()
 
     def hover(self):
         if self.hovering:
@@ -372,10 +407,12 @@ class Player(Sprite):
             if self.hover_time_ms >= self.HOVER_TIME_MS:
                 self.fall()
 
+        super(Player, self).tick()
+
     def on_added(self, layer):
+        print 'on_add'
         for obj in (self.propulsion_below, self.tractor_beam):
             layer.add(obj)
-            obj.hide()
 
     def on_removed(self, layer):
         for obj in (self.propulsion_below, self.tractor_beam):
@@ -404,8 +441,8 @@ class Player(Sprite):
     def on_collision(self, dx, dy, obj):
         if self.jumping and dy < 0:
             self.fall()
-        elif self.falling:
-            self.falling = False
+        else:
+            super(Player, self).on_collision(dx, dy, obj)
 
 
 class Box(Sprite):

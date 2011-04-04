@@ -126,9 +126,4 @@ class ForeverEndEngine(object):
     def _tick(self):
         if not self.paused:
             self.active_level.tick()
-
-            for sprite in [self.player]:
-                if sprite.velocity != (0, 0):
-                    sprite.move_by(*sprite.velocity)
-
             self.camera.update()
