@@ -4,8 +4,13 @@ from pygame.locals import *
 from foreverend.resources import load_image
 
 
+class Direction(object):
+    LEFT = 0
+    RIGHT = 1
+
+
 class Sprite(pygame.sprite.DirtySprite):
-    def __init__(self, name):
+    def __init__(self, name, flip_image=False):
         super(Sprite, self).__init__()
 
         self.rect = pygame.Rect(0, 0, 0, 0)
@@ -16,13 +21,23 @@ class Sprite(pygame.sprite.DirtySprite):
         self.velocity = (0, 0)
         self.collidable = True
         self.check_collisions = False
+        self.flip_image = flip_image
         self.collision_rects = []
         self._colliding_objects = set()
+        self._direction = Direction.RIGHT
+        self._flipped_image = None
 
     def __repr__(self):
         return 'Sprite %s (%s, %s, %s, %s)' % \
                (self.name, self.rect.left, self.rect.top,
                 self.rect.width, self.rect.height)
+
+    def _set_direction(self, direction):
+        if self.direction != direction:
+            self._direction = direction
+            self.update_image()
+
+    direction = property(lambda self: self._direction, _set_direction)
 
     def show(self):
         if not self.visible:
@@ -42,7 +57,15 @@ class Sprite(pygame.sprite.DirtySprite):
         self.rect.size = self.image.get_rect().size
 
     def generate_image(self):
-        return load_image(self.name)
+        image = load_image(self.name)
+
+        if self.flip_image and self._direction == Direction.LEFT:
+            if not self._flipped_image:
+                self._flipped_image = pygame.transform.flip(image, True, False)
+
+            image = self._flipped_image
+
+        return image
 
     def trigger(self):
         pass
@@ -183,12 +206,8 @@ class Player(Sprite):
 
     PROPULSION_BELOW_OFFSET = 8
 
-    # Directions
-    LEFT = 0
-    RIGHT = 1
-
     def __init__(self, engine):
-        super(Player, self).__init__('player')
+        super(Player, self).__init__('player', flip_image=True)
         self.engine = engine
         self.jumping = False
         self.falling = False
@@ -198,7 +217,6 @@ class Player(Sprite):
         self.jump_origin = None
         self.propulsion_below = Sprite("propulsion_below")
         self.propulsion_below.collidable = False
-        self.direction = self.RIGHT
 
     def handle_event(self, event):
         if event.type == KEYDOWN:
@@ -220,28 +238,18 @@ class Player(Sprite):
             elif event.key == K_SPACE:
                 self.fall()
 
-    def generate_image(self):
-        if self.direction == self.LEFT:
-            name = self.name + '-left'
-        elif self.direction == self.RIGHT:
-            name = self.name + '-right'
-        else:
-            assert False
-
-        return load_image(name)
-
     def move_right(self):
         self.velocity = (self.MOVE_SPEED, self.velocity[1])
 
-        if self.direction != self.RIGHT:
-            self.direction = self.RIGHT
+        if self.direction != Direction.RIGHT:
+            self.direction = Direction.RIGHT
             self.update_image()
 
     def move_left(self):
         self.velocity = (-self.MOVE_SPEED, self.velocity[1])
 
-        if self.direction != self.LEFT:
-            self.direction = self.LEFT
+        if self.direction != Direction.LEFT:
+            self.direction = Direction.LEFT
             self.update_image()
 
     def trigger_object(self):
@@ -303,9 +311,9 @@ class Player(Sprite):
             self.hover()
 
         if self.propulsion_below.visible:
-            if self.direction == self.RIGHT:
+            if self.direction == Direction.RIGHT:
                 offset = self.PROPULSION_BELOW_OFFSET
-            if self.direction == self.LEFT:
+            if self.direction == Direction.LEFT:
                 offset = self.rect.width - self.propulsion_below.rect.width - \
                          self.PROPULSION_BELOW_OFFSET
 
