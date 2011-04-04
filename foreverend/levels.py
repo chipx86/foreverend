@@ -200,10 +200,15 @@ class TimePeriod1999AD(TimePeriod):
         elevator1.move_to(building_rect.left + 100,
                           building_rect.top - elevator1.rect.height)
 
+        # Bottom elevator
         elevator2 = Elevator()
         self.main_layer.add(elevator2)
         elevator2.move_to(elevator1.rect.left,
                           floor2.rect.top - elevator2.rect.height)
+
+        # Link up the elevators
+        elevator1.destination = elevator2
+        elevator2.destination = elevator1
 
         # Mountain
         mountain = Mountain1999AD()

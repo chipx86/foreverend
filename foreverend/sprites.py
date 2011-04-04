@@ -44,6 +44,9 @@ class Sprite(pygame.sprite.DirtySprite):
     def generate_image(self):
         return load_image(self.name)
 
+    def trigger(self):
+        pass
+
     def move_to(self, x, y, check_collisions=False):
         self.move_by(x - self.rect.x, y - self.rect.y, check_collisions)
 
@@ -82,7 +85,7 @@ class Sprite(pygame.sprite.DirtySprite):
         for obj in old_colliding_objects.difference(self._colliding_objects):
             obj.handle_stop_colliding(self)
 
-    def get_collisions(self, group=None):
+    def get_collisions(self, group=None, ignore_collidable_flag=False):
         if not self.check_collisions:
             raise StopIteration
 
@@ -96,15 +99,18 @@ class Sprite(pygame.sprite.DirtySprite):
         # instead of calling spritecollide.
         for obj in group:
             self_rect, obj_rect = \
-                self._check_collision(self, obj, compare_layers)
+                self._check_collision(self, obj, compare_layers,
+                                      ignore_collidable_flag)
 
             if self_rect and obj_rect:
                 yield obj, self_rect, obj_rect
 
-    def _check_collision(self, left, right, compare_layers):
+    def _check_collision(self, left, right, compare_layers,
+                         ignore_collidable_flag):
         if (left == right or
             (compare_layers and left.layer != right.layer) or
-            not left.collidable or not right.collidable or
+            (not ignore_collidable_flag and
+             (not left.collidable or not right.collidable)) or
             (not left.check_collisions and not right.check_collisions)):
             return None, None
 
@@ -202,6 +208,8 @@ class Player(Sprite):
                 self.move_left()
             elif event.key == K_SPACE:
                 self.jump()
+            elif event.key == K_UP or event.key == K_DOWN:
+                self.trigger_object()
         elif event.type == KEYUP:
             if event.key == K_LEFT:
                 if self.velocity[0] < 0:
@@ -235,6 +243,15 @@ class Player(Sprite):
         if self.direction != self.LEFT:
             self.direction = self.LEFT
             self.update_image()
+
+    def trigger_object(self):
+        old_rect = self.rect.copy()
+
+        for obj, _, _ in self.get_collisions(ignore_collidable_flag=True):
+            obj.trigger()
+
+            if self.rect != old_rect:
+                break
 
     def jump(self):
         if self.falling or self.jumping:
@@ -320,6 +337,16 @@ class Elevator(Sprite):
     def __init__(self):
         super(Elevator, self).__init__('1999ad/elevator')
         self.collidable = False
+        self.destination = None
+
+    def trigger(self):
+        if self.destination:
+            player = self.layer.level.engine.player
+            dest_rect = self.destination.rect
+
+            player.move_to(
+                dest_rect.left + (dest_rect.width - player.rect.width) / 2,
+                dest_rect.bottom - player.rect.height)
 
 
 class Volcano(Sprite):
