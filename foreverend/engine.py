@@ -33,7 +33,8 @@ class Camera(object):
             self.rect.centery = player_rect.centery + self.SCREEN_PAD
 
         if old_rect != self.rect:
-            self.rect.clamp_ip(pygame.Rect(0, 0, *self.engine.active_level.size))
+            self.rect.clamp_ip(
+                pygame.Rect(0, 0, *self.engine.active_level.size))
 
 
 class ForeverEndEngine(object):

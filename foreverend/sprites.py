@@ -62,20 +62,10 @@ class Sprite(pygame.sprite.DirtySprite):
     def _move(self, dx=0, dy=0):
         self.rect.move_ip(dx, dy)
 
-        if not self.check_collisions:
-            return
-
         old_colliding_objects = set(self._colliding_objects)
         self._colliding_objects = set()
 
-        # We want more detailed collision info, so we use our own logic
-        # instead of calling spritecollide.
-        for obj in self.layer.level.group:
-            self_rect, obj_rect = self._check_collision(self, obj)
-
-            if not self_rect and not obj_rect:
-                continue
-
+        for obj, self_rect, obj_rect in self.get_collisions():
             if dy < 0:
                 self.rect.top = obj_rect.bottom
             elif dy > 0:
@@ -87,14 +77,33 @@ class Sprite(pygame.sprite.DirtySprite):
 
             obj.handle_collision(self, obj_rect, dx, dy)
             self.on_collision(dx, dy, obj)
-
             self._colliding_objects.add(obj)
 
         for obj in old_colliding_objects.difference(self._colliding_objects):
             obj.handle_stop_colliding(self)
 
-    def _check_collision(self, left, right):
-        if (left == right or left.layer != right.layer or
+    def get_collisions(self, group=None):
+        if not self.check_collisions:
+            raise StopIteration
+
+        if group is None:
+            group = self.layer.level.group
+            compare_layers = True
+        else:
+            compare_layers = False
+
+        # We want more detailed collision info, so we use our own logic
+        # instead of calling spritecollide.
+        for obj in group:
+            self_rect, obj_rect = \
+                self._check_collision(self, obj, compare_layers)
+
+            if self_rect and obj_rect:
+                yield obj, self_rect, obj_rect
+
+    def _check_collision(self, left, right, compare_layers):
+        if (left == right or
+            (compare_layers and left.layer != right.layer) or
             not left.collidable or not right.collidable or
             (not left.check_collisions and not right.check_collisions)):
             return None, None

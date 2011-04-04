@@ -44,19 +44,19 @@ class Level(object):
 
     def add(self, time_period):
         self.time_periods.append(time_period)
-        time_period.time_periodset = self
-
-        if not self.active_time_period:
-            self.active_time_period = time_period
 
     def switch_time_period(self, time_period_num):
         player = self.engine.player
+        time_period = self.time_periods[time_period_num]
 
-        if self.active_time_period:
-            self.active_time_period.main_layer.remove(player)
+        # First, make sure the player can be there.
+        if (not self.active_time_period or
+            not list(player.get_collisions(group=time_period.group))):
+            if self.active_time_period:
+                self.active_time_period.main_layer.remove(player)
 
-        self.active_time_period = self.time_periods[time_period_num]
-        self.active_time_period.main_layer.add(player)
+            self.active_time_period = time_period
+            self.active_time_period.main_layer.add(player)
 
     def draw(self, screen):
         self.active_time_period.draw(screen)
@@ -78,7 +78,7 @@ class TimePeriod(object):
 
     def new_layer(self):
         layer = Layer(len(self.layers), self)
-        layer.level = self
+        layer.time_period = self
         self.layers.append(layer)
         return layer
 
