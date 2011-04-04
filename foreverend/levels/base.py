@@ -113,7 +113,17 @@ class EventBox(object):
     def __init__(self, time_period, x, y, w, h):
         self.rect = pygame.Rect(x, y, w, h)
         time_period.register_for_events(self)
+
+        # Signals
         self.event_fired = Signal()
+        self.object_moved = Signal()
+
+    def watch_object_moves(self, obj):
+        obj.moved.connect(lambda: self.handle_object_move(obj))
 
     def handle_event(self, event):
         return self.event_fired.emit(event)
+
+    def handle_object_move(self, obj):
+        if self.rect.colliderect(obj.rect):
+            self.object_moved.emit(obj)
