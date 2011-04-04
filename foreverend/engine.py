@@ -44,15 +44,22 @@ class ForeverEndEngine(object):
         self.screen = screen
         self.clock = pygame.time.Clock()
         self.paused = False
+        self.camera = Camera(self)
+
+        # Debug flags
         self.debug_collision_rects = False
         self.god_mode = False
-        self.camera = Camera(self)
+        self.show_debug_info = False
 
     def run(self):
         self._setup_game()
         self._mainloop()
 
     def _setup_game(self):
+        pygame.font.init()
+
+        self.debug_font = pygame.font.Font(pygame.font.get_default_font(), 16)
+
         self.player = Player(self)
         self.player.update_image()
         self.levels = [level(self) for level in get_levels()]
@@ -91,6 +98,8 @@ class ForeverEndEngine(object):
                 # Switch time periods
                 self._show_time_periods()
             # XXX
+            elif event.type == KEYDOWN and event.key == K_F2:
+                self.show_debug_info = not self.show_debug_info
             elif event.type == KEYDOWN and event.key == K_F3:
                 self.debug_collision_rects = not self.debug_collision_rects
             elif event.type == KEYDOWN and event.key == K_F4:
@@ -127,6 +136,16 @@ class ForeverEndEngine(object):
             pygame.Rect(self.camera.rect.left, self.camera.rect.top,
                         self.screen.get_width(), self.screen.get_height())),
             (0, 0))
+
+        if self.show_debug_info:
+            debug_str = '%s, %s - %s, %s' % (
+                self.player.rect.left, self.player.rect.top,
+                self.player.rect.right, self.player.rect.bottom)
+
+            self.screen.blit(
+                self.debug_font.render(debug_str, True, (255, 0, 0)),
+                (10, 10))
+
         pygame.display.flip()
 
     def _tick(self):
