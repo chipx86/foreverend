@@ -1,6 +1,8 @@
 import pygame
 from pygame.locals import *
 
+from foreverend.signals import Signal
+
 
 class Layer(object):
     def __init__(self, index, level):
@@ -101,3 +103,13 @@ class TimePeriod(object):
 
         for sprite in self.group:
             sprite.tick()
+
+
+class EventBox(object):
+    def __init__(self, time_period, x, y, w, h):
+        self.rect = pygame.Rect(x, y, w, h)
+        time_period.register_for_events(self)
+        self.event_fired = Signal()
+
+    def handle_event(self, event):
+        return self.event_fired.emit(event)

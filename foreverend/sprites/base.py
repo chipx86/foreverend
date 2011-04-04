@@ -2,6 +2,7 @@ import pygame
 from pygame.locals import *
 
 from foreverend.resources import load_image
+from foreverend.signals import Signal
 
 
 class Direction(object):
@@ -15,6 +16,10 @@ class Sprite(pygame.sprite.DirtySprite):
     def __init__(self, name, flip_image=False, obey_gravity=False):
         super(Sprite, self).__init__()
 
+        # Signals
+        self.moved = Signal()
+
+        # State
         self.rect = pygame.Rect(0, 0, 0, 0)
         self.name = name
         self.image = None
@@ -177,7 +182,7 @@ class Sprite(pygame.sprite.DirtySprite):
             self.move_by(*self.velocity)
 
     def on_moved(self):
-        pass
+        self.moved.emit()
 
     def on_collision(self, dx, dy, obj, self_rect):
         if self.obey_gravity and self.falling:

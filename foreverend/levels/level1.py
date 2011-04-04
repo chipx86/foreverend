@@ -1,6 +1,6 @@
 import pygame
 
-from foreverend.levels.base import Level, TimePeriod
+from foreverend.levels.base import EventBox, Level, TimePeriod
 from foreverend.sprites import Box, Dynamite, Elevator, Mountain600AD, \
                                Mountain1999AD, Sprite, TiledSprite, Volcano
 
@@ -152,6 +152,9 @@ class TimePeriod65000000BC(TimePeriod):
         volcano = Volcano()
         self.main_layer.add(volcano)
         volcano.move_to(1400, ground.rect.top - volcano.rect.height)
+
+        # Dynamite explosion trigger
+        explosion_box = EventBox(self, 1934, 1540, 16, 16)
 
 
 class Level1(Level):
