@@ -366,9 +366,10 @@ class Mountain(Sprite):
         (1459, 937, 94, 17),
         (1450, 922, 96, 15),
         (1428, 878, 96, 22),
+        (443, 219, 93, 40),
     ]
 
-    def __init__(self, name='mountain_600ad'):
+    def __init__(self, name):
         super(Mountain, self).__init__(name)
         self.default_name = name
         self.interior_name = name + '_interior'
@@ -390,3 +391,16 @@ class Mountain(Sprite):
             not self.rect.contains(obj.rect)):
             self.name = self.default_name
             self.update_image()
+
+
+class Mountain600AD(Mountain):
+    def __init__(self):
+        super(Mountain600AD, self).__init__('600ad/mountain')
+
+
+class Mountain1999AD(Mountain):
+    BASE_COLLISION_RECTS = Mountain.BASE_COLLISION_RECTS + [
+        (443, 126, 100, 100),
+    ]
+    def __init__(self):
+        super(Mountain1999AD, self).__init__('1999ad/mountain')

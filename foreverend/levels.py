@@ -1,9 +1,8 @@
 import pygame
 from pygame.locals import *
 
-from foreverend.sprites import Box, Mountain, Sprite, TiledSprite, Volcano
-
-
+from foreverend.sprites import Box, Mountain600AD, Mountain1999AD, \
+                               Sprite, TiledSprite, Volcano
 DEBUG_COLLISION_RECTS = True
 
 
@@ -112,7 +111,7 @@ class TimePeriod600AD(TimePeriod):
         self.main_layer.add(ground)
         ground.move_to(0, self.level.size[1] - ground.rect.height)
 
-        mountain = Mountain('600ad/mountain')
+        mountain = Mountain600AD()
         self.main_layer.add(mountain)
         mountain.move_to(1345, ground.rect.top - mountain.rect.height)
 
@@ -176,7 +175,7 @@ class TimePeriod1999AD(TimePeriod):
         box.move_to(1300, self.level.size[1] - box.rect.height)
 
         # Mountain
-        mountain = Mountain('600ad/mountain')
+        mountain = Mountain1999AD()
         self.main_layer.add(mountain)
         mountain.move_to(1345, ground.rect.top - mountain.rect.height)
 
