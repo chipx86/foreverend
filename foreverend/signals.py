@@ -3,7 +3,7 @@ class Signal(object):
         self.callbacks = []
 
     def connect(self, callback):
-        self.callbacks.add(callback)
+        self.callbacks.append(callback)
 
     def emit(self, *args, **kwargs):
         result = False
