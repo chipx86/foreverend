@@ -1,58 +1,73 @@
 import pygame
 
-from foreverend.sprites.base import Sprite
+from foreverend.levels.base import EventBox
+from foreverend.sprites.base import Sprite, TiledSprite
 from foreverend.sprites.player import Player
 
 
-class Volcano(Sprite):
-    BASE_CAVERN_RECT = pygame.Rect(0, 310, 600, 55)
+class Volcano(object):
+    BASE_CAVERN_RECT = pygame.Rect(0, 310, 600, 57)
 
-    def __init__(self, name='65000000bc/volcano'):
-        super(Volcano, self).__init__(name)
-        self.cavern_rect = self.BASE_CAVERN_RECT.copy()
-        self.default_name = name
-        self.interior_name = name + '_inside'
-        self.passage_blocked = True
+    def __init__(self):
+        self.lava_pool = TiledSprite('65000000bc/lava_pool', 4, 1)
+        self.lava_pool.lethal = True
 
-        self.moved.connect(self.update_collision_rects)
+        self.lava_puddle = Sprite('65000000bc/volcano_lava_puddle')
+        self.lava_puddle.collidable = False
+
+        self.top_sprite = Sprite('65000000bc/volcano_top')
+        self.top_sprite.use_pixel_collisions = True
+        self.top_sprite.update_image()
+
+        self.bottom_sprite = Sprite('65000000bc/volcano_bottom')
+        self.bottom_sprite.update_image()
+
+        self.column_sprite = Sprite('65000000bc/volcano_column')
+        self.column_sprite.use_pixel_collisions = True
+        self.column_sprite.update_image()
+
+        self.cover_sprite = Sprite('65000000bc/volcano_cover')
+        self.cover_sprite.collidable = False
+
+        self.rect = pygame.Rect(0, 0, self.bottom_sprite.rect.width,
+                                self.top_sprite.rect.height +
+                                self.BASE_CAVERN_RECT.height +
+                                self.bottom_sprite.rect.height)
+
+    def add_to(self, time_period):
+        self.eventbox = EventBox(time_period)
+        self.eventbox.object_entered.connect(
+            lambda x: self.cover_sprite.hide())
+        self.eventbox.object_exited.connect(
+            lambda x: self.cover_sprite.show())
+        self.eventbox.watch_object_moves(time_period.engine.player)
+
+        time_period.main_layer.add(self.lava_puddle)
+        time_period.main_layer.add(self.lava_pool)
+        time_period.main_layer.add(self.top_sprite)
+        time_period.main_layer.add(self.bottom_sprite)
+        time_period.main_layer.add(self.column_sprite)
+        time_period.fg_layer.add(self.cover_sprite)
+
+    def move_to(self, x, y):
+        self.rect.left = x
+        self.rect.top = y
+
+        self.lava_pool.move_to(x + 360, y + 10)
+        self.top_sprite.move_to(x, y)
+        self.column_sprite.move_to(
+            x + 578, y + self.rect.height - self.column_sprite.rect.height)
+        self.bottom_sprite.move_to(
+            x, y + self.rect.height - self.bottom_sprite.rect.height)
+        self.lava_puddle.move_to(x + 574, self.bottom_sprite.rect.top - self.lava_puddle.rect.height + 4)
+        self.cover_sprite.move_to(
+            x, y + self.rect.height - self.cover_sprite.rect.height)
+
+        self.eventbox.rects.append(
+            pygame.Rect(x, y + self.BASE_CAVERN_RECT.top,
+                        self.rect.width, self.BASE_CAVERN_RECT.height))
+        self.eventbox.rects.append(self.column_sprite.rect)
 
     def clear_passage(self):
-        self.passage_blocked = False
-        self.interior_name = self.default_name + '_clear'
-        self.update_collision_rects()
-        self.update_image()
-
-    def update_collision_rects(self):
-        self.cavern_rect.left = self.rect.left + self.BASE_CAVERN_RECT.left
-        self.cavern_rect.top = self.rect.top + self.BASE_CAVERN_RECT.top
-
-        self.collision_rects = [
-            pygame.Rect(self.rect.left, self.rect.top, self.rect.width,
-                        self.cavern_rect.top - self.rect.top),
-        ]
-
-        if self.passage_blocked:
-            self.collision_rects.append(
-                pygame.Rect(self.cavern_rect.right,
-                            self.cavern_rect.top,
-                            self.rect.width - self.cavern_rect.width,
-                            self.cavern_rect.height))
-        else:
-            self.cavern_rect.width = self.rect.right - \
-                                     self.BASE_CAVERN_RECT.left
-
-        self.ground_rect = pygame.Rect(self.rect.left, self.cavern_rect.bottom,
-                                       self.rect.width, self.rect.width)
-        self.collision_rects.append(self.ground_rect)
-
-    def handle_collision(self, obj, matched_rect, dx, dy):
-        if (isinstance(obj, Player) and dy > 0 and
-            matched_rect == self.ground_rect):
-            self.name = self.interior_name
-            self.update_image()
-
-    def handle_stop_colliding(self, obj):
-        if (self.name == self.interior_name and isinstance(obj, Player) and
-            not obj.rect.colliderect(self.rect)):
-            self.name = self.default_name
-            self.update_image()
+        self.column_sprite.hide()
+        self.lava_puddle.hide()

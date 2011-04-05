@@ -173,7 +173,7 @@ class TimePeriod65000000BC(TimePeriod):
 
         # Volcano
         self.volcano = Volcano()
-        self.main_layer.add(self.volcano)
+        self.volcano.add_to(self)
         self.volcano.move_to(1400, ground.rect.top - self.volcano.rect.height)
 
         # Left-side lava pool
@@ -204,9 +204,14 @@ class TimePeriod65000000BC(TimePeriod):
                           ground.rect.top - 18)
 
         # Dynamite explosion trigger
-        explosion_box = EventBox(self, 1990, 1554, 3, 3)
+        explosion_box = EventBox(self)
+        explosion_box.rects.append(
+            pygame.Rect(self.volcano.lava_puddle.rect.x,
+                        self.volcano.lava_puddle.rect.centery,
+                        self.volcano.lava_puddle.rect.width,
+                        self.volcano.lava_puddle.rect.height / 2))
         explosion_box.watch_object_moves(self.level.dynamite)
-        explosion_box.object_moved.connect(self.on_dynamite_placed)
+        explosion_box.object_entered.connect(self.on_dynamite_placed)
 
         self.explosion = None
 
