@@ -34,6 +34,7 @@ class Sprite(pygame.sprite.DirtySprite):
         self.use_pixel_collisions = False
         self.flip_image = flip_image
         self.collision_rects = []
+        self.collision_masks = []
         self._colliding_objects = set()
         self._direction = Direction.RIGHT
         self._flipped_images = {}
@@ -167,56 +168,67 @@ class Sprite(pygame.sprite.DirtySprite):
         left_rects = left.collision_rects or [left.rect]
         right_rects = right.collision_rects or [right.rect]
 
-        print 'checking...'
-        for left_rect in left_rects:
-            index = left_rect.collidelist(right_rects)
-            print index
+        for left_index, left_rect in enumerate(left_rects):
+            right_index = left_rect.collidelist(right_rects)
 
-            if index == -1:
+            if right_index == -1:
                 continue
 
-            right_rect = right_rects[index]
+            right_rect = right_rects[right_index]
 
             if left.use_pixel_collisions or right.use_pixel_collisions:
-                if left.use_pixel_collisions:
-                    if not hasattr(left, 'mask'):
-                        left.mask = pygame.sprite.from_surface(left.image)
-                else:
-                    left.mask = pygame.Mask(left.rect.size)
-                    left.mask.fill()
-
-                if right.use_pixel_collisions:
-                    if not hasattr(right, 'mask'):
-                        right.mask = pygame.sprite.from_surface(right.image)
-                else:
-                    right.mask = pygame.Mask(right.rect.size)
-                    right.mask.fill()
-
-                # See if they collide.
-                xoffset = left.rect.left - right.rect.left
-                yoffset = left.rect.top - right.rect.top
-
-                pos = right.mask.overlap(left.mask, (xoffset, yoffset))
+                left_mask = left._build_mask(left_rect, left_index)
+                right_mask = right._build_mask(right_rect, right_index)
+                pos = right_mask.overlap(left_mask,
+                                         (left_rect.left - right_rect.left,
+                                          left_rect.top - right_rect.top))
 
                 if not pos:
                     continue
 
-                x = right.rect.left + pos[0]
-                y = right.rect.top + pos[1]
-
-                print 'collide - %s, %s -- %s, %s, %s, %s' % \
-                    (x, y, right_rect.left, right_rect.top,
-                     right_rect.width, right_rect.height)
-
-                if not right_rect.collidepoint(x, y):
-                    continue
-
-                print 'collision!'
-                right_rect = pygame.Rect(x, y, 1, 1)
+                right_rect = pygame.Rect(right_rect.left + pos[0],
+                                         right_rect.top + pos[1], 1, 1)
 
             return left_rect, right_rect
 
         return None, None
+
+    def _build_mask(self, rect, collision_index):
+        mask = None
+        image = None
+
+        if self.use_pixel_collisions:
+            if collision_index < len(self.collision_masks):
+                mask = self.collision_masks[collision_index]
+
+            if not mask:
+                mask = getattr(self, 'mask', None)
+
+            if not mask:
+                if rect == self.rect:
+                    image = self.image
+                else:
+                    try:
+                        image = self.image.subsurface(rect)
+                    except ValueError, e:
+                        image = None
+
+                if image:
+                    mask = pygame.sprite.from_surface(image)
+
+        if not mask:
+            mask = pygame.Mask(rect.size)
+            mask.fill()
+
+        if self.collision_rects:
+            if not self.collision_masks:
+                self.collision_masks = [None] * len(self.collision_rects)
+
+            self.collision_masks[collision_index] = mask
+        else:
+            self.mask = mask
+
+        return mask
 
     def handle_collision(self, obj, rect, dx, dy):
         pass

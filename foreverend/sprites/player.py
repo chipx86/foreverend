@@ -209,6 +209,8 @@ class Player(Sprite):
         self.velocity = (self.velocity[0], 0)
 
     def calculate_collision_rects(self):
+        self.collision_masks = []
+
         if self.tractor_beam.item:
             self.collision_rects = [
                 self.rect,
