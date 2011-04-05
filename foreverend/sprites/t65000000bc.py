@@ -2,6 +2,7 @@ import pygame
 
 from foreverend.levels.base import EventBox
 from foreverend.sprites.base import Sprite, TiledSprite
+from foreverend.sprites.common import Box
 from foreverend.sprites.player import Player
 
 
@@ -14,6 +15,9 @@ class Volcano(object):
 
         self.lava_puddle = Sprite('65000000bc/volcano_lava_puddle')
         self.lava_puddle.collidable = False
+
+        self.lava_puddle_blocker = Box(10, self.BASE_CAVERN_RECT.height,
+                                       (0, 0, 0))
 
         self.top_sprite = Sprite('65000000bc/volcano_top')
         self.top_sprite.use_pixel_collisions = True
@@ -42,6 +46,7 @@ class Volcano(object):
             lambda x: self.cover_sprite.show())
         self.eventbox.watch_object_moves(time_period.engine.player)
 
+        time_period.main_layer.add(self.lava_puddle_blocker)
         time_period.main_layer.add(self.lava_puddle)
         time_period.main_layer.add(self.lava_pool)
         time_period.main_layer.add(self.top_sprite)
@@ -59,7 +64,12 @@ class Volcano(object):
             x + 578, y + self.rect.height - self.column_sprite.rect.height)
         self.bottom_sprite.move_to(
             x, y + self.rect.height - self.bottom_sprite.rect.height)
-        self.lava_puddle.move_to(x + 574, self.bottom_sprite.rect.top - self.lava_puddle.rect.height + 4)
+        self.lava_puddle.move_to(
+            x + 574,
+            self.bottom_sprite.rect.top - self.lava_puddle.rect.height + 4)
+        self.lava_puddle_blocker.move_to(
+            self.lava_puddle.rect.right - 10,
+            self.lava_puddle.rect.bottom - self.lava_puddle_blocker.rect.height)
         self.cover_sprite.move_to(
             x, y + self.rect.height - self.cover_sprite.rect.height)
 
@@ -71,3 +81,4 @@ class Volcano(object):
     def clear_passage(self):
         self.column_sprite.hide()
         self.lava_puddle.hide()
+        self.lava_puddle_blocker.hide()
