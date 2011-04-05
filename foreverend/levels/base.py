@@ -104,7 +104,8 @@ class TimePeriod(object):
 
             for eventbox in self.event_handlers:
                 if isinstance(eventbox, EventBox):
-                    pygame.draw.rect(screen, (255, 0, 0), eventbox.rect, 1)
+                    for rect in eventbox.rects:
+                        pygame.draw.rect(screen, (255, 0, 0), rect, 1)
 
     def register_for_events(self, obj):
         self.event_handlers.append(obj)
@@ -123,13 +124,16 @@ class TimePeriod(object):
 
 
 class EventBox(object):
-    def __init__(self, time_period, x, y, w, h):
-        self.rect = pygame.Rect(x, y, w, h)
+    def __init__(self, time_period):
+        self.rects = []
         time_period.register_for_events(self)
+        self.entered_objects = set()
 
         # Signals
         self.event_fired = Signal()
         self.object_moved = Signal()
+        self.object_entered = Signal()
+        self.object_exited = Signal()
 
     def watch_object_moves(self, obj):
         obj.moved.connect(lambda: self.handle_object_move(obj))
@@ -138,5 +142,12 @@ class EventBox(object):
         return self.event_fired.emit(event)
 
     def handle_object_move(self, obj):
-        if self.rect.colliderect(obj.rect):
+        if obj.rect.collidelist(self.rects) != -1:
+            if obj not in self.entered_objects:
+                self.entered_objects.add(obj)
+                self.object_entered.emit(obj)
+
             self.object_moved.emit(obj)
+        elif obj in self.entered_objects:
+            self.entered_objects.remove(obj)
+            self.object_exited.emit(obj)

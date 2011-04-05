@@ -122,7 +122,12 @@ class ForeverEndEngine(object):
                     time_period = self.active_level.active_time_period
 
                     for box in time_period.event_handlers:
-                        if (box.rect.colliderect(self.player.rect) and
+                        if hasattr(box, 'rects'):
+                            rects = box.rects
+                        else:
+                            rects = [box.rect]
+
+                        if (self.player.rect.collidelist(rects) != -1 and
                             box.handle_event(event)):
                             break
 
