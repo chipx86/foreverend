@@ -78,6 +78,7 @@ class TimePeriod(object):
         self.layers = []
         self.group = pygame.sprite.LayeredDirty()
         self.default_layer = self.new_layer()
+        self.bg_layer = self.new_layer()
         self.main_layer = self.new_layer()
         self.bg = pygame.Surface(self.engine.screen.get_size()).convert()
         self.event_handlers = []

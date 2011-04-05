@@ -9,7 +9,7 @@ from foreverend.sprites import Box, Dynamite, Elevator, Mountain600AD, \
 class TimePeriod600AD(TimePeriod):
     def __init__(self, *args, **kwargs):
         super(TimePeriod600AD, self).__init__(*args, **kwargs)
-        self.bg.fill((255, 255, 255))
+        self.bg.fill((237, 243, 255))
 
         tiles_x = self.level.size[0] / 32
         ground = TiledSprite('ground', tiles_x, 1)
@@ -66,7 +66,7 @@ class TimePeriod1999AD(TimePeriod):
 
     def __init__(self, *args, **kwargs):
         super(TimePeriod1999AD, self).__init__(*args, **kwargs)
-        self.bg.fill((255, 255, 255))
+        self.bg.fill((199, 214, 251))
 
         level_width, level_height = self.level.size
 
@@ -77,6 +77,11 @@ class TimePeriod1999AD(TimePeriod):
 
         building_rect = self.BUILDING_RECT.move(
             0, ground.rect.top - self.BUILDING_RECT.height)
+
+        # Building background
+        building_bg = Box(*building_rect.size)
+        self.bg_layer.add(building_bg)
+        building_bg.move_to(*building_rect.topleft)
 
         # Second floor
         floor2 = Box(building_rect.width, self.GROUND_HEIGHT)
