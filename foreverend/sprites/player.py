@@ -258,7 +258,7 @@ class Player(Sprite):
         super(Player, self).on_moved()
 
     def on_collision(self, dx, dy, obj, self_rect, obj_rect):
-        if obj.lethal and self_rect == self.rect:
+        if obj.lethal and not self.engine.god_mode and self_rect == self.rect:
             self.engine.dead()
             return
 
