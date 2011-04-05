@@ -30,11 +30,3 @@ class Elevator(Sprite):
             return True
 
         return False
-
-
-class Mountain1999AD(Mountain):
-    BASE_COLLISION_RECTS = Mountain.BASE_COLLISION_RECTS + [
-        (443, 126, 100, 100),
-    ]
-    def __init__(self):
-        super(Mountain1999AD, self).__init__('1999ad/mountain')

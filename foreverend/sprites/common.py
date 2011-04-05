@@ -1,5 +1,6 @@
 import pygame
 
+from foreverend.levels.base import EventBox
 from foreverend.sprites.base import Sprite
 from foreverend.sprites.player import Player
 
@@ -18,38 +19,95 @@ class Box(Sprite):
         return surface
 
 
-class Mountain(Sprite):
-    BASE_COLLISION_RECTS = [
-        (0, 991, 1565, 11),
-        (0, 954, 140, 37),
-        (0, 900, 140, 54),
-        (1467, 954, 98, 37),
-        (1459, 937, 94, 17),
-        (1450, 922, 96, 15),
-        (1428, 878, 96, 22),
-        (443, 219, 93, 40),
-        (350, 230, 93, 100),
-    ]
+class Mountain(object):
+    LEFT_OFFSETS = [0, 90, 189, 239, 313]
+    RIGHT_OFFSETS = [1427, 1236, 1208, 1121, 940]
 
-    def __init__(self, name):
-        super(Mountain, self).__init__(name)
-        self.default_name = name
-        self.interior_name = name + '_interior'
+    def __init__(self):
+        self.bg_sprite = Sprite('mountain_bg')
 
-    def on_moved(self):
-        self.collision_rects = [
-            pygame.Rect(self.rect.left + x, self.rect.top + y, w, h)
-            for x, y, w, h in self.BASE_COLLISION_RECTS
-        ]
+        self.cover_sprite = Sprite('mountain_cover')
+        self.cover_sprite.collidable = False
 
-    def handle_collision(self, obj, matched_rect, dx, dy):
-        if (isinstance(obj, Player) and dy > 0 and
-            self.rect.contains(matched_rect)):
-            self.name = self.interior_name
-            self.update_image()
+        self.bottom_sprite = Sprite('mountain_bottom')
+        self.bottom_sprite.use_pixel_collisions = True
+        self.bottom_sprite.update_image()
 
-    def handle_stop_colliding(self, obj):
-        if (self.name == self.interior_name and isinstance(obj, Player) and
-            not self.rect.contains(obj.rect)):
-            self.name = self.default_name
-            self.update_image()
+        self.top_sprite = Sprite('mountain_top')
+        self.top_sprite.use_pixel_collisions = True
+        self.top_sprite.update_image()
+
+        self.left_sprites = []
+        self.right_sprites = []
+
+        for i in range(1, 6):
+            sprite = Sprite('mountain_left_%s' % i)
+            sprite.use_pixel_collisions = True
+            sprite.update_image()
+            self.left_sprites.append(sprite)
+
+            sprite = Sprite('mountain_right_%s' % i)
+            sprite.use_pixel_collisions = True
+            sprite.update_image()
+            self.right_sprites.append(sprite)
+
+        self.rect = pygame.Rect(
+            0, 0, self.bottom_sprite.rect.width,
+            sum([sprite.rect.height for sprite in self.right_sprites]) +
+            self.top_sprite.rect.height + self.bottom_sprite.rect.height)
+
+    def add_to(self, time_period):
+        time_period.bg_layer.add(self.bg_sprite)
+        time_period.main_layer.add(self.bottom_sprite)
+        time_period.main_layer.add(self.top_sprite)
+        time_period.fg_layer.add(self.cover_sprite)
+
+        for sprite in self.left_sprites:
+            time_period.main_layer.add(sprite)
+
+        for sprite in self.right_sprites:
+            time_period.main_layer.add(sprite)
+
+        self.cave_eventbox = EventBox(time_period)
+        self.cave_eventbox.object_moved.connect(
+            self.on_cave_eventbox_moved)
+        self.cave_eventbox.watch_object_moves(time_period.engine.player)
+
+        self.floor_eventbox = EventBox(time_period)
+        self.floor_eventbox.object_entered.connect(
+            lambda x: self.cover_sprite.hide())
+        self.floor_eventbox.watch_object_moves(time_period.engine.player)
+
+    def move_to(self, x, y):
+        self.rect.left = x
+        self.rect.top = y
+
+        self.cover_sprite.move_to(x, y)
+        self.bg_sprite.move_to(x, y)
+        self.top_sprite.move_to(x + 485, y)
+        self.bottom_sprite.move_to(
+            x, y + self.rect.height - self.bottom_sprite.rect.height)
+
+        new_y = self.bottom_sprite.rect.top
+
+        for i, sprite in enumerate(self.left_sprites):
+            new_y = new_y - sprite.rect.height
+            sprite.move_to(x + self.LEFT_OFFSETS[i], new_y)
+
+        new_y = self.bottom_sprite.rect.top
+
+        for i, sprite in enumerate(self.right_sprites):
+            new_y = new_y - sprite.rect.height
+            sprite.move_to(x + self.RIGHT_OFFSETS[i], new_y)
+
+        self.cave_eventbox.rects.append(
+            pygame.Rect(x + 382, y + 110, 157, 110))
+        self.floor_eventbox.rects.append(
+            pygame.Rect(x + 30, self.bottom_sprite.rect.top - 30,
+                        self.rect.width - 60, 30))
+
+    def on_cave_eventbox_moved(self, player):
+        if player.rect.centerx <= self.cave_eventbox.rects[0].centerx:
+            self.cover_sprite.show()
+        else:
+            self.cover_sprite.hide()

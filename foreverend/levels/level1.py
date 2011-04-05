@@ -3,8 +3,7 @@ import pygame
 from foreverend.timer import Timer
 from foreverend.levels.base import EventBox, Level, TimePeriod
 from foreverend.sprites import Artifact, Box, Dynamite, Elevator, \
-                               Mountain600AD, Mountain1999AD, Sprite, \
-                               TiledSprite, Volcano
+                               Mountain, Sprite, TiledSprite, Volcano
 
 
 class TimePeriod600AD(TimePeriod):
@@ -21,8 +20,8 @@ class TimePeriod600AD(TimePeriod):
         self.bg_layer.add(hills)
         hills.move_to(0, ground.rect.top - hills.rect.height)
 
-        mountain = Mountain600AD()
-        self.main_layer.add(mountain)
+        mountain = Mountain()
+        mountain.add_to(self)
         mountain.move_to(1300, ground.rect.top - mountain.rect.height)
 
         # Mountain platforms
@@ -142,8 +141,8 @@ class TimePeriod1999AD(TimePeriod):
         #    200, ground.rect.top - self.level.dynamite.rect.height)
 
         # Mountain
-        mountain = Mountain1999AD()
-        self.main_layer.add(mountain)
+        mountain = Mountain()
+        mountain.add_to(self)
         mountain.move_to(1300, ground.rect.top - mountain.rect.height)
 
         platform = Sprite('1999ad/lavamatics_platform')
