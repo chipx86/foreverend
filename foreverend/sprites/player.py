@@ -174,11 +174,12 @@ class Player(Sprite):
         self.calculate_collision_rects()
 
     def jump(self):
-        if self.falling or self.jumping:
+        if (self.falling and not self.engine.god_mode) or self.jumping:
             return
 
         self.jump_origin = (self.rect.left, self.rect.top)
         self.jumping = True
+        self.falling = False
         self.velocity = (self.velocity[0], -self.JUMP_SPEED)
         self.propulsion_below.show()
 
