@@ -38,12 +38,14 @@ class TractorBeam(Sprite):
         self.freeze_item_y = False
         self.name = 'tractor_beam'
         self.update_image()
+        self.item.grab_changed.emit()
 
     def ungrab(self):
         if self.item:
             self.item.obey_gravity = True
             self.item.collidable = True
             self.item.fall()
+            self.item.grab_changed.emit()
             self.item = None
 
         self.name = 'tractor_beam_wide'
@@ -118,6 +120,7 @@ class Player(Sprite):
         self.jumping = False
         self.hovering = False
         self.should_check_collisions = True
+        self.block_events = False
         self.hover_time_ms = 0
         self.jump_origin = None
         self.propulsion_below = Sprite("propulsion_below")
@@ -126,6 +129,9 @@ class Player(Sprite):
         self.tractor_beam = TractorBeam(self)
 
     def handle_event(self, event):
+        if self.block_events:
+            return
+
         if event.type == KEYDOWN:
             if event.key == K_RIGHT:
                 self.move_right()

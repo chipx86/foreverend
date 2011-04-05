@@ -215,6 +215,7 @@ class TimePeriod65000000BC(TimePeriod):
         self.main_layer.add(artifact)
         artifact.move_to(lava_pool.rect.right + 200,
                          ground.rect.top - artifact.rect.height - 50)
+        artifact.grab_changed.connect(self.on_artifact_grabbed)
 
 
     def on_dynamite_placed(self, obj):
@@ -253,6 +254,11 @@ class TimePeriod65000000BC(TimePeriod):
         self.exploding = False
         self.exploded = True
         self.volcano.clear_passage()
+
+    def on_artifact_grabbed(self):
+        self.engine.player.block_events = True
+        self.engine.player.fall()
+        print 'Level done!'
 
 
 class Level1(Level):

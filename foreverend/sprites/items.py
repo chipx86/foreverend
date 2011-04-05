@@ -1,6 +1,7 @@
 import pygame
 from pygame.locals import *
 
+from foreverend.signals import Signal
 from foreverend.sprites.base import Sprite
 
 
@@ -9,6 +10,9 @@ class Item(Sprite):
         super(Item, self).__init__(obey_gravity=True, *args, **kwargs)
         self.should_check_collisions = True
         self.grabbable = True
+
+        # Signals
+        self.grab_changed = Signal()
 
 
 class Artifact(Item):
