@@ -144,24 +144,19 @@ class Sprite(pygame.sprite.DirtySprite):
 
         if group is None:
             group = self.layer.level.group
-            compare_layers = True
-        else:
-            compare_layers = False
 
         # We want more detailed collision info, so we use our own logic
         # instead of calling spritecollide.
         for obj in group:
             self_rect, obj_rect = \
-                self._check_collision(self, obj, compare_layers,
-                                      ignore_collidable_flag)
+                self._check_collision(self, obj, ignore_collidable_flag)
 
             if self_rect and obj_rect:
                 yield obj, self_rect, obj_rect
 
-    def _check_collision(self, left, right, compare_layers,
-                         ignore_collidable_flag):
+    def _check_collision(self, left, right, ignore_collidable_flag):
         if (left == right or
-            (compare_layers and left.layer != right.layer) or
+            left.layer.index != right.layer.index or
             (not ignore_collidable_flag and
              ((not left.collidable or not right.collidable) or
               (not left.should_check_collisions and
