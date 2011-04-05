@@ -23,3 +23,8 @@ class Artifact(Item):
 class Dynamite(Item):
     def __init__(self):
         super(Dynamite, self).__init__('1999ad/dynamite')
+
+    def light(self):
+        self.name = '1999ad/dynamite_lit'
+        self.update_image()
+        self.grabbable = False

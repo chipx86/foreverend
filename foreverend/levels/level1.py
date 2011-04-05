@@ -207,9 +207,9 @@ class TimePeriod65000000BC(TimePeriod):
         explosion_box = EventBox(self)
         explosion_box.rects.append(
             pygame.Rect(self.volcano.lava_puddle.rect.x,
-                        self.volcano.lava_puddle.rect.centery,
+                        self.volcano.lava_puddle.rect.bottom - 5,
                         self.volcano.lava_puddle.rect.width,
-                        self.volcano.lava_puddle.rect.height / 2))
+                        5))
         explosion_box.watch_object_moves(self.level.dynamite)
         explosion_box.object_entered.connect(self.on_dynamite_placed)
 
@@ -229,7 +229,7 @@ class TimePeriod65000000BC(TimePeriod):
         if self.exploding or self.exploded:
             return
 
-        self.level.dynamite.grabbable = False
+        self.level.dynamite.light()
         self.exploding = True
 
         self.detonate_timer = Timer(self.engine, self, 1000,
