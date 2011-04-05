@@ -157,24 +157,24 @@ class TimePeriod65000000BC(TimePeriod):
         self.volcano.move_to(1400, ground.rect.top - self.volcano.rect.height)
 
         # Left-side lava pool
-        lava_pool = Sprite('65000000bc/lava_pool')
+        lava_pool = TiledSprite('65000000bc/lava_pool', 5, 1)
         lava_pool.lethal = True
         self.main_layer.add(lava_pool)
         lava_pool.move_to(self.volcano.rect.left - lava_pool.rect.width - 100,
-                          ground.rect.top - lava_pool.rect.height / 2)
+                          ground.rect.top - 19)
 
         # Platforms
         platform = Sprite('65000000bc/platform')
         self.main_layer.add(platform)
-        platform.move_to(lava_pool.rect.left + 300, lava_pool.rect.top - 10)
+        platform.move_to(lava_pool.rect.left + 250, lava_pool.rect.top - 10)
 
         platform = Sprite('65000000bc/platform')
         self.main_layer.add(platform)
-        platform.move_to(lava_pool.rect.left + 600, lava_pool.rect.top - 8)
+        platform.move_to(lava_pool.rect.left + 500, lava_pool.rect.top - 8)
 
         platform = Sprite('65000000bc/platform')
         self.main_layer.add(platform)
-        platform.move_to(lava_pool.rect.left + 900, lava_pool.rect.top - 12)
+        platform.move_to(lava_pool.rect.left + 750, lava_pool.rect.top - 12)
 
         # Right-side lava pool
         lava_pool = Sprite('65000000bc/lava_pool_small')
