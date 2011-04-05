@@ -179,15 +179,19 @@ class Sprite(pygame.sprite.DirtySprite):
             if left.use_pixel_collisions or right.use_pixel_collisions:
                 left_mask = left._build_mask(left_rect, left_index)
                 right_mask = right._build_mask(right_rect, right_index)
-                pos = right_mask.overlap(left_mask,
-                                         (left_rect.left - right_rect.left,
-                                          left_rect.top - right_rect.top))
+
+                offset = (left_rect.left - right_rect.left,
+                          left_rect.top - right_rect.top)
+                pos = right_mask.overlap(left_mask, offset)
 
                 if not pos:
                     continue
 
-                right_rect = pygame.Rect(right_rect.left + pos[0],
-                                         right_rect.top + pos[1], 1, 1)
+                mask = right_mask.overlap_mask(left_mask, offset)
+                collision_rect = mask.get_bounding_rects()[0]
+                right_rect = pygame.Rect(right_rect.left + collision_rect.left,
+                                         right_rect.top + collision_rect.top,
+                                         *collision_rect.size)
 
             return left_rect, right_rect
 
