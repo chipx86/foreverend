@@ -75,9 +75,10 @@ class TimePeriod1999AD(TimePeriod):
         level_width, level_height = self.level.size
 
         # Ground
-        ground = Box(level_width, self.GROUND_HEIGHT)
+        tiles_x = self.level.size[0] / 32
+        ground = TiledSprite('ground', tiles_x, 1)
         self.main_layer.add(ground)
-        ground.move_to(0, level_height - ground.rect.height)
+        ground.move_to(0, self.level.size[1] - ground.rect.height)
 
         building_rect = self.BUILDING_RECT.move(
             0, ground.rect.top - self.BUILDING_RECT.height)
@@ -87,8 +88,13 @@ class TimePeriod1999AD(TimePeriod):
         self.bg_layer.add(building_bg)
         building_bg.move_to(*building_rect.topleft)
 
+        # First floor
+        floor1 = Box(building_rect.width, self.GROUND_HEIGHT, self.FLOOR_COLOR)
+        self.main_layer.add(floor1)
+        floor1.move_to(building_rect.left, ground.rect.top)
+
         # Second floor
-        floor2 = Box(building_rect.width, self.GROUND_HEIGHT)
+        floor2 = Box(building_rect.width, self.GROUND_HEIGHT, self.FLOOR_COLOR)
         self.main_layer.add(floor2)
         floor2.move_to(building_rect.left,
                        building_rect.top +
