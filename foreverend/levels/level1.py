@@ -22,7 +22,7 @@ class TimePeriod600AD(TimePeriod):
 
         mountain = Mountain600AD()
         self.main_layer.add(mountain)
-        mountain.move_to(1345, ground.rect.top - mountain.rect.height)
+        mountain.move_to(1300, ground.rect.top - mountain.rect.height)
 
         # Mountain platforms
         platform = Sprite('600ad/platform')
@@ -137,7 +137,7 @@ class TimePeriod1999AD(TimePeriod):
         # Mountain
         mountain = Mountain1999AD()
         self.main_layer.add(mountain)
-        mountain.move_to(1345, ground.rect.top - mountain.rect.height)
+        mountain.move_to(1300, ground.rect.top - mountain.rect.height)
 
         platform = Sprite('1999ad/lavamatics_platform')
         self.main_layer.add(platform)
