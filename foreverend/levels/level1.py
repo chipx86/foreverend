@@ -151,9 +151,31 @@ class TimePeriod65000000BC(TimePeriod):
         self.main_layer.add(ground)
         ground.move_to(0, self.level.size[1] - ground.rect.height)
 
+        # Volcano
         self.volcano = Volcano()
         self.main_layer.add(self.volcano)
         self.volcano.move_to(1400, ground.rect.top - self.volcano.rect.height)
+
+        # Left-side lava pool
+        lava_pool = Sprite('65000000bc/lava_pool')
+        lava_pool.lethal = True
+        self.main_layer.add(lava_pool)
+        lava_pool.move_to(self.volcano.rect.left - lava_pool.rect.width - 100,
+                          ground.rect.top - lava_pool.rect.height / 2)
+
+        # Platforms
+        platform = Sprite('65000000bc/platform')
+        self.main_layer.add(platform)
+        platform.move_to(lava_pool.rect.left + 300, lava_pool.rect.top - 10)
+
+        platform = Sprite('65000000bc/platform')
+        self.main_layer.add(platform)
+        platform.move_to(lava_pool.rect.left + 600, lava_pool.rect.top - 8)
+
+        platform = Sprite('65000000bc/platform')
+        self.main_layer.add(platform)
+        platform.move_to(lava_pool.rect.left + 900, lava_pool.rect.top - 12)
+
 
         # Dynamite explosion trigger
         explosion_box = EventBox(self, 1990, 1554, 3, 3)
