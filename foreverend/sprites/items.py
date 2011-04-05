@@ -11,6 +11,11 @@ class Item(Sprite):
         self.grabbable = True
 
 
+class Artifact(Item):
+    def __init__(self, num):
+        super(Artifact, self).__init__('artifact%s' % num)
+
+
 class Dynamite(Item):
     def __init__(self):
         super(Dynamite, self).__init__('1999ad/dynamite')
