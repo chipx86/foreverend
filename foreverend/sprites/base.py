@@ -31,6 +31,7 @@ class Sprite(pygame.sprite.DirtySprite):
         self.falling = False
         self.collidable = True
         self.should_check_collisions = False
+        self.use_pixel_collisions = False
         self.flip_image = flip_image
         self.collision_rects = []
         self._colliding_objects = set()
@@ -166,11 +167,54 @@ class Sprite(pygame.sprite.DirtySprite):
         left_rects = left.collision_rects or [left.rect]
         right_rects = right.collision_rects or [right.rect]
 
+        print 'checking...'
         for left_rect in left_rects:
             index = left_rect.collidelist(right_rects)
+            print index
 
-            if index != -1:
-                return left_rect, right_rects[index]
+            if index == -1:
+                continue
+
+            right_rect = right_rects[index]
+
+            if left.use_pixel_collisions or right.use_pixel_collisions:
+                if left.use_pixel_collisions:
+                    if not hasattr(left, 'mask'):
+                        left.mask = pygame.sprite.from_surface(left.image)
+                else:
+                    left.mask = pygame.Mask(left.rect.size)
+                    left.mask.fill()
+
+                if right.use_pixel_collisions:
+                    if not hasattr(right, 'mask'):
+                        right.mask = pygame.sprite.from_surface(right.image)
+                else:
+                    right.mask = pygame.Mask(right.rect.size)
+                    right.mask.fill()
+
+                # See if they collide.
+                xoffset = left.rect.left - right.rect.left
+                yoffset = left.rect.top - right.rect.top
+
+                pos = right.mask.overlap(left.mask, (xoffset, yoffset))
+
+                if not pos:
+                    continue
+
+                x = right.rect.left + pos[0]
+                y = right.rect.top + pos[1]
+
+                print 'collide - %s, %s -- %s, %s, %s, %s' % \
+                    (x, y, right_rect.left, right_rect.top,
+                     right_rect.width, right_rect.height)
+
+                if not right_rect.collidepoint(x, y):
+                    continue
+
+                print 'collision!'
+                right_rect = pygame.Rect(x, y, 1, 1)
+
+            return left_rect, right_rect
 
         return None, None
 
