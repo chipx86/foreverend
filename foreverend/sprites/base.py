@@ -215,6 +215,7 @@ class TiledSprite(Sprite):
         self.rect.height = self.tiles_y * self.rect.height
 
         new_image = pygame.Surface(self.rect.size).convert_alpha()
+        new_image.fill((0, 0, 0, 0))
 
         for y in range(0, self.tiles_y):
             for x in range(0, self.tiles_x):

@@ -12,7 +12,7 @@ class Box(Sprite):
         self.color = color
 
     def generate_image(self):
-        surface = pygame.Surface(self.rect.size).convert()
+        surface = pygame.Surface(self.rect.size).convert_alpha()
         pygame.draw.rect(surface, self.color, self.rect)
         pygame.draw.rect(surface, (0, 0, 0), self.rect, 1)
         return surface

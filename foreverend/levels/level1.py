@@ -16,6 +16,10 @@ class TimePeriod600AD(TimePeriod):
         self.main_layer.add(ground)
         ground.move_to(0, self.level.size[1] - ground.rect.height)
 
+        hills = Sprite('600ad/hills_1')
+        self.bg_layer.add(hills)
+        hills.move_to(0, ground.rect.top - hills.rect.height)
+
         mountain = Mountain600AD()
         self.main_layer.add(mountain)
         mountain.move_to(1345, ground.rect.top - mountain.rect.height)
@@ -156,6 +160,10 @@ class TimePeriod65000000BC(TimePeriod):
         self.main_layer.add(ground)
         ground.move_to(0, self.level.size[1] - ground.rect.height)
 
+        hills = Sprite('65000000bc/hills_1')
+        self.bg_layer.add(hills)
+        hills.move_to(0, ground.rect.top - hills.rect.height)
+
         # Volcano
         self.volcano = Volcano()
         self.main_layer.add(self.volcano)
@@ -166,7 +174,7 @@ class TimePeriod65000000BC(TimePeriod):
         lava_pool.lethal = True
         self.main_layer.add(lava_pool)
         lava_pool.move_to(self.volcano.rect.left - lava_pool.rect.width - 100,
-                          ground.rect.top - 19)
+                          ground.rect.top - 18)
 
         # Platforms
         platform = Sprite('65000000bc/platform')
@@ -186,7 +194,7 @@ class TimePeriod65000000BC(TimePeriod):
         lava_pool.lethal = True
         self.main_layer.add(lava_pool)
         lava_pool.move_to(self.volcano.rect.right + 200,
-                          ground.rect.top - 19)
+                          ground.rect.top - 18)
 
         # Dynamite explosion trigger
         explosion_box = EventBox(self, 1990, 1554, 3, 3)
