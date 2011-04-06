@@ -331,3 +331,5 @@ class Player(Sprite):
 
         if self.lives == 0:
             self.engine.game_over()
+        else:
+            self.engine.dead()

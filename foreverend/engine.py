@@ -4,6 +4,7 @@ from pygame.locals import *
 from foreverend.levels import get_levels
 from foreverend.signals import Signal
 from foreverend.sprites import Player, TiledSprite
+from foreverend.timer import Timer
 from foreverend.ui import UIManager
 
 
@@ -70,12 +71,29 @@ class ForeverEndEngine(object):
         self._setup_game()
         self._mainloop()
 
-    def game_over(self):
-        print 'Game Over'
+    def dead(self):
+        def on_timeout():
+            widget.close()
+            self.restart_level()
+
+        widget = self.ui_manager.show_textbox([
+            "It's okay! You had another guy!",
+            "%s lives left." % self.player.lives
+        ])
+        self.paused = True
+
+        timer = Timer(self, 2000, on_timeout, one_shot=True)
+
+    def restart_level(self):
+        self.paused = False
         self.player.move_to(*self.active_level.start_pos)
         self.player.show()
         self.active_level.reset()
         self.active_level.switch_time_period(0)
+
+    def game_over(self):
+        self.ui_manager.show_textbox('Game Over')
+        self.paused = True
 
     def _setup_game(self):
         self.debug_font = pygame.font.Font(pygame.font.get_default_font(), 16)

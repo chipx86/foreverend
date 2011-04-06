@@ -19,6 +19,9 @@ class Widget(object):
         self.rect.width = w
         self.rect.height = h
 
+    def close(self):
+        self.ui_manager.close(self)
+
     def draw(self, surface):
         raise NotImplemented
 
