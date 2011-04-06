@@ -1,6 +1,7 @@
 import pygame
 from pygame.locals import *
 
+from foreverend.signals import Signal
 from foreverend.sprites.base import Direction, Sprite
 from foreverend.sprites.items import Item
 
@@ -112,22 +113,36 @@ class Player(Sprite):
     MAX_JUMP_HEIGHT = 100
     HOVER_TIME_MS = 1000
 
+    MAX_HEALTH = 3
+    MAX_LIVES = 3
+
     PROPULSION_BELOW_OFFSET = 8
 
     def __init__(self, engine):
         super(Player, self).__init__('player', flip_image=True,
                                      obey_gravity=True)
         self.engine = engine
-        self.jumping = False
-        self.hovering = False
         self.should_check_collisions = True
-        self.block_events = False
-        self.hover_time_ms = 0
-        self.jump_origin = None
+
+        # Sprites
         self.propulsion_below = Sprite("propulsion_below")
         self.propulsion_below.collidable = False
         self.propulsion_below.visible = 0
         self.tractor_beam = TractorBeam(self)
+
+        # State
+        self.jumping = False
+        self.hovering = False
+        self.block_events = False
+        self.jump_origin = None
+        self.hover_time_ms = 0
+        self.health = self.MAX_HEALTH
+        self.lives = self.MAX_LIVES
+        self.last_safe_spot = None
+
+        # Signals
+        self.health_changed = Signal()
+        self.lives_changed = Signal()
 
     def handle_event(self, event):
         if self.block_events:
@@ -244,6 +259,9 @@ class Player(Sprite):
             layer.remove(obj)
 
     def on_moved(self):
+        if not self.last_safe_spot:
+            self.last_safe_spot = self.rect.topleft
+
         if (self.jumping and
             not self.engine.god_mode and
             self.jump_origin[1] - self.rect.top >= self.MAX_JUMP_HEIGHT):
@@ -268,8 +286,10 @@ class Player(Sprite):
 
     def on_collision(self, dx, dy, obj, self_rect, obj_rect):
         if obj.lethal and not self.engine.god_mode and self_rect == self.rect:
-            self.engine.dead()
+            self.on_hit()
             return
+
+        self.last_safe_spot = self.rect.topleft
 
         if self.tractor_beam.item and self_rect == self.tractor_beam.item.rect:
             move_player = True
@@ -294,3 +314,20 @@ class Player(Sprite):
             self.fall()
         else:
             super(Player, self).on_collision(dx, dy, obj, self_rect, obj_rect)
+
+    def on_hit(self):
+        self.health -= 1
+        self.health_changed.emit()
+
+        if self.health == 0:
+            self.on_dead()
+        else:
+            self.move_to(*self.last_safe_spot)
+
+    def on_dead(self):
+        self.lives -= 1
+        self.health = self.MAX_HEALTH
+        self.lives_changed.emit()
+
+        if self.lives == 0:
+            self.engine.game_over()

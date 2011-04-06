@@ -54,9 +54,10 @@ class ForeverEndEngine(object):
         self.tick = Signal()
 
         # State and objects
+        self.paused = False
         self.screen = screen
         self.clock = pygame.time.Clock()
-        self.paused = False
+        self.player = Player(self)
         self.ui_manager = UIManager(self)
         self.camera = Camera(self)
 
@@ -69,8 +70,8 @@ class ForeverEndEngine(object):
         self._setup_game()
         self._mainloop()
 
-    def dead(self):
-        print 'You died'
+    def game_over(self):
+        print 'Game Over'
         self.player.move_to(*self.active_level.start_pos)
         self.player.show()
         self.active_level.reset()
@@ -79,7 +80,6 @@ class ForeverEndEngine(object):
     def _setup_game(self):
         self.debug_font = pygame.font.Font(pygame.font.get_default_font(), 16)
 
-        self.player = Player(self)
         self.player.update_image()
         self.levels = [level(self) for level in get_levels()]
         self.switch_level(0)

@@ -1,6 +1,7 @@
 import pygame
 
 from foreverend.resources import load_image
+from foreverend.sprites.player import Player
 from foreverend.timer import Timer
 
 
@@ -103,21 +104,20 @@ class TextBox(Widget):
 
 
 class ControlPanel(Widget):
-    MAX_LIVES = 3
-    MAX_HEALTH = 3
-
     HEART_X = 10
     HEART_SPACING = 5
 
     def __init__(self, *args, **kwargs):
         super(ControlPanel, self).__init__(*args, **kwargs)
         self._level = None
-        self._health = 3
-        self._lives = 0
         self.resize(self.ui_manager.size[0], 40)
         self.surface = pygame.Surface(self.rect.size)
         self.heart_image = load_image('heart')
         self.heart_lost_image = load_image('heart_lost')
+
+        player = self.ui_manager.engine.player
+        player.lives_changed.connect(self.render)
+        player.health_changed.connect(self.render)
 
         self.time_period_changed_cnx = None
 
@@ -134,16 +134,6 @@ class ControlPanel(Widget):
 
     level = property(lambda self: self._level, _set_level)
 
-    def _set_health(self, health):
-        self._health = health
-        self.render()
-    health = property(lambda self: self._health, _set_health)
-
-    def _set_lives(self, lives):
-        self._lives = lives
-        self.render()
-    lives = property(lambda self: self._lives, _set_lives)
-
     def render(self):
         self.surface.fill((0, 0, 0))
 
@@ -157,8 +147,10 @@ class ControlPanel(Widget):
         y = (self.rect.height - self.heart_image.get_height()) / 2
         heart_width = self.heart_image.get_width()
 
-        for i in range(self.MAX_HEALTH):
-            if self.health > i:
+        player = self.ui_manager.engine.player
+
+        for i in range(Player.MAX_HEALTH):
+            if player.health > i:
                 self.surface.blit(self.heart_image, (x, y))
             else:
                 self.surface.blit(self.heart_lost_image, (x, y))
