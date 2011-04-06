@@ -119,11 +119,11 @@ class ForeverEndEngine(object):
                 self.debug_rects = not self.debug_rects
             elif event.type == KEYDOWN and event.key == K_F4:
                 self.god_mode = not self.god_mode
-            elif event.type == KEYDOWN and event.key == K_1:
+            elif event.type == KEYDOWN and event.key in (K_1, K_a):
                 self.active_level.switch_time_period(0)
-            elif event.type == KEYDOWN and event.key == K_2:
+            elif event.type == KEYDOWN and event.key in (K_2, K_s):
                 self.active_level.switch_time_period(1)
-            elif event.type == KEYDOWN and event.key == K_3:
+            elif event.type == KEYDOWN and event.key in (K_3, K_d):
                 self.active_level.switch_time_period(2)
             else:
                 if not self.player.handle_event(event):
