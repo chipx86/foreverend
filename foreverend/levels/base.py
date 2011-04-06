@@ -4,29 +4,158 @@ from pygame.locals import *
 from foreverend.signals import Signal
 
 
+class QuadTree(object):
+    def __init__(self, rect, depth=4, parent=None):
+        depth -= 1
+
+        self.rect = rect
+        self.sprites = []
+        self.parent = parent
+        self.depth = depth
+        self.cx = self.rect.centerx
+        self.cy = self.rect.centery
+        self.moved_cnxs = {}
+
+        if depth == 0:
+            self.nw_tree = None
+            self.ne_tree = None
+            self.sw_tree = None
+            self.se_tree = None
+        else:
+            quad_size = (rect.width / 2, rect.height / 2)
+
+            self.nw_tree = QuadTree(pygame.Rect(rect.x, rect.y, *quad_size),
+                                    depth, self)
+            self.ne_tree = QuadTree(pygame.Rect(self.cx, rect.y, *quad_size),
+                                    depth, self)
+            self.sw_tree = QuadTree(pygame.Rect(rect.x, self.cy, *quad_size),
+                                    depth, self)
+            self.se_tree = QuadTree(pygame.Rect(self.cx, self.cy, *quad_size),
+                                    depth, self)
+
+    def __repr__(self):
+        return 'Quad Tree (%s, %s, %s, %s)' % (self.rect.left, self.rect.top,
+                                               self.rect.width,
+                                               self.rect.height)
+
+    def add(self, sprite):
+        if not self.parent:
+            assert sprite not in self.moved_cnxs
+            self.moved_cnxs[sprite] = \
+                sprite.moved.connect(lambda: self._recompute_sprite(sprite))
+
+        # If it's overlapping all regions, or we're a leaf, it
+        # belongs in items. Otherwise, stick it in as many regions as
+        # necessary.
+        if self.depth > 0:
+            trees = list(self._get_trees(sprite.rect))
+            assert len(trees) > 0
+
+            if len(trees) < 4:
+                for tree in trees:
+                    tree.add(sprite)
+
+                return
+
+        assert sprite not in self.sprites
+        self.sprites.append(sprite)
+        sprite.quad_trees.add(self)
+
+    def remove(self, sprite):
+        if self.parent:
+            self.parent.remove(sprite)
+            return
+
+        assert sprite.quad_trees
+
+        for tree in sprite.quad_trees:
+            tree.sprites.remove(sprite)
+
+        sprite.quad_trees.clear()
+        cnx = self.moved_cnxs.pop(sprite)
+        cnx.disconnect()
+
+    def get_sprites(self, rect=None):
+        """Returns any sprites stored in quadrants intersecting with rect.
+
+        This does not necessarily mean that the sprites themselves intersect
+        with rect.
+        """
+        for sprite in self.sprites:
+            yield sprite
+
+        for tree in self._get_trees(rect):
+            for sprite in tree.get_sprites(rect):
+                yield sprite
+
+    def __iter__(self):
+        return self.get_sprites()
+
+    def _get_trees(self, rect):
+        if self.depth > 0:
+            if not rect or (rect.left <= self.cx and rect.top <= self.cy):
+                yield self.nw_tree
+
+            if not rect or (rect.right >= self.cx and rect.top <= self.cy):
+                yield self.ne_tree
+
+            if not rect or (rect.left <= self.cx and rect.bottom >= self.cy):
+                yield self.sw_tree
+
+            if not rect or (rect.right >= self.cx and rect.bottom >= self.cy):
+                yield self.se_tree
+
+    def _get_leaf_trees(self, rect):
+        trees = list(self._get_trees(rect))
+
+        if not trees or len(trees) == 4:
+            yield self
+        else:
+            for tree in trees:
+                yield tree
+
+    def _recompute_sprite(self, sprite):
+        assert sprite.quad_trees
+
+        if sprite.quad_trees != set(self._get_leaf_trees(sprite.rect)):
+            self.remove(sprite)
+            self.add(sprite)
+
+
 class Layer(object):
-    def __init__(self, index, level):
-        self.level = level
+    def __init__(self, index, time_period):
+        self.time_period = time_period
         self.index = index
-        self.objs = set()
+        self.quad_tree = QuadTree(
+            pygame.Rect(0, 0, *self.time_period.level.size))
+
+    def __repr__(self):
+        return 'Layer %s on time period %s' % (self.index, self.time_period)
 
     def add(self, *objs):
         for obj in objs:
             obj.layer = self
             obj.update_image()
-            self.level.group.add(obj, layer=self.index)
-            self.objs.add(obj)
+            self.time_period.group.add(obj, layer=self.index)
+
+            if obj not in self.quad_tree:
+                self.quad_tree.add(obj)
+                assert obj in self.quad_tree
+
             obj.on_added(self)
 
     def remove(self, *objs):
         for obj in objs:
             obj.update_image()
-            self.level.group.remove(obj)
-            self.objs.discard(obj)
+            self.time_period.group.remove(obj)
+
+            if obj in self.quad_tree:
+                self.quad_tree.remove(obj)
+
             obj.on_removed(self)
 
     def __iter__(self):
-        return iter(self.objs)
+        return iter(self.quad_tree)
 
     def handle_event(self, event):
         pass
@@ -61,7 +190,8 @@ class Level(object):
 
         # First, make sure the player can be there.
         if (not self.active_time_period or
-            not list(player.get_collisions(group=time_period.group))):
+            not list(player.get_collisions(
+                tree=time_period.main_layer.quad_tree))):
             if self.active_time_period:
                 self.active_time_period.main_layer.remove(player)
 

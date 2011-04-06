@@ -23,6 +23,8 @@ class Sprite(pygame.sprite.DirtySprite):
 
         # State
         self.rect = pygame.Rect(0, 0, 0, 0)
+        self.quad_trees = set()
+        self.layer = None
         self.name = name
         self.image = None
         self.visible = 1
@@ -142,21 +144,32 @@ class Sprite(pygame.sprite.DirtySprite):
         elif dx > 0:
             self.rect.right = rect.left
 
-    def get_collisions(self, group=None, ignore_collidable_flag=False):
+    def get_collisions(self, tree=None, ignore_collidable_flag=False):
         if not self.should_check_collisions and not ignore_collidable_flag:
             raise StopIteration
 
-        if group is None:
-            group = self.layer.level.group
+        if tree is None:
+            tree = self.layer.quad_tree
+
+        num_checks = 0
+
+        if self.collision_rects:
+            self_rect = self.collision_rects[0].unionall(
+                self.collision_rects[1:])
+        else:
+            self_rect = self.rect
 
         # We want more detailed collision info, so we use our own logic
         # instead of calling spritecollide.
-        for obj in group:
+        for obj in tree.get_sprites(self_rect):
+            num_checks += 1
             self_rect, obj_rect = \
                 self._check_collision(self, obj, ignore_collidable_flag)
 
             if self_rect and obj_rect:
                 yield obj, self_rect, obj_rect
+
+        #print 'Performing %s checks' % num_checks
 
     def _check_collision(self, left, right, ignore_collidable_flag):
         if (left == right or
