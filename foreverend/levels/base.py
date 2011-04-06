@@ -39,6 +39,9 @@ class Level(object):
         self.active_time_period = None
         self.size = None
 
+        # Signals
+        self.time_period_changed = Signal()
+
     def add(self, time_period):
         self.time_periods.append(time_period)
 
@@ -62,6 +65,7 @@ class Level(object):
 
             self.active_time_period = time_period
             self.active_time_period.main_layer.add(player)
+            self.time_period_changed.emit()
 
     def draw(self, screen):
         self.active_time_period.draw(screen)
