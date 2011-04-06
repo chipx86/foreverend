@@ -112,10 +112,12 @@ class QuadTree(object):
             yield self
         else:
             for tree in trees:
-                yield tree
+                for leaf in tree._get_leaf_trees(rect):
+                    yield leaf
 
     def _recompute_sprite(self, sprite):
         assert sprite.quad_trees
+
 
         if sprite.quad_trees != set(self._get_leaf_trees(sprite.rect)):
             self.remove(sprite)
