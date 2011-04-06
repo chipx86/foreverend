@@ -1,5 +1,5 @@
 class Timer(object):
-    def __init__(self, engine, parent, ms, cb):
+    def __init__(self, engine, parent, ms, cb, one_shot=False):
         self.engine = engine
         self.parent = parent
         self.ms = ms
@@ -8,6 +8,7 @@ class Timer(object):
         self.started = False
         self.paused_for_ms = 0
         self.unpause_cb = None
+        self.one_shot = one_shot
 
         if ms > 0:
             self.start()
@@ -47,3 +48,6 @@ class Timer(object):
         elif self.tick_count >= self.ms:
             self.tick_count = 0
             self.cb()
+
+            if self.one_shot:
+                self.stop()

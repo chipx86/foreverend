@@ -3,6 +3,7 @@ from pygame.locals import *
 
 from foreverend.levels import get_levels
 from foreverend.sprites import Player, TiledSprite
+from foreverend.ui import UIManager
 
 
 class Camera(object):
@@ -45,6 +46,7 @@ class ForeverEndEngine(object):
         self.clock = pygame.time.Clock()
         self.paused = False
         self.camera = Camera(self)
+        self.ui_manager = UIManager(self)
 
         # Debug flags
         self.debug_rects = False
@@ -63,8 +65,6 @@ class ForeverEndEngine(object):
         self.active_level.switch_time_period(0)
 
     def _setup_game(self):
-        pygame.font.init()
-
         self.debug_font = pygame.font.Font(pygame.font.get_default_font(), 16)
 
         self.player = Player(self)
@@ -79,6 +79,8 @@ class ForeverEndEngine(object):
         self.surface = pygame.Surface(self.active_level.size)
         self.player.move_to(*self.active_level.start_pos)
         self.player.show()
+
+        self.ui_manager.show_level(self.active_level)
 
     def _mainloop(self):
         while 1:
@@ -149,6 +151,8 @@ class ForeverEndEngine(object):
                         self.screen.get_width(), self.screen.get_height())),
             (0, 0))
 
+        self.ui_manager.draw(self.screen)
+
         if self.show_debug_info:
             debug_str = '%s, %s - %s, %s' % (
                 self.player.rect.left, self.player.rect.top,
@@ -161,6 +165,8 @@ class ForeverEndEngine(object):
         pygame.display.flip()
 
     def _tick(self):
+        self.ui_manager.tick()
+
         if not self.paused:
             self.active_level.tick()
             self.camera.update()

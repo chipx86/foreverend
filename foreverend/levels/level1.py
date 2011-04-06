@@ -10,6 +10,7 @@ from foreverend.timer import Timer
 class TimePeriod600AD(TimePeriod):
     def __init__(self, *args, **kwargs):
         super(TimePeriod600AD, self).__init__(*args, **kwargs)
+        self.name = '600 AD'
         self.bg.fill((237, 243, 255))
 
         tiles_x = self.level.size[0] / 32
@@ -71,6 +72,7 @@ class TimePeriod1999AD(TimePeriod):
 
     def __init__(self, *args, **kwargs):
         super(TimePeriod1999AD, self).__init__(*args, **kwargs)
+        self.name = '1999 AD'
         self.bg.fill((199, 214, 251))
 
         level_width, level_height = self.level.size
@@ -160,6 +162,7 @@ class TimePeriod1999AD(TimePeriod):
 class TimePeriod65000000BC(TimePeriod):
     def __init__(self, *args, **kwargs):
         super(TimePeriod65000000BC, self).__init__(*args, **kwargs)
+        self.name = '65,000,000 BC'
         self.exploding = False
         self.exploded = False
 
@@ -262,6 +265,7 @@ class TimePeriod65000000BC(TimePeriod):
 class Level1(Level):
     def __init__(self, *args, **kwargs):
         super(Level1, self).__init__(*args, **kwargs)
+        self.name = 'Level 1'
         self.size = (10000, 1600)
         self.start_pos = (10,
                           self.size[1] - 32 - self.engine.player.rect.height)
