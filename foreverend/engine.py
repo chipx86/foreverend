@@ -16,7 +16,12 @@ class Camera(object):
         self.rect.height -= self.engine.ui_manager.control_panel.rect.height
         self.old_player_rect = None
 
+        self.engine.tick.connect(self.update)
+
     def update(self):
+        if self.engine.paused:
+            return
+
         player_rect = self.engine.player.rect
 
         if player_rect == self.old_player_rect:
@@ -46,6 +51,7 @@ class ForeverEndEngine(object):
     def __init__(self, screen):
         # Signals
         self.level_changed = Signal()
+        self.tick = Signal()
 
         # State and objects
         self.screen = screen
@@ -94,7 +100,7 @@ class ForeverEndEngine(object):
                 if not self._handle_event(event):
                     return
 
-            self._tick()
+            self.tick.emit()
             self._paint()
             self.clock.tick(self.FPS)
 
@@ -165,10 +171,3 @@ class ForeverEndEngine(object):
                 (10, 10))
 
         pygame.display.flip()
-
-    def _tick(self):
-        self.ui_manager.tick()
-
-        if not self.paused:
-            self.active_level.tick()
-            self.camera.update()

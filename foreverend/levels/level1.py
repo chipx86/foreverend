@@ -232,8 +232,7 @@ class TimePeriod65000000BC(TimePeriod):
         self.level.dynamite.light()
         self.exploding = True
 
-        self.detonate_timer = Timer(self.engine, self, 1000,
-                                    self.start_explosion)
+        self.detonate_timer = Timer(self.engine, 1000, self.start_explosion)
 
     def start_explosion(self):
         self.detonate_timer.stop()
@@ -245,8 +244,7 @@ class TimePeriod65000000BC(TimePeriod):
         self.explosion = ExplosionParticleSystem(self)
         self.explosion.start(2040, 1500)
 
-        self.explosion_timer = Timer(self.engine, self, 350,
-                                     self.on_explosion_done)
+        self.explosion_timer = Timer(self.engine, 350, self.on_explosion_done)
         self.explosion_timer.start()
 
     def on_explosion_done(self):

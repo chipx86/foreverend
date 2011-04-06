@@ -39,6 +39,8 @@ class Level(object):
         self.active_time_period = None
         self.size = None
 
+        self.engine.tick.connect(self.on_tick)
+
         # Signals
         self.time_period_changed = Signal()
 
@@ -70,8 +72,9 @@ class Level(object):
     def draw(self, screen):
         self.active_time_period.draw(screen)
 
-    def tick(self):
-        self.active_time_period.tick()
+    def on_tick(self):
+        if not self.engine.paused and self.engine.active_level == self:
+            self.active_time_period.tick()
 
 
 class TimePeriod(object):
@@ -127,9 +130,6 @@ class TimePeriod(object):
 
         for sprite in self.group:
             sprite.tick()
-
-        for timer in self.timers:
-            timer.tick()
 
 
 class EventBox(object):

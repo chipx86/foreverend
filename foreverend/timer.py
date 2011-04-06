@@ -1,7 +1,6 @@
 class Timer(object):
-    def __init__(self, engine, parent, ms, cb, one_shot=False):
+    def __init__(self, engine, ms, cb, one_shot=False):
         self.engine = engine
-        self.parent = parent
         self.ms = ms
         self.cb = cb
         self.tick_count_count = 0
@@ -9,6 +8,7 @@ class Timer(object):
         self.paused_for_ms = 0
         self.unpause_cb = None
         self.one_shot = one_shot
+        self.tick_cnx = None
 
         if ms > 0:
             self.start()
@@ -18,7 +18,7 @@ class Timer(object):
             self.tick_count = 0
             self.paused_for_ms = 0
             self.unpause_cb = None
-            self.parent.timers.append(self)
+            self.tick_cnx = self.engine.tick.connect(self.on_tick)
             self.started = True
 
     def reset(self):
@@ -31,7 +31,8 @@ class Timer(object):
 
     def stop(self):
         if self.started:
-            self.parent.timers.remove(self)
+            self.tick_cnx.disconnect()
+            self.tick_cnx = None
             self.started = False
 
     def pause(self, ms, unpause_cb):
@@ -39,7 +40,7 @@ class Timer(object):
         self.unpause_cb = unpause_cb
         self.tick_count = 0
 
-    def tick(self):
+    def on_tick(self):
         self.tick_count += 1.0 / self.engine.FPS * 1000
 
         if self.paused_for_ms > 0 and self.tick_count >= self.paused_for_ms:

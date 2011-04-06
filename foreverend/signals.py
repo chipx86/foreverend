@@ -4,7 +4,7 @@ class SignalConnection(object):
         self.cb = cb
 
     def disconnect(self):
-        self.signal.callbacks.remove(cb)
+        self.signal.callbacks.remove(self.cb)
 
 
 class Signal(object):

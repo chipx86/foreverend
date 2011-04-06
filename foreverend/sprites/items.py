@@ -20,7 +20,6 @@ class Artifact(Item):
     def __init__(self, time_period, num):
         super(Artifact, self).__init__('artifact%s' % num)
         self.float_timer = None
-        self.time_period = None
         self.up_count = 0
         self.down_count = 0
         self.pause_count = 0
@@ -32,8 +31,7 @@ class Artifact(Item):
 
         self.grab_changed.connect(self.stop_floating)
 
-        self.float_timer = Timer(time_period.engine, time_period, 100,
-                                 self.on_float)
+        self.float_timer = Timer(time_period.engine, 100, self.on_float)
         self.float_timer.start()
 
     def stop_floating(self):

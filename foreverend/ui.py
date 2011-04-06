@@ -206,7 +206,7 @@ class UIManager(object):
              for time_period in level.time_periods]
         ], line_spacing=0)
 
-        timer = Timer(self.engine, self, 2000, lambda: self.close(widget),
+        timer = Timer(self.engine, 2000, lambda: self.close(widget),
                       one_shot=True)
         timer.start()
 
@@ -228,10 +228,6 @@ class UIManager(object):
             element.draw(self.surface)
 
         surface.blit(self.surface, (0, 0))
-
-    def tick(self):
-        for timer in self.timers:
-            timer.tick()
 
     def on_level_changed(self):
         level = self.engine.active_level
