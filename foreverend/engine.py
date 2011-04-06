@@ -2,6 +2,7 @@ import pygame
 from pygame.locals import *
 
 from foreverend import set_engine
+from foreverend.cutscenes import OpeningCutscene
 from foreverend.levels import get_levels
 from foreverend.signals import Signal
 from foreverend.sprites import Player, TiledSprite
@@ -21,7 +22,7 @@ class Camera(object):
         self.engine.tick.connect(self.update)
 
     def update(self):
-        if self.engine.paused:
+        if self.engine.paused or not self.engine.active_level:
             return
 
         player_rect = self.engine.player.rect
@@ -58,6 +59,8 @@ class ForeverEndEngine(object):
         self.tick = Signal()
 
         # State and objects
+        self.active_level = None
+        self.active_cutscene = None
         self.paused = False
         self.screen = screen
         self.clock = pygame.time.Clock()
@@ -71,7 +74,10 @@ class ForeverEndEngine(object):
         self.show_debug_info = False
 
     def run(self):
-        self._setup_game()
+        self.active_cutscene = OpeningCutscene()
+        self.active_cutscene.done.connect(self._setup_game)
+        self.active_cutscene.start()
+
         self._mainloop()
 
     def dead(self):
@@ -99,6 +105,7 @@ class ForeverEndEngine(object):
         self.paused = True
 
     def _setup_game(self):
+        self.active_cutscene = None
         self.debug_font = pygame.font.Font(pygame.font.get_default_font(), 16)
 
         self.player.update_image()
@@ -126,8 +133,7 @@ class ForeverEndEngine(object):
             self.clock.tick(self.FPS)
 
     def _handle_event(self, event):
-        if (event.type == QUIT or
-            (event.type == KEYDOWN and event.key == K_ESCAPE)):
+        if event.type == QUIT:
             pygame.quit()
             return False
         elif event.type == KEYDOWN and event.key == K_RETURN:
@@ -152,7 +158,12 @@ class ForeverEndEngine(object):
                 self.active_level.switch_time_period(1)
             elif event.type == KEYDOWN and event.key in (K_3, K_d):
                 self.active_level.switch_time_period(2)
-            else:
+            elif self.active_level:
+                # XXX This should eventually bring up a confirmation
+                if event.type == KEYDOWN and event.key == K_ESCAPE:
+                    pygame.quit()
+                    return False
+
                 if not self.player.handle_event(event):
                     time_period = self.active_level.active_time_period
 
@@ -165,6 +176,8 @@ class ForeverEndEngine(object):
                         if (self.player.rect.collidelist(rects) != -1 and
                             box.handle_event(event)):
                             break
+            elif self.active_cutscene:
+                self.active_cutscene.handle_event(event)
 
         return True
 
@@ -178,8 +191,13 @@ class ForeverEndEngine(object):
         self._pause()
 
     def _paint(self):
-        self.active_level.draw(self.surface)
-        self.screen.blit(self.surface.subsurface(self.camera.rect), (0, 0))
+        if self.active_cutscene:
+            self.active_cutscene.draw(self.active_cutscene)
+
+        if self.active_level:
+            self.active_level.draw(self.surface)
+            self.screen.blit(self.surface.subsurface(self.camera.rect), (0, 0))
+
         self.ui_manager.draw(self.screen)
 
         if self.show_debug_info:

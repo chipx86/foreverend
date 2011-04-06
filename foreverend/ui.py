@@ -1,6 +1,6 @@
 import pygame
 
-from foreverend.resources import load_image
+from foreverend.resources import get_font_filename, load_image
 from foreverend.sprites.player import Player
 from foreverend.timer import Timer
 
@@ -194,7 +194,8 @@ class UIManager(object):
         self.widgets = []
         self.timers = []
 
-        self.default_font = pygame.font.get_default_font()
+        self.default_font = get_font_filename()
+        #self.default_font = pygame.font.get_default_font()
         self.font = pygame.font.Font(self.default_font, 20)
         self.small_font = pygame.font.Font(self.default_font, 14)
 
@@ -229,7 +230,11 @@ class UIManager(object):
         return textbox
 
     def close(self, widget):
-        self.widgets.remove(widget)
+        try:
+            self.widgets.remove(widget)
+        except ValueError:
+            # It was already closed
+            pass
 
     def draw(self, surface):
         self.surface.fill((0, 0, 0, 0))
