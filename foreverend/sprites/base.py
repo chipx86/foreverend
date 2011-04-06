@@ -59,13 +59,13 @@ class Sprite(pygame.sprite.DirtySprite):
         if not self.visible:
             self.visible = 1
             self.dirty = 2
-            self.layer.add(self)
+            self.layer.update_sprite(self)
 
     def hide(self):
         if self.visible:
             self.visible = 0
             self.dirty = 1
-            self.layer.remove(self)
+            self.layer.update_sprite(self)
 
     def fall(self):
         if self.falling or not self.obey_gravity:

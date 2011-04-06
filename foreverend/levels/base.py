@@ -137,24 +137,25 @@ class Layer(object):
     def add(self, *objs):
         for obj in objs:
             obj.layer = self
-            obj.update_image()
-            self.time_period.group.add(obj, layer=self.index)
-
-            if obj not in self.quad_tree:
-                self.quad_tree.add(obj)
-                assert obj in self.quad_tree
-
+            self.update_sprite(obj)
+            self.quad_tree.add(obj)
             obj.on_added(self)
 
     def remove(self, *objs):
         for obj in objs:
-            obj.update_image()
-            self.time_period.group.remove(obj)
-
-            if obj in self.quad_tree:
-                self.quad_tree.remove(obj)
-
+            self.update_sprite(obj)
+            self.quad_tree.remove(obj)
             obj.on_removed(self)
+
+    def update_sprite(self, sprite):
+        assert sprite.layer == self
+
+        sprite.update_image()
+
+        if sprite.visible:
+            self.time_period.group.add(sprite, layer=self.index)
+        else:
+            self.time_period.group.remove(sprite)
 
     def __iter__(self):
         return iter(self.quad_tree)
