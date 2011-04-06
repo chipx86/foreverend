@@ -24,14 +24,14 @@ class Artifact(Item):
         self.down_count = 0
         self.pause_count = 0
         self.float_paused = False
-        self.max_movement = 6
-        self.max_pause_count = 1
+        self.max_movement = 2
+        self.max_pause_count = 6
         self.float_distance = 1
         self.direction = Direction.UP
 
         self.grab_changed.connect(self.stop_floating)
 
-        self.float_timer = Timer(100, self.on_float)
+        self.float_timer = Timer(150, self.on_float)
         self.float_timer.start()
 
     def stop_floating(self):
@@ -59,7 +59,6 @@ class Artifact(Item):
 
             if self.down_count == self.max_movement:
                 self.direction = Direction.UP
-                self.float_paused = True
                 self.down_count = 0
 
 

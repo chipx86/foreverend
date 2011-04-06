@@ -256,6 +256,7 @@ class TimePeriod65000000BC(TimePeriod):
 
     def on_artifact_grabbed(self):
         self.engine.player.block_events = True
+        self.engine.player.velocity = (0, 0)
         self.engine.player.fall()
         print 'Level done!'
 
