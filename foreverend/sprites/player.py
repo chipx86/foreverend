@@ -70,7 +70,7 @@ class TractorBeam(Sprite):
             self.item.rect.top - self.VERT_OFFSET_ALLOWANCE):
             self.freeze_item_y = True
             self.item.move_to(self.item.rect.left,
-                              collide_rect.top - self.item.rect.height - 1)
+                              collide_rect.top - self.item.rect.height)
             return True
 
         return False
@@ -78,13 +78,14 @@ class TractorBeam(Sprite):
     def on_moved(self):
         if self.item:
             mid_y = self.rect.top + \
-                    (self.rect.height - self.item.rect.height) / 2 - 1
+                    (self.rect.height - self.item.rect.height) / 2
+
             if self.freeze_item_y:
                 y = self.item.rect.top
             else:
                 y = mid_y
 
-            if y <= mid_y:
+            if y > mid_y:
                 self.freeze_item_y = False
                 y = mid_y
 
