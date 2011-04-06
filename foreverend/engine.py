@@ -61,7 +61,7 @@ class ForeverEndEngine(object):
         self.paused = False
         self.screen = screen
         self.clock = pygame.time.Clock()
-        self.player = Player(self)
+        self.player = Player()
         self.ui_manager = UIManager(self)
         self.camera = Camera(self)
 

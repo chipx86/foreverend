@@ -1,6 +1,7 @@
 import pygame
 from pygame.locals import *
 
+from foreverend import get_engine
 from foreverend.signals import Signal
 from foreverend.sprites.base import Direction, Sprite
 from foreverend.sprites.items import Item
@@ -118,10 +119,10 @@ class Player(Sprite):
 
     PROPULSION_BELOW_OFFSET = 8
 
-    def __init__(self, engine):
+    def __init__(self):
         super(Player, self).__init__('player', flip_image=True,
                                      obey_gravity=True)
-        self.engine = engine
+        self.engine = get_engine()
         self.should_check_collisions = True
 
         # Sprites
