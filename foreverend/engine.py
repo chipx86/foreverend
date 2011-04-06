@@ -106,7 +106,6 @@ class ForeverEndEngine(object):
 
     def _setup_game(self):
         self.active_cutscene = None
-        self.debug_font = pygame.font.Font(pygame.font.get_default_font(), 16)
 
         self.player.update_image()
         self.levels = [level(self) for level in get_levels()]
@@ -201,12 +200,12 @@ class ForeverEndEngine(object):
         self.ui_manager.draw(self.screen)
 
         if self.show_debug_info:
-            debug_str = '%s, %s - %s, %s' % (
-                self.player.rect.left, self.player.rect.top,
-                self.player.rect.right, self.player.rect.bottom)
+            debug_str = '%0.f FPS     X: %s     Y: %s' % (
+                self.clock.get_fps(),
+                self.player.rect.left, self.player.rect.top)
 
             self.screen.blit(
-                self.debug_font.render(debug_str, True, (255, 0, 0)),
-                (10, 10))
+                self.ui_manager.small_font.render(debug_str, True, (255, 0, 0)),
+                (30, 10))
 
         pygame.display.flip()
