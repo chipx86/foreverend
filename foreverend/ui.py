@@ -171,6 +171,8 @@ class UIManager(object):
         self.control_panel.move_to(
             0, self.size[1] - self.control_panel.rect.height)
 
+        self.engine.level_changed.connect(self.on_level_changed)
+
     def show_level(self, level):
         timeline_attrs = {
             'font': self.small_font,
@@ -209,3 +211,8 @@ class UIManager(object):
     def tick(self):
         for timer in self.timers:
             timer.tick()
+
+    def on_level_changed(self):
+        level = self.engine.active_level
+        self.show_level(level)
+        self.control_panel.level = level

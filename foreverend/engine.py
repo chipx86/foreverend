@@ -2,6 +2,7 @@ import pygame
 from pygame.locals import *
 
 from foreverend.levels import get_levels
+from foreverend.signals import Signal
 from foreverend.sprites import Player, TiledSprite
 from foreverend.ui import UIManager
 
@@ -43,6 +44,10 @@ class ForeverEndEngine(object):
     FPS = 30
 
     def __init__(self, screen):
+        # Signals
+        self.level_changed = Signal()
+
+        # State and objects
         self.screen = screen
         self.clock = pygame.time.Clock()
         self.paused = False
@@ -81,8 +86,7 @@ class ForeverEndEngine(object):
         self.player.move_to(*self.active_level.start_pos)
         self.player.show()
 
-        self.ui_manager.show_level(self.active_level)
-        self.ui_manager.control_panel.level = self.active_level
+        self.level_changed.emit()
 
     def _mainloop(self):
         while 1:
