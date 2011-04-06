@@ -1,6 +1,9 @@
+from foreverend import get_engine
+
+
 class Timer(object):
-    def __init__(self, engine, ms, cb, one_shot=False):
-        self.engine = engine
+    def __init__(self, ms, cb, one_shot=False):
+        self.engine = get_engine()
         self.ms = ms
         self.cb = cb
         self.tick_count_count = 0

@@ -31,7 +31,7 @@ class Artifact(Item):
 
         self.grab_changed.connect(self.stop_floating)
 
-        self.float_timer = Timer(time_period.engine, 100, self.on_float)
+        self.float_timer = Timer(100, self.on_float)
         self.float_timer.start()
 
     def stop_floating(self):

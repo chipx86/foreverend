@@ -1,6 +1,7 @@
 import pygame
 from pygame.locals import *
 
+from foreverend import set_engine
 from foreverend.levels import get_levels
 from foreverend.signals import Signal
 from foreverend.sprites import Player, TiledSprite
@@ -50,6 +51,8 @@ class ForeverEndEngine(object):
     FPS = 30
 
     def __init__(self, screen):
+        set_engine(self)
+
         # Signals
         self.level_changed = Signal()
         self.tick = Signal()
@@ -82,7 +85,7 @@ class ForeverEndEngine(object):
         ])
         self.paused = True
 
-        timer = Timer(self, 2000, on_timeout, one_shot=True)
+        timer = Timer(2000, on_timeout, one_shot=True)
 
     def restart_level(self):
         self.paused = False

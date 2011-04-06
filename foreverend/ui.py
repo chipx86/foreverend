@@ -216,8 +216,7 @@ class UIManager(object):
              for time_period in level.time_periods]
         ], line_spacing=0)
 
-        timer = Timer(self.engine, 2000, lambda: self.close(widget),
-                      one_shot=True)
+        timer = Timer(2000, lambda: self.close(widget), one_shot=True)
         timer.start()
 
     def show_textbox(self, text, **kwargs):

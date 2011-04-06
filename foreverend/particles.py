@@ -66,7 +66,7 @@ class ParticleSystem(object):
         self.free_particles = []
         self.pos = None
 
-        self.timer = Timer(time_period.engine, 60, self.on_particle_update)
+        self.timer = Timer(60, self.on_particle_update)
 
     def start(self, x, y):
         assert self.pos is None
