@@ -12,6 +12,7 @@ class Camera(object):
     def __init__(self, engine):
         self.engine = engine
         self.rect = self.engine.screen.get_rect()
+        self.rect.height -= self.engine.ui_manager.control_panel.rect.height
         self.old_player_rect = None
 
     def update(self):
@@ -45,8 +46,8 @@ class ForeverEndEngine(object):
         self.screen = screen
         self.clock = pygame.time.Clock()
         self.paused = False
-        self.camera = Camera(self)
         self.ui_manager = UIManager(self)
+        self.camera = Camera(self)
 
         # Debug flags
         self.debug_rects = False
@@ -81,6 +82,7 @@ class ForeverEndEngine(object):
         self.player.show()
 
         self.ui_manager.show_level(self.active_level)
+        self.ui_manager.control_panel.level = self.active_level
 
     def _mainloop(self):
         while 1:
@@ -146,11 +148,7 @@ class ForeverEndEngine(object):
 
     def _paint(self):
         self.active_level.draw(self.surface)
-        self.screen.blit(self.surface.subsurface(
-            pygame.Rect(self.camera.rect.left, self.camera.rect.top,
-                        self.screen.get_width(), self.screen.get_height())),
-            (0, 0))
-
+        self.screen.blit(self.surface.subsurface(self.camera.rect), (0, 0))
         self.ui_manager.draw(self.screen)
 
         if self.show_debug_info:

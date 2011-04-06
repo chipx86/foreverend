@@ -6,6 +6,7 @@ from foreverend.timer import Timer
 class Widget(object):
     def __init__(self, ui_manager):
         self.ui_manager = ui_manager
+        self.ui_manager.widgets.append(self)
         self.rect = pygame.Rect(0, 0, 0, 0)
 
     def move_to(self, x, y):
@@ -100,9 +101,58 @@ class TextBox(Widget):
         surface.blit(self.surface, self.rect.topleft)
 
 
+class ControlPanel(Widget):
+    def __init__(self, *args, **kwargs):
+        super(ControlPanel, self).__init__(*args, **kwargs)
+        self._level = None
+        self._health = 0
+        self._lives = 0
+        self.resize(self.ui_manager.size[0], 40)
+        self.surface = pygame.Surface(self.rect.size)
+
+        self.time_period_changed_cnx = None
+
+    def _set_level(self, level):
+        if self.time_period_changed_cnx:
+            self.time_period_changed_cnx.disconnect()
+
+        self._level = level
+        self.render()
+
+        if self._level:
+            self.time_period_changed_cnx = \
+                level.time_period_changed.connect(self.render)
+
+    level = property(lambda self: self._level, _set_level)
+
+    def _set_health(self, health):
+        self._health = health
+        self.render()
+    health = property(lambda self: self._health, _set_health)
+
+    def _set_lives(self, lives):
+        self._lives = lives
+        self.render()
+    lives = property(lambda self: self._lives, _set_lives)
+
+    def render(self):
+        self.surface.fill((0, 0, 0))
+
+        text_surface = self.ui_manager.font.render(
+            self.level.active_time_period.name, True, (255, 255, 255))
+        self.surface.blit(text_surface,
+                          ((self.rect.width - text_surface.get_width()) / 2,
+                           (self.rect.height - text_surface.get_height()) / 2))
+
+
+    def draw(self, surface):
+        surface.blit(self.surface, self.rect.topleft)
+
+
 class UIManager(object):
     SCREEN_PADDING = 100
     TEXTBOX_HEIGHT = 100
+    CONTROL_PANEL_HEIGHT = 40
 
     def __init__(self, engine):
         pygame.font.init()
@@ -110,12 +160,16 @@ class UIManager(object):
         self.engine = engine
         self.size = engine.screen.get_size()
         self.surface = pygame.Surface(self.size).convert_alpha()
-        self.ui_widgets = []
+        self.widgets = []
         self.timers = []
 
         self.default_font = pygame.font.get_default_font()
         self.font = pygame.font.Font(self.default_font, 20)
         self.small_font = pygame.font.Font(self.default_font, 14)
+
+        self.control_panel = ControlPanel(self)
+        self.control_panel.move_to(
+            0, self.size[1] - self.control_panel.rect.height)
 
     def show_level(self, level):
         timeline_attrs = {
@@ -140,15 +194,14 @@ class UIManager(object):
         textbox.move_to(self.SCREEN_PADDING,
                         self.size[1] - textbox.rect.height -
                         self.SCREEN_PADDING)
-        self.ui_widgets.append(textbox)
         return textbox
 
     def close(self, widget):
-        self.ui_widgets.remove(widget)
+        self.widgets.remove(widget)
 
     def draw(self, surface):
         self.surface.fill((0, 0, 0, 0))
-        for element in self.ui_widgets:
+        for element in self.widgets:
             element.draw(self.surface)
 
         surface.blit(self.surface, (0, 0))
