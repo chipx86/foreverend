@@ -151,19 +151,18 @@ class ForeverEndEngine(object):
                 self.debug_rects = not self.debug_rects
             elif event.type == KEYDOWN and event.key == K_F4:
                 self.god_mode = not self.god_mode
-            elif event.type == KEYDOWN and event.key in (K_1, K_a):
-                self.active_level.switch_time_period(0)
-            elif event.type == KEYDOWN and event.key in (K_2, K_s):
-                self.active_level.switch_time_period(1)
-            elif event.type == KEYDOWN and event.key in (K_3, K_d):
-                self.active_level.switch_time_period(2)
             elif self.active_level:
-                # XXX This should eventually bring up a confirmation
-                if event.type == KEYDOWN and event.key == K_ESCAPE:
-                    pygame.quit()
-                    return False
-
-                if not self.player.handle_event(event):
+                if event.type == KEYDOWN and event.key in (K_1, K_a):
+                    self.active_level.switch_time_period(0)
+                elif event.type == KEYDOWN and event.key in (K_2, K_s):
+                    self.active_level.switch_time_period(1)
+                elif event.type == KEYDOWN and event.key in (K_3, K_d):
+                    self.active_level.switch_time_period(2)
+                elif event.type == KEYDOWN and event.key == K_ESCAPE:
+                    # XXX This should eventually bring up a confirmation
+                        pygame.quit()
+                        return False
+                elif not self.player.handle_event(event):
                     time_period = self.active_level.active_time_period
 
                     for box in time_period.event_handlers:
