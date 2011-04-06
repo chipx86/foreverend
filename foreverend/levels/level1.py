@@ -179,6 +179,11 @@ class TimePeriod65000000BC(TimePeriod):
         self.volcano.add_to(self)
         self.volcano.move_to(1400, ground.rect.top - self.volcano.rect.height)
 
+        blocker = Box(150, self.level.size[1] - self.volcano.rect.height - 20,
+                      (0, 0, 0, 0))
+        self.main_layer.add(blocker)
+        blocker.move_to(self.volcano.lava_pool.rect.right - 100, 0)
+
         # Left-side lava pool
         lava_pool = TiledSprite('65000000bc/lava_pool', 5, 1)
         lava_pool.lethal = True

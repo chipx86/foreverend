@@ -26,6 +26,9 @@ class Volcano(object):
         self.bottom_sprite = Sprite('65000000bc/volcano_bottom')
         self.bottom_sprite.update_image()
 
+        self.cavern_blocker = Box(self.bottom_sprite.rect.width / 2,
+                                  self.BASE_CAVERN_RECT.height, (0, 0, 0))
+
         self.column_sprite = Sprite('65000000bc/volcano_column')
         self.column_sprite.use_pixel_collisions = True
         self.column_sprite.update_image()
@@ -47,6 +50,7 @@ class Volcano(object):
         self.eventbox.watch_object_moves(time_period.engine.player)
 
         time_period.main_layer.add(self.lava_puddle_blocker)
+        time_period.main_layer.add(self.cavern_blocker)
         time_period.main_layer.add(self.lava_puddle)
         time_period.main_layer.add(self.lava_pool)
         time_period.main_layer.add(self.top_sprite)
@@ -70,6 +74,9 @@ class Volcano(object):
         self.lava_puddle_blocker.move_to(
             self.lava_puddle.rect.right - 10,
             self.lava_puddle.rect.bottom - self.lava_puddle_blocker.rect.height)
+        self.cavern_blocker.move_to(
+            self.column_sprite.rect.right,
+            self.bottom_sprite.rect.top - self.cavern_blocker.rect.height)
         self.cover_sprite.move_to(
             x, y + self.rect.height - self.cover_sprite.rect.height)
 
@@ -82,3 +89,4 @@ class Volcano(object):
         self.column_sprite.hide()
         self.lava_puddle.hide()
         self.lava_puddle_blocker.hide()
+        self.cavern_blocker.hide()
