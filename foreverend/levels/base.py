@@ -84,6 +84,7 @@ class TimePeriod(object):
         self.bg = pygame.Surface(self.engine.screen.get_size()).convert()
         self.event_handlers = []
         self.timers = []
+        self.particle_systems = []
 
     def new_layer(self):
         layer = Layer(len(self.layers), self)
@@ -107,6 +108,9 @@ class TimePeriod(object):
                 if isinstance(eventbox, EventBox):
                     for rect in eventbox.rects:
                         pygame.draw.rect(screen, (255, 0, 0), rect, 1)
+
+        for particle_system in self.particle_systems:
+            particle_system.draw(screen)
 
     def register_for_events(self, obj):
         self.event_handlers.append(obj)

@@ -1,9 +1,10 @@
 import pygame
 
-from foreverend.timer import Timer
 from foreverend.levels.base import EventBox, Level, TimePeriod
+from foreverend.particles import ExplosionParticleSystem
 from foreverend.sprites import Artifact, Box, Dynamite, Elevator, \
                                Mountain, Sprite, TiledSprite, Volcano
+from foreverend.timer import Timer
 
 
 class TimePeriod600AD(TimePeriod):
@@ -212,15 +213,12 @@ class TimePeriod65000000BC(TimePeriod):
         explosion_box.watch_object_moves(self.level.dynamite)
         explosion_box.object_entered.connect(self.on_dynamite_placed)
 
-        self.explosion = None
-
         # Artifact
         artifact = Artifact(self, 1)
         self.main_layer.add(artifact)
         artifact.move_to(lava_pool.rect.right + 200,
                          ground.rect.top - artifact.rect.height - 50)
         artifact.grab_changed.connect(self.on_artifact_grabbed)
-
 
     def on_dynamite_placed(self, obj):
         assert obj == self.level.dynamite
@@ -241,18 +239,14 @@ class TimePeriod65000000BC(TimePeriod):
         self.level.dynamite.hide()
         self.level.dynamite = None
 
-        self.explosion = Sprite('big_explosion')
-        self.explosion.lethal = True
-        self.main_layer.add(self.explosion)
-        self.explosion.move_to(1980, 1400)
+        self.explosion = ExplosionParticleSystem(self)
+        self.explosion.start(2040, 1500)
 
         self.explosion_timer = Timer(self.engine, self, 350,
                                      self.on_explosion_done)
         self.explosion_timer.start()
 
     def on_explosion_done(self):
-        self.explosion.hide()
-        self.explosion = None
         self.explosion_timer.stop()
         self.explosion_timer = None
         self.exploding = False
