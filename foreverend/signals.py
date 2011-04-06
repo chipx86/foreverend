@@ -19,6 +19,6 @@ class Signal(object):
         result = False
 
         for callback in self.callbacks:
-            result = result or callback(*args, **kwargs)
+            result = callback(*args, **kwargs) or result
 
         return result
