@@ -326,10 +326,11 @@ class Player(Sprite):
 
     def on_dead(self):
         self.lives -= 1
-        self.health = self.MAX_HEALTH
         self.lives_changed.emit()
 
         if self.lives == 0:
             self.engine.game_over()
         else:
+            self.health = self.MAX_HEALTH
+            self.health_changed.emit()
             self.engine.dead()

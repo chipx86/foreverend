@@ -107,8 +107,8 @@ class TextBox(Widget):
 
 
 class ControlPanel(Widget):
-    HEART_X = 10
-    HEART_SPACING = 5
+    SIDE_SPACING = 10
+    IMAGE_SPACING = 5
 
     def __init__(self, *args, **kwargs):
         super(ControlPanel, self).__init__(*args, **kwargs)
@@ -117,6 +117,8 @@ class ControlPanel(Widget):
         self.surface = pygame.Surface(self.rect.size)
         self.heart_image = load_image('heart')
         self.heart_lost_image = load_image('heart_lost')
+        self.life_image = load_image('life')
+        self.life_lost_image = load_image('life_lost')
 
         player = self.ui_manager.engine.player
         player.lives_changed.connect(self.render)
@@ -146,7 +148,7 @@ class ControlPanel(Widget):
                           ((self.rect.width - text_surface.get_width()) / 2,
                            (self.rect.height - text_surface.get_height()) / 2))
 
-        x = self.HEART_X
+        x = self.SIDE_SPACING
         y = (self.rect.height - self.heart_image.get_height()) / 2
         heart_width = self.heart_image.get_width()
 
@@ -158,8 +160,21 @@ class ControlPanel(Widget):
             else:
                 self.surface.blit(self.heart_lost_image, (x, y))
 
-            x += heart_width + self.HEART_SPACING
+            x += heart_width + self.IMAGE_SPACING
 
+        life_width = self.life_image.get_width()
+        x = self.rect.width - self.SIDE_SPACING - \
+            (Player.MAX_LIVES * (life_width + self.IMAGE_SPACING)) + \
+            self.IMAGE_SPACING
+        y = (self.rect.height - self.life_image.get_height()) / 2
+
+        for i in range(Player.MAX_LIVES):
+            if player.lives > i:
+                self.surface.blit(self.life_image, (x, y))
+            else:
+                self.surface.blit(self.life_lost_image, (x, y))
+
+            x += life_width + self.IMAGE_SPACING
 
     def draw(self, surface):
         surface.blit(self.surface, self.rect.topleft)
