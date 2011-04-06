@@ -32,7 +32,6 @@ class TractorBeam(Sprite):
     def grab(self, item):
         assert item
         assert not self.item
-        print 'Got item'
         self.item = item
         self.item.stop_falling()
         self.item.obey_gravity = False
@@ -324,6 +323,7 @@ class Player(Sprite):
             self.on_dead()
         else:
             self.move_to(*self.last_safe_spot)
+            self.velocity = (0, 0)
 
     def on_dead(self):
         self.lives -= 1
