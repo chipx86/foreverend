@@ -8,6 +8,8 @@ from foreverend.signals import Signal
 class Direction(object):
     LEFT = 0
     RIGHT = 1
+    UP = 2
+    DOWN = 3
 
 
 class Sprite(pygame.sprite.DirtySprite):

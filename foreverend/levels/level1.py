@@ -215,7 +215,7 @@ class TimePeriod65000000BC(TimePeriod):
         self.explosion = None
 
         # Artifact
-        artifact = Artifact(1)
+        artifact = Artifact(self, 1)
         self.main_layer.add(artifact)
         artifact.move_to(lava_pool.rect.right + 200,
                          ground.rect.top - artifact.rect.height - 50)
