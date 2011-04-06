@@ -324,6 +324,8 @@ class Player(Sprite):
         else:
             self.move_to(*self.last_safe_spot)
             self.velocity = (0, 0)
+            self.falling = False
+            self.fall()
 
     def on_dead(self):
         self.lives -= 1
