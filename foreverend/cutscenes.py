@@ -56,7 +56,7 @@ class Cutscene(object):
         self.show_next_page()
 
     def stop(self):
-        self.next_page = len(self.pages)
+        self.next_page = -1
         self.current_page.stop()
         self.current_page = None
         self.done.emit()
@@ -64,7 +64,7 @@ class Cutscene(object):
     def show_next_page(self):
         if self.next_page == len(self.pages):
             self.done.emit()
-        else:
+        elif self.next_page >= 0:
             self.current_page = self.pages[self.next_page]
             self.next_page += 1
             self.current_page.done.connect(self.show_next_page)
