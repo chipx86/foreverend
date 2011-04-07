@@ -16,7 +16,12 @@ class Level2OutsideArea(Area):
 
 
 class Level2PyramidArea(Area):
-    size = (1500, 800)
+    size = (4000, 800)
+
+    DOOR_X = 230
+    PLATFORM_X = DOOR_X + 600
+    PLATFORM_Y = 200
+    PIT_TILES_X = 65
 
     def __init__(self, *args, **kwargs):
         super(Level2PyramidArea, self).__init__(*args, **kwargs)
@@ -128,14 +133,45 @@ class Pyramid1000AD(Level2PyramidArea):
 
         area_width, area_height = self.size
 
-        tiles_x = area_width / 144
-        ground = TiledSprite('1000ad/ground', tiles_x, 1)
+        tiles_y = area_height / 32
+        wall = TiledSprite('1000ad/pyramid_wall', 4, tiles_y)
+        self.main_layer.add(wall)
+        wall.move_to(0, 0)
+
+        ground = TiledSprite('1000ad/ground', 10, 1)
         self.main_layer.add(ground)
-        ground.move_to(0, area_height - ground.rect.height)
+        ground.move_to(wall.rect.right, area_height - ground.rect.height)
+
+        pit = TiledSprite('1000ad/spike', self.PIT_TILES_X, 1)
+        pit.lethal = True
+        self.main_layer.add(pit)
+        pit.move_to(ground.rect.right, ground.rect.bottom - pit.rect.height)
 
         self.door.destination = self.time_period.areas['default'].pyramid_door
         self.main_layer.add(self.door)
-        self.door.move_to(100, ground.rect.top - self.door.rect.height)
+        self.door.move_to(self.DOOR_X, ground.rect.top - self.door.rect.height)
+
+        ground = TiledSprite('1000ad/ground', 5, 1)
+        self.main_layer.add(ground)
+        ground.move_to(pit.rect.right, area_height - ground.rect.height)
+
+        tiles_y = area_height / 32
+        wall = TiledSprite('1000ad/pyramid_wall', 8, tiles_y)
+        self.main_layer.add(wall)
+        wall.move_to(ground.rect.right, 0)
+
+        platform = TiledSprite('1000ad/pyramid_wall', 15, 2)
+        self.main_layer.add(platform)
+        platform.move_to(self.PLATFORM_X, 200)
+        x = platform.rect.left
+        y = platform.rect.top
+
+        for i in range(7):
+            step = TiledSprite('1000ad/pyramid_wall', 2, 2)
+            self.main_layer.add(step)
+            x -= step.rect.width
+            y += step.rect.height
+            step.move_to(x, y)
 
 
 class Outside2300AD(Level2OutsideArea):
