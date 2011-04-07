@@ -79,8 +79,7 @@ class Outside1000AD(Level2OutsideArea):
         self.main_layer.add(ground)
         ground.move_to(0, level_height - ground.rect.height)
 
-        cactus = Sprite('1000ad/cactus')
-        cactus.lethal = True
+        cactus = Cactus()
         self.main_layer.add(cactus)
         cactus.move_to(100, ground.rect.top - cactus.rect.height)
 
@@ -88,14 +87,12 @@ class Outside1000AD(Level2OutsideArea):
         self.bg_layer.add(pyramid)
         pyramid.move_to(922, ground.rect.top - pyramid.rect.height)
 
-        cactus = Sprite('1000ad/cactus')
-        cactus.lethal = True
+        cactus = Cactus()
         self.main_layer.add(cactus)
         cactus.move_to(pyramid.rect.left + 100,
                        ground.rect.top - cactus.rect.height)
 
-        cactus = Sprite('1000ad/cactus')
-        cactus.lethal = True
+        cactus = Cactus()
         self.main_layer.add(cactus)
         cactus.move_to(2600, ground.rect.top - cactus.rect.height)
 
