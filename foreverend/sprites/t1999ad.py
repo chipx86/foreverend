@@ -20,7 +20,7 @@ class Elevator(Sprite):
         if (event.type == KEYDOWN and
             event.key in (K_UP, K_DOWN) and
             self.destination):
-            player = self.layer.level.engine.player
+            player = self.layer.time_period.engine.player
             dest_rect = self.destination.rect
 
             player.move_to(
