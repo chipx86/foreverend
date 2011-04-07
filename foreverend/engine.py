@@ -114,6 +114,7 @@ class ForeverEndEngine(object):
     def switch_level(self, num):
         assert num < len(self.levels)
         self.active_level = self.levels[num]
+        self.active_level.reset()
         self.active_level.switch_time_period(0)
         self.surface = pygame.Surface(self.active_level.size)
         self.player.move_to(*self.active_level.start_pos)
@@ -157,6 +158,14 @@ class ForeverEndEngine(object):
                     self.active_level.switch_time_period(1)
                 elif event.type == KEYDOWN and event.key in (K_3, K_d):
                     self.active_level.switch_time_period(2)
+                elif event.type == KEYDOWN and event.key == K_F5:
+                    # XXX For debugging only.
+                    i = self.levels.index(self.active_level)
+
+                    if i + 1 == len(self.levels):
+                        self.switch_level(0)
+                    else:
+                        self.switch_level(i + 1)
                 elif event.type == KEYDOWN and event.key == K_ESCAPE:
                     # XXX This should eventually bring up a confirmation
                         pygame.quit()
