@@ -2,8 +2,9 @@ import pygame
 
 from foreverend.effects import FloatEffect
 from foreverend.levels.base import Area, Level, TimePeriod
-from foreverend.sprites import Box, Cactus, Door, FlameThrower, IceBoulder, \
-                               Snake, Sprite, TiledSprite
+from foreverend.sprites import Box, Cactus, Door, FlameThrower, \
+                               IceBoulder, QuarantineSign, Snake, Sprite, \
+                               TiledSprite
 from foreverend.timer import Timer
 
 
@@ -142,18 +143,14 @@ class Outside2300AD(Level2OutsideArea):
             pyramid.rect.left + (pyramid.rect.width - bubble.rect.width) / 2,
             ground.rect.top - bubble.rect.height)
 
-        sign = Sprite('2300ad/quarantine')
+        sign = QuarantineSign()
         self.main_layer.add(sign)
         sign.move_to(bubble.rect.left - sign.rect.width - 200,
                      ground.rect.top - 300)
-        float_effect = FloatEffect(sign)
-        float_effect.start()
 
-        sign = Sprite('2300ad/quarantine')
+        sign = QuarantineSign()
         self.main_layer.add(sign)
         sign.move_to(bubble.rect.right + 200, ground.rect.top - 300)
-        float_effect = FloatEffect(sign)
-        float_effect.start()
 
 
 class Level2PyramidArea(Area):
