@@ -78,7 +78,7 @@ class Cutscene(object):
         if event.type == KEYDOWN:
             if event.key == K_ESCAPE:
                 self.stop()
-            else:
+            elif event.key in (K_SPACE, K_RETURN, K_RIGHT):
                 self.current_page.stop()
 
 
