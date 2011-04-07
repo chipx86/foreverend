@@ -35,6 +35,8 @@ class Sprite(pygame.sprite.DirtySprite):
         self.lethal = False
         self.falling = False
         self.collidable = True
+        self.grabbed = False
+        self.grabbable = False
         self.should_check_collisions = False
         self.use_pixel_collisions = False
         self.flip_image = flip_image

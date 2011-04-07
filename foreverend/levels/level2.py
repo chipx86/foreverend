@@ -3,8 +3,8 @@ import pygame
 from foreverend.effects import FloatEffect
 from foreverend.levels.base import Area, Level, TimePeriod
 from foreverend.sprites import Box, Button, Cactus, Door, FlameThrower, \
-                               IceBoulder, QuarantineSign, Snake, Sprite, \
-                               TiledSprite, TogglePlatform
+                               Hoverboard, IceBoulder, QuarantineSign, \
+                               Snake, Sprite, TiledSprite, TogglePlatform
 from foreverend.timer import Timer
 
 
@@ -376,6 +376,7 @@ class Level2(Level):
 
     def setup(self):
         self.flamethrower = FlameThrower()
+        self.hoverboard = Hoverboard()
 
         self.add(TimePeriod('12,000 BC', [Outside12000BC(self)]))
         self.add(TimePeriod('1000 AD', [

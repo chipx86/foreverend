@@ -41,6 +41,39 @@ class FlameThrower(Item):
         self.flip_image = True
 
 
+class Vehicle(Item):
+    pass
+
+
+class Hoverboard(Vehicle):
+    def __init__(self):
+        super(Hoverboard, self).__init__('2300ad/hoverboard')
+        self.flip_image = True
+        self.obey_gravity = False
+        self.use_pixel_collisions = True
+
+        self.float_effect = FloatEffect(self)
+
+        self.grab_changed.connect(self.on_grab_changed)
+        self.player = None
+
+    def should_adjust_position_with(self, obj, dx, dy):
+        return obj != self.player or self.player.vehicle != self
+
+    def on_added(self, layer):
+        self.player = layer.area.level.engine.player
+        self.float_effect.start()
+
+    def on_removed(self, layer):
+        self.float_effect.stop()
+
+    def on_grab_changed(self):
+        if self.grabbed:
+            self.float_effect.start()
+        else:
+            self.float_effect.stop()
+
+
 # Not technically an item, but close enough for now.
 class Snake(Item):
     MOVE_SPEED = 3

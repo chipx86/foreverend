@@ -4,7 +4,7 @@ from pygame.locals import *
 from foreverend import get_engine
 from foreverend.signals import Signal
 from foreverend.sprites.base import Direction, Sprite
-from foreverend.sprites.items import Item
+from foreverend.sprites.items import Item, Vehicle
 
 
 class TractorBeam(Sprite):
@@ -25,17 +25,19 @@ class TractorBeam(Sprite):
             return
 
         for obj, _, _ in self.get_collisions(ignore_collidable_flag=True):
-            if isinstance(obj, Item) and obj.grabbable:
+            if obj.grabbable and obj != self.player.vehicle:
                 self.grab(obj)
                 return
 
     def grab(self, item):
         assert item
         assert not self.item
+        self.old_item_obey_gravity = item.obey_gravity
         self.item = item
         self.item.stop_falling()
         self.item.obey_gravity = False
         self.item.collidable = False
+        self.item.grabbed = True
         self.freeze_item_y = False
         self.name = 'tractor_beam'
         self.update_image()
@@ -43,8 +45,9 @@ class TractorBeam(Sprite):
 
     def ungrab(self):
         if self.item:
-            self.item.obey_gravity = True
+            self.item.obey_gravity = self.old_item_obey_gravity
             self.item.collidable = True
+            self.item.grabbed = False
             self.item.fall()
             self.item.grab_changed.emit()
             self.item = None
@@ -142,10 +145,14 @@ class Player(Sprite):
         self.health = self.MAX_HEALTH
         self.lives = self.MAX_LIVES
         self.last_safe_spot = None
+        self.vehicle = None
+        self.vehicle_move_cnx = None
 
         # Signals
         self.health_changed = Signal()
         self.lives_changed = Signal()
+
+        self.direction_changed.connect(self.on_direction_changed)
 
     def handle_event(self, event):
         if self.block_events:
@@ -198,6 +205,13 @@ class Player(Sprite):
         self.tractor_beam.hide()
         self.calculate_collision_rects()
 
+    def ride(self, vehicle):
+        self.vehicle = vehicle
+        self.velocity = (self.velocity[0], 0)
+        self.vehicle_moved_cnx = \
+            self.vehicle.moved.connect(self.on_vehicle_moved)
+        self.calculate_collision_rects()
+
     def jump(self):
         if (self.falling and not self.engine.god_mode) or self.jumping:
             return
@@ -207,6 +221,11 @@ class Player(Sprite):
         self.falling = False
         self.velocity = (self.velocity[0], -self.JUMP_SPEED)
         self.propulsion_below.show()
+
+        if self.vehicle:
+            self.vehicle_moved_cnx.disconnect()
+            self.vehicle = None
+            self.calculate_collision_rects()
 
     def fall(self):
         if self.falling:
@@ -229,20 +248,22 @@ class Player(Sprite):
 
     def calculate_collision_rects(self):
         self.collision_masks = []
+        self.collision_rects = [self.rect]
 
         if self.tractor_beam.item:
-            self.collision_rects = [
-                self.rect,
-                self.tractor_beam.item.rect
-            ]
-        else:
-            self.collision_rects = []
+            self.collision_rects.append(self.tractor_beam.item.rect)
+
+        if self.vehicle:
+            self.collision_rects.append(self.vehicle.rect)
 
     def check_collisions(self, *args, **kwargs):
         if self.tractor_beam.item:
             self.tractor_beam.update_position(self)
 
         super(Player, self).check_collisions(*args, **kwargs)
+
+    def should_adjust_position_with(self, obj, dx, dy):
+        return obj != self.vehicle
 
     def tick(self):
         if self.hovering:
@@ -254,12 +275,14 @@ class Player(Sprite):
         super(Player, self).tick()
 
     def on_added(self, layer):
-        for obj in (self.propulsion_below, self.tractor_beam):
-            layer.add(obj)
+        for obj in (self.propulsion_below, self.tractor_beam, self.vehicle):
+            if obj:
+                layer.add(obj)
 
     def on_removed(self, layer):
-        for obj in (self.propulsion_below, self.tractor_beam):
-            layer.remove(obj)
+        for obj in (self.propulsion_below, self.tractor_beam, self.vehicle):
+            if obj:
+                layer.remove(obj)
 
     def on_moved(self, dx, dy):
         if not self.last_safe_spot:
@@ -282,6 +305,12 @@ class Player(Sprite):
 
         if self.tractor_beam.visible:
             self.tractor_beam.update_position(self)
+
+        if self.vehicle and dx != 0:
+            self.vehicle.move_to(
+                self.rect.left -
+                (self.vehicle.rect.width - self.rect.width) / 2,
+                self.vehicle.rect.top)
 
         self.calculate_collision_rects()
 
@@ -313,10 +342,21 @@ class Player(Sprite):
                                   self.rect.left),
                                  self.rect.top)
 
+        if dy > 0 and not self.vehicle and isinstance(obj, Vehicle):
+            self.ride(obj)
+
         if self.jumping and dy < 0:
             self.fall()
         else:
             super(Player, self).on_collision(dx, dy, obj, self_rect, obj_rect)
+
+    def on_direction_changed(self):
+        if self.vehicle:
+            self.vehicle.direction = self.direction
+
+    def on_vehicle_moved(self, dx, dy):
+        if dy != 0:
+            self.move_by(0, dy)
 
     def on_hit(self):
         self.health -= 1
