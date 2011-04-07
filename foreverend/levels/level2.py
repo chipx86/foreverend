@@ -4,7 +4,7 @@ from foreverend.effects import FloatEffect
 from foreverend.levels.base import Area, Level, TimePeriod
 from foreverend.sprites import Box, Button, Cactus, Door, FlameThrower, \
                                IceBoulder, QuarantineSign, Snake, Sprite, \
-                               TiledSprite
+                               TiledSprite, TogglePlatform
 from foreverend.timer import Timer
 
 
@@ -248,11 +248,36 @@ class Pyramid1000AD(Level2PyramidArea):
 
 
 class Pyramid2300AD(Level2PyramidArea):
+    PLATFORM_DELAY_TIME = 2000
+    PLATFORM_POS = [
+        # To weapons
+        (0, 180),
+        (218, 218),
+        (218, 124),
+        (409, 54),
+        (611, 0),
+        (611, 148),
+        (824, 118),
+        (930, 45),
+
+        # To exit
+        (1079, 373),
+        (944, 297),
+        (742, 275),
+        (521, 326),
+        (362, 266),
+        (218, 250),
+    ]
+
     def __init__(self, *args, **kwargs):
         super(Pyramid2300AD, self).__init__(*args, **kwargs)
         self.ground_name = '2300ad/ground'
         self.wall_name = '2300ad/pyramid_wall'
         self.spike_name = '2300ad/spike'
+        self.platforms_on = False
+        self.platforms = []
+        self.next_platform_num = 0
+        self.last_platform = None
 
     def setup(self):
         super(Pyramid2300AD, self).setup()
@@ -291,13 +316,56 @@ class Pyramid2300AD(Level2PyramidArea):
         sign.move_to(button.rect.right - sign.rect.width,
                      wall.rect.bottom - sign.rect.height - 20)
 
+        step = TiledSprite(self.wall_name, 2, 6)
+        self.main_layer.add(step)
+        step.move_to(self.pit.rect.left - step.rect.width,
+                     self.ground_top - step.rect.height)
+        x = step.rect.left
+
+        step = TiledSprite(self.wall_name, 2, 4)
+        self.main_layer.add(step)
+        step.move_to(x - step.rect.width, self.ground_top - step.rect.height)
+        x = step.rect.left
+
+        step = TiledSprite(self.wall_name, 2, 2)
+        self.main_layer.add(step)
+        step.move_to(x - step.rect.width, self.ground_top - step.rect.height)
+
+        platform_x = self.pit.rect.left
+        platform_y = self.pit.rect.top - 500
+
+        for x, y in self.PLATFORM_POS:
+            platform = TogglePlatform()
+            self.main_layer.add(platform)
+            platform.move_to(platform_x + x, platform_y + y)
+            self.platforms.append(platform)
+
 #        self.main_layer.add(self.level.flamethrower)
 #        self.level.flamethrower.move_to(
 #            wall.rect.right + 100,
 #            wall.rect.bottom - self.level.flamethrower.rect.height)
 
     def on_platforms_button_pressed(self):
-        print 'pressed'
+        if self.platforms_on:
+            return
+
+        self.platforms_on = True
+        self.platforms_timer = Timer(self.PLATFORM_DELAY_TIME,
+                                     self.next_platform)
+
+    def next_platform(self):
+        if self.last_platform:
+            self.last_platform.close()
+
+        platform = self.platforms[self.next_platform_num]
+        self.last_platform = platform
+
+        if self.next_platform_num == len(self.platforms) - 1:
+            self.next_platform_num = 0
+        else:
+            self.next_platform_num += 1
+
+        platform.open()
 
 
 class Level2(Level):
