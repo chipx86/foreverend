@@ -1,4 +1,5 @@
 import pygame
+from pygame.locals import *
 
 from foreverend.eventbox import EventBox
 from foreverend.sprites.base import Sprite
@@ -17,6 +18,39 @@ class Box(Sprite):
         pygame.draw.rect(surface, self.color, self.rect)
         pygame.draw.rect(surface, (0, 0, 0), self.rect, 1)
         return surface
+
+
+class Door(Sprite):
+    def __init__(self, name):
+        super(Door, self).__init__(name)
+        self.collidable = False
+        self.destination = None
+
+    def on_added(self, layer):
+        layer.area.register_for_events(self)
+
+    def on_removed(self, layer):
+        layer.area.unregister_for_events(self)
+
+    def handle_event(self, event):
+        if (event.type == KEYDOWN and event.key in (K_UP, K_DOWN) and
+            self.destination):
+            player = self.layer.area.engine.player
+            dest_rect = self.destination.rect
+
+            dest_area = self.destination.layer.area
+            assert dest_area.level == self.layer.area.level
+
+            if self.layer.area != dest_area:
+                dest_level.switch_area(dest_area)
+
+            player.move_to(
+                dest_rect.left + (dest_rect.width - player.rect.width) / 2,
+                dest_rect.bottom - player.rect.height)
+
+            return True
+
+        return False
 
 
 class Mountain(object):
