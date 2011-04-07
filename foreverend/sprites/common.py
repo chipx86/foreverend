@@ -2,6 +2,7 @@ import pygame
 from pygame.locals import *
 
 from foreverend.eventbox import EventBox
+from foreverend.signals import Signal
 from foreverend.sprites.base import Sprite
 from foreverend.sprites.player import Player
 
@@ -18,6 +19,15 @@ class Box(Sprite):
         pygame.draw.rect(surface, self.color, self.rect)
         pygame.draw.rect(surface, (0, 0, 0), self.rect, 1)
         return surface
+
+
+class Button(Sprite):
+    def __init__(self, name):
+        super(Button, self).__init__(name)
+        self.pressed = Signal()
+
+    def handle_collision(self, *args, **kwargs):
+        self.pressed.emit()
 
 
 class Door(Sprite):

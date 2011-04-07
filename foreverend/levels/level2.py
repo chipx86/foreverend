@@ -2,7 +2,7 @@ import pygame
 
 from foreverend.effects import FloatEffect
 from foreverend.levels.base import Area, Level, TimePeriod
-from foreverend.sprites import Box, Cactus, Door, FlameThrower, \
+from foreverend.sprites import Box, Button, Cactus, Door, FlameThrower, \
                                IceBoulder, QuarantineSign, Snake, Sprite, \
                                TiledSprite
 from foreverend.timer import Timer
@@ -193,7 +193,7 @@ class Level2PyramidArea(Area):
         self.main_layer.add(ground)
         ground.move_to(self.pit.rect.right, area_height - ground.rect.height)
 
-        self.topleft_platform = TiledSprite(self.wall_name, 15, 2)
+        self.topleft_platform = TiledSprite(self.wall_name, 25, 2)
         self.main_layer.add(self.topleft_platform)
         self.topleft_platform.move_to(self.PLATFORM_X, 200)
 
@@ -265,10 +265,39 @@ class Pyramid2300AD(Level2PyramidArea):
         self.main_layer.add(wall)
         wall.move_to(*self.weapons_entrance_pos)
 
-        self.main_layer.add(self.level.flamethrower)
-        self.level.flamethrower.move_to(
-            wall.rect.right + 100,
-            wall.rect.bottom - self.level.flamethrower.rect.height)
+        wall = TiledSprite(self.wall_name, 2, 7)
+        self.main_layer.add(wall)
+        wall.move_to(self.topleft_platform.rect.left,
+                     self.topleft_platform.rect.top - wall.rect.height)
+
+        wall = TiledSprite(self.wall_name, 2, 7)
+        self.main_layer.add(wall)
+        wall.move_to(self.topleft_platform.rect.right - wall.rect.width,
+                     self.topleft_platform.rect.top - wall.rect.height)
+
+        button = Button('2300ad/button')
+        button.pressed.connect(self.on_platforms_button_pressed)
+        self.main_layer.add(button)
+        button.move_to(wall.rect.left - button.rect.width,
+                       self.topleft_platform.rect.top - button.rect.height - 10)
+
+        wall = TiledSprite(self.wall_name, 15, 6)
+        self.main_layer.add(wall)
+        wall.move_to(self.topleft_platform.rect.right - wall.rect.width,
+                     button.rect.top - wall.rect.height - 10)
+
+        sign = Sprite('2300ad/weapons_sign')
+        self.main_layer.add(sign)
+        sign.move_to(button.rect.right - sign.rect.width,
+                     wall.rect.bottom - sign.rect.height - 20)
+
+#        self.main_layer.add(self.level.flamethrower)
+#        self.level.flamethrower.move_to(
+#            wall.rect.right + 100,
+#            wall.rect.bottom - self.level.flamethrower.rect.height)
+
+    def on_platforms_button_pressed(self):
+        print 'pressed'
 
 
 class Level2(Level):
