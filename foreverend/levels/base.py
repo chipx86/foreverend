@@ -144,16 +144,16 @@ class Layer(object):
 
     def remove(self, *objs):
         for obj in objs:
-            self.update_sprite(obj)
+            self.update_sprite(obj, True)
             self.quad_tree.remove(obj)
             obj.on_removed(self)
 
-    def update_sprite(self, sprite):
+    def update_sprite(self, sprite, force_remove=False):
         assert sprite.layer == self
 
         sprite.update_image()
 
-        if sprite.visible:
+        if sprite.visible and not force_remove:
             self.area.group.add(sprite, layer=self.index)
         else:
             self.area.group.remove(sprite)
