@@ -68,6 +68,11 @@ class TimePeriod1000AD(TimePeriod):
         self.main_layer.add(ground)
         ground.move_to(0, level_height - ground.rect.height)
 
+        cactus = Sprite('1000ad/cactus')
+        cactus.lethal = True
+        self.main_layer.add(cactus)
+        cactus.move_to(100, ground.rect.top - cactus.rect.height)
+
         pyramid = Sprite('1000ad/pyramid')
         self.bg_layer.add(pyramid)
         pyramid.move_to(922, ground.rect.top - pyramid.rect.height)
@@ -75,7 +80,13 @@ class TimePeriod1000AD(TimePeriod):
         cactus = Sprite('1000ad/cactus')
         cactus.lethal = True
         self.main_layer.add(cactus)
-        cactus.move_to(1050, ground.rect.top - cactus.rect.height)
+        cactus.move_to(pyramid.rect.left + 100,
+                       ground.rect.top - cactus.rect.height)
+
+        cactus = Sprite('1000ad/cactus')
+        cactus.lethal = True
+        self.main_layer.add(cactus)
+        cactus.move_to(2600, ground.rect.top - cactus.rect.height)
 
         # Artifact
         self.level.add_artifact(self, cactus.rect.right + 100, ground.rect.top)
@@ -84,8 +95,25 @@ class TimePeriod1000AD(TimePeriod):
 class TimePeriod2300AD(TimePeriod):
     def __init__(self, *args, **kwargs):
         super(TimePeriod2300AD, self).__init__(*args, **kwargs)
-        self.bg.fill((238, 236, 232))
+        self.bg.fill((89, 80, 67))
         self.name = '2300 AD'
+
+        level_width, level_height = self.level.size
+
+        tiles_x = self.level.size[0] / 144
+        ground = TiledSprite('2300ad/ground', tiles_x, 1)
+        self.main_layer.add(ground)
+        ground.move_to(0, level_height - ground.rect.height)
+
+        pyramid = Sprite('2300ad/pyramid')
+        self.bg_layer.add(pyramid)
+        pyramid.move_to(922, ground.rect.top - pyramid.rect.height)
+
+        bubble = Sprite('2300ad/pyramid_bubble')
+        self.fg_layer.add(bubble)
+        bubble.move_to(
+            pyramid.rect.left + (pyramid.rect.width - bubble.rect.width) / 2,
+            ground.rect.top - bubble.rect.height)
 
 
 class Level2(Level):
