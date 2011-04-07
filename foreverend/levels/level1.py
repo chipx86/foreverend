@@ -241,7 +241,7 @@ class TimePeriod65000000BC(TimePeriod):
         self.detonate_timer.stop()
         self.detonate_timer = None
 
-        self.level.dynamite.hide()
+        self.level.dynamite.remove()
         self.level.dynamite = None
 
         self.explosion = ExplosionParticleSystem(self)

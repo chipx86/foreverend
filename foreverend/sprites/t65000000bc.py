@@ -86,7 +86,7 @@ class Volcano(object):
         self.eventbox.rects.append(self.column_sprite.rect)
 
     def clear_passage(self):
-        self.column_sprite.hide()
-        self.lava_puddle.hide()
-        self.lava_puddle_blocker.hide()
-        self.cavern_blocker.hide()
+        self.column_sprite.remove()
+        self.lava_puddle.remove()
+        self.lava_puddle_blocker.remove()
+        self.cavern_blocker.remove()

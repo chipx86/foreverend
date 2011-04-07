@@ -24,7 +24,7 @@ class IceBoulder(Sprite):
 
         if new_height <= 0:
             self.timer.stop()
-            self.hide()
+            self.remove()
         else:
             self.image = self.image.subsurface(
                 pygame.Rect(0, 0, self.image.get_width(), new_height))
