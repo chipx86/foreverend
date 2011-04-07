@@ -63,11 +63,6 @@ class Outside12000BC(Level2OutsideArea):
         self.ice_boulder.move_to(
             2315, ground.rect.top - self.ice_boulder.rect.height)
 
-        self.main_layer.add(self.level.flamethrower)
-        self.level.flamethrower.move_to(
-            2000,
-            ground.rect.top - self.level.flamethrower.rect.height)
-
 
 class Outside1000AD(Level2OutsideArea):
     def __init__(self, *args, **kwargs):
@@ -271,10 +266,10 @@ class Pyramid2300AD(Level2PyramidArea):
         self.main_layer.add(wall)
         wall.move_to(*self.weapons_entrance_pos)
 
-#        self.main_layer.add(self.level.flamethrower)
-#        self.level.flamethrower.move_to(
-#            wall.rect.right + 100,
-#            wall.rect.bottom - self.level.flamethrower.rect.height)
+        self.main_layer.add(self.level.flamethrower)
+        self.level.flamethrower.move_to(
+            wall.rect.right + 100,
+            wall.rect.bottom - self.level.flamethrower.rect.height)
 
 
 class Level2(Level):
