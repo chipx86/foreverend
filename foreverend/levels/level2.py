@@ -100,17 +100,27 @@ class TimePeriod2300AD(TimePeriod):
 
         level_width, level_height = self.level.size
 
-        tiles_x = self.level.size[0] / 144
-        ground = TiledSprite('2300ad/ground', tiles_x, 1)
+        toxicwaste = TiledSprite('2300ad/toxicwaste', 5, 1)
+        toxicwaste.lethal = True
+        self.main_layer.add(toxicwaste)
+        toxicwaste.move_to(0, level_height - toxicwaste.rect.height)
+
+        ground = TiledSprite('2300ad/ground', 15, 1)
         self.main_layer.add(ground)
-        ground.move_to(0, level_height - ground.rect.height)
+        ground.move_to(toxicwaste.rect.right, level_height - ground.rect.height)
+
+        toxicwaste = TiledSprite('2300ad/toxicwaste', 8, 1)
+        toxicwaste.lethal = True
+        self.main_layer.add(toxicwaste)
+        toxicwaste.move_to(ground.rect.right,
+                           level_height - toxicwaste.rect.height)
 
         pyramid = Sprite('2300ad/pyramid')
         self.bg_layer.add(pyramid)
         pyramid.move_to(922, ground.rect.top - pyramid.rect.height)
 
         bubble = Sprite('2300ad/pyramid_bubble')
-        self.fg_layer.add(bubble)
+        self.bg_layer.add(bubble)
         bubble.move_to(
             pyramid.rect.left + (pyramid.rect.width - bubble.rect.width) / 2,
             ground.rect.top - bubble.rect.height)
