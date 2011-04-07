@@ -340,10 +340,10 @@ class Pyramid2300AD(Level2PyramidArea):
             platform.move_to(platform_x + x, platform_y + y)
             self.platforms.append(platform)
 
-#        self.main_layer.add(self.level.flamethrower)
-#        self.level.flamethrower.move_to(
-#            wall.rect.right + 100,
-#            wall.rect.bottom - self.level.flamethrower.rect.height)
+        self.main_layer.add(self.level.flamethrower)
+        self.level.flamethrower.move_to(
+            wall.rect.right + 100,
+            wall.rect.bottom - self.level.flamethrower.rect.height)
 
     def on_platforms_button_pressed(self):
         if self.platforms_on:
