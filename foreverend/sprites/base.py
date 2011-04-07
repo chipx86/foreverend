@@ -130,7 +130,8 @@ class Sprite(pygame.sprite.DirtySprite):
         self._colliding_objects = set()
 
         for obj, self_rect, obj_rect in self.get_collisions():
-            if self_rect == self.rect:
+            if (self_rect == self.rect and
+                self.should_adjust_position_with(obj, dx, dy)):
                 self.position_beside(obj_rect, dx, dy)
 
             obj.handle_collision(self, obj_rect, dx, dy)
@@ -139,6 +140,9 @@ class Sprite(pygame.sprite.DirtySprite):
 
         for obj in old_colliding_objects.difference(self._colliding_objects):
             obj.handle_stop_colliding(self)
+
+    def should_adjust_position_with(self, obj, dx, dy):
+        return True
 
     def position_beside(self, rect, dx, dy):
         if dy < 0:
