@@ -1,6 +1,7 @@
 import pygame
 from pygame.locals import *
 
+from foreverend.effects import FloatEffect
 from foreverend.signals import Signal
 from foreverend.sprites.base import Direction, Sprite
 from foreverend.timer import Timer
@@ -19,47 +20,9 @@ class Item(Sprite):
 class Artifact(Item):
     def __init__(self, time_period, num):
         super(Artifact, self).__init__('artifact%s' % num)
-        self.float_timer = None
-        self.up_count = 0
-        self.down_count = 0
-        self.pause_count = 0
-        self.float_paused = False
-        self.max_movement = 2
-        self.max_pause_count = 6
-        self.float_distance = 1
-        self.direction = Direction.UP
-
-        self.grab_changed.connect(self.stop_floating)
-
-        self.float_timer = Timer(150, self.on_float)
-        self.float_timer.start()
-
-    def stop_floating(self):
-        self.float_timer.stop()
-        self.float_timer = None
-
-    def on_float(self):
-        if self.float_paused:
-            self.pause_count += 1
-
-            if self.pause_count == self.max_pause_count:
-                self.float_paused = False
-                self.pause_count = 0
-        elif self.direction == Direction.UP:
-            self.move_by(0, -self.float_distance)
-            self.up_count += 1
-
-            if self.up_count == self.max_movement:
-                self.direction = Direction.DOWN
-                self.float_paused = True
-                self.up_count = 0
-        elif self.direction == Direction.DOWN:
-            self.move_by(0, self.float_distance)
-            self.down_count += 1
-
-            if self.down_count == self.max_movement:
-                self.direction = Direction.UP
-                self.down_count = 0
+        self.float_effect = FloatEffect(self)
+        self.grab_changed.connect(self.float_effect.stop)
+        self.float_effect.start()
 
 
 class Dynamite(Item):

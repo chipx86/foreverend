@@ -1,5 +1,6 @@
 import pygame
 
+from foreverend.effects import FloatEffect
 from foreverend.levels.base import Level, TimePeriod
 from foreverend.sprites import Box, IceBoulder, Sprite, TiledSprite
 from foreverend.timer import Timer
