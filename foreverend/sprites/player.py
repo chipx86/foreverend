@@ -330,6 +330,7 @@ class Player(Sprite):
     def on_dead(self):
         self.lives -= 1
         self.lives_changed.emit()
+        self.velocity = (0, 0)
 
         if self.lives == 0:
             self.engine.game_over()
