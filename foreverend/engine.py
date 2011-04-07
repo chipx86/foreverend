@@ -135,23 +135,22 @@ class ForeverEndEngine(object):
         if event.type == QUIT:
             pygame.quit()
             return False
-        elif event.type == KEYDOWN and event.key == K_RETURN:
-            if self.paused:
-                self._unpause()
-            else:
-                self._pause()
-        elif not self.paused:
+        if event.type == KEYDOWN and event.key == K_F2:
+            self.show_debug_info = not self.show_debug_info
+        elif event.type == KEYDOWN and event.key == K_F3:
+            self.debug_rects = not self.debug_rects
+        elif event.type == KEYDOWN and event.key == K_F4:
+            self.god_mode = not self.god_mode
+        elif self.active_level:
             if event.type == KEYDOWN and event.key == K_TAB:
                 # Switch time periods
                 self._show_time_periods()
-            # XXX
-            elif event.type == KEYDOWN and event.key == K_F2:
-                self.show_debug_info = not self.show_debug_info
-            elif event.type == KEYDOWN and event.key == K_F3:
-                self.debug_rects = not self.debug_rects
-            elif event.type == KEYDOWN and event.key == K_F4:
-                self.god_mode = not self.god_mode
-            elif self.active_level:
+            elif event.type == KEYDOWN and event.key == K_RETURN:
+                if self.paused:
+                    self._unpause()
+                else:
+                    self._pause()
+            elif not self.paused:
                 if event.type == KEYDOWN and event.key in (K_1, K_a):
                     self.active_level.switch_time_period(0)
                 elif event.type == KEYDOWN and event.key in (K_2, K_s):
@@ -174,8 +173,8 @@ class ForeverEndEngine(object):
                         if (self.player.rect.collidelist(rects) != -1 and
                             box.handle_event(event)):
                             break
-            elif self.active_cutscene:
-                self.active_cutscene.handle_event(event)
+        elif self.active_cutscene:
+            self.active_cutscene.handle_event(event)
 
         return True
 
