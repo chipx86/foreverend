@@ -86,6 +86,7 @@ class ParticleSystem(object):
 
         self.add_particles()
         self.area.particle_systems.append(self)
+        self.timer.start()
 
     def add_particles(self):
         num_particles = random.randint(self.min_particles, self.max_particles)
@@ -93,8 +94,6 @@ class ParticleSystem(object):
         for i in range(num_particles):
             if self.free_particles:
                 self.setup_particle(self.free_particles.pop())
-
-        self.timer.start()
 
     def stop(self):
         self.timer.stop()
