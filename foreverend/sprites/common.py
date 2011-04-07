@@ -35,6 +35,8 @@ class Door(Sprite):
     def handle_event(self, event):
         if (event.type == KEYDOWN and event.key in (K_UP, K_DOWN) and
             self.destination):
+            assert isinstance(self.destination, Door)
+
             player = self.layer.area.engine.player
             dest_rect = self.destination.rect
 
@@ -42,7 +44,7 @@ class Door(Sprite):
             assert dest_area.level == self.layer.area.level
 
             if self.layer.area != dest_area:
-                dest_level.switch_area(dest_area)
+                dest_area.level.switch_area(dest_area)
 
             player.move_to(
                 dest_rect.left + (dest_rect.width - player.rect.width) / 2,

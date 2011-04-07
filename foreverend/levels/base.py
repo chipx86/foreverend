@@ -168,7 +168,6 @@ class Layer(object):
 class Level(object):
     def __init__(self, engine):
         self.engine = engine
-        self.areas = []
         self.time_periods = []
         self.active_area = None
 
@@ -191,12 +190,17 @@ class Level(object):
     def reset(self):
         self.active_area = None
         self.active_time_period = None
-        self.areas = []
         self.time_periods = []
-        self.setup()
+        self._setup()
 
     def setup(self):
         pass
+
+    def _setup(self):
+        self.setup()
+
+        for time_period in self.time_periods:
+            time_period.setup()
 
     def switch_area(self, area):
         player = self.engine.player
@@ -255,9 +259,14 @@ class TimePeriod(object):
             self.default_area = area
 
         self.areas[area.key] = area
+        area.time_period = self
 
     def draw(self, screen):
         self.active_area.draw(screen)
+
+    def setup(self):
+        for area in self.areas.itervalues():
+            area.setup()
 
 
 class Area(object):

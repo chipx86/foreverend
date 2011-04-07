@@ -2,7 +2,7 @@ import pygame
 
 from foreverend.effects import FloatEffect
 from foreverend.levels.base import Area, Level, TimePeriod
-from foreverend.sprites import Box, IceBoulder, Sprite, TiledSprite
+from foreverend.sprites import Box, Door, IceBoulder, Sprite, TiledSprite
 from foreverend.timer import Timer
 
 
@@ -15,11 +15,19 @@ class Level2OutsideArea(Area):
                           self.size[1] - 64 - self.engine.player.rect.height)
 
 
-class Outside12000BC(Level2OutsideArea):
+class Level2PyramidArea(Area):
+    size = (1500, 800)
+
     def __init__(self, *args, **kwargs):
-        super(Outside12000BC, self).__init__(*args, **kwargs)
+        super(Level2PyramidArea, self).__init__(*args, **kwargs)
+        self.key = 'pyramid'
+        self.start_pos = (100,
+                          self.size[1] - 64 - self.engine.player.rect.height)
+
+
+class Outside12000BC(Level2OutsideArea):
+    def setup(self):
         self.bg.fill((219, 228, 252))
-        self.name = '12,000 BC'
 
         level_width, level_height = self.size
 
@@ -68,8 +76,10 @@ class Outside12000BC(Level2OutsideArea):
 class Outside1000AD(Level2OutsideArea):
     def __init__(self, *args, **kwargs):
         super(Outside1000AD, self).__init__(*args, **kwargs)
+        self.pyramid_door = Door('1000ad/pyramid_door')
+
+    def setup(self):
         self.bg.fill((255, 251, 219))
-        self.name = '1000 AD'
 
         level_width, level_height = self.size
 
@@ -98,15 +108,39 @@ class Outside1000AD(Level2OutsideArea):
         self.main_layer.add(cactus)
         cactus.move_to(2600, ground.rect.top - cactus.rect.height)
 
+        self.pyramid_door.destination = self.time_period.areas['pyramid'].door
+        self.main_layer.add(self.pyramid_door)
+        self.pyramid_door.move_to(
+            pyramid.rect.left + 621,
+            pyramid.rect.bottom - self.pyramid_door.rect.height)
+
         # Artifact
         self.level.add_artifact(self, cactus.rect.right + 100, ground.rect.top)
 
 
-class Outside2300AD(Level2OutsideArea):
+class Pyramid1000AD(Level2PyramidArea):
     def __init__(self, *args, **kwargs):
-        super(Outside2300AD, self).__init__(*args, **kwargs)
+        super(Pyramid1000AD, self).__init__(*args, **kwargs)
+        self.door = Door('1000ad/pyramid_door')
+
+    def setup(self):
+        self.bg.fill((255, 251, 219))
+
+        area_width, area_height = self.size
+
+        tiles_x = area_width / 144
+        ground = TiledSprite('1000ad/ground', tiles_x, 1)
+        self.main_layer.add(ground)
+        ground.move_to(0, area_height - ground.rect.height)
+
+        self.door.destination = self.time_period.areas['default'].pyramid_door
+        self.main_layer.add(self.door)
+        self.door.move_to(100, ground.rect.top - self.door.rect.height)
+
+
+class Outside2300AD(Level2OutsideArea):
+    def setup(self):
         self.bg.fill((89, 80, 67))
-        self.name = '2300 AD'
 
         level_width, level_height = self.size
 
@@ -149,6 +183,11 @@ class Outside2300AD(Level2OutsideArea):
         float_effect.start()
 
 
+class Pyramid2300AD(Level2PyramidArea):
+    def setup(self):
+        self.bg.fill((89, 80, 67))
+
+
 class Level2(Level):
     def __init__(self, *args, **kwargs):
         super(Level2, self).__init__(*args, **kwargs)
@@ -157,5 +196,11 @@ class Level2(Level):
 
     def setup(self):
         self.add(TimePeriod('12,000 BC', [Outside12000BC(self)]))
-        self.add(TimePeriod('1000 AD', [Outside1000AD(self)]))
-        self.add(TimePeriod('2300 AD', [Outside2300AD(self)]))
+        self.add(TimePeriod('1000 AD', [
+            Outside1000AD(self),
+            Pyramid1000AD(self),
+        ]))
+        self.add(TimePeriod('2300 AD', [
+            Outside2300AD(self),
+            Pyramid2300AD(self),
+        ]))
