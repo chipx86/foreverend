@@ -42,11 +42,11 @@ class Particle(object):
 
 
 class ParticleSystem(object):
-    def __init__(self, area, max_particles):
+    def __init__(self, area):
         # Settings
         self.particle_filename = None
         self.min_particles = 0
-        self.max_particles = max_particles
+        self.max_particles = 0
         self.min_initial_speed = 0
         self.max_initial_speed = 0
         self.min_acceleration = 0
@@ -57,6 +57,8 @@ class ParticleSystem(object):
         self.max_scale = 0
         self.min_rotation_speed = 0
         self.max_rotation_speed = 0
+        self.min_angle = 0
+        self.max_angle = 2 * math.pi
         self.repeat = False
 
         # State
@@ -83,6 +85,7 @@ class ParticleSystem(object):
             self.image = load_image(self.particle_filename).convert_alpha()
 
         self.add_particles()
+        self.area.particle_systems.append(self)
 
     def add_particles(self):
         num_particles = random.randint(self.min_particles, self.max_particles)
@@ -91,7 +94,6 @@ class ParticleSystem(object):
             if self.free_particles:
                 self.setup_particle(self.free_particles.pop())
 
-        self.area.particle_systems.append(self)
         self.timer.start()
 
     def stop(self):
@@ -126,7 +128,7 @@ class ParticleSystem(object):
         particle.rotation = self.random_float(0.0, 360.0)
 
     def random_direction(self):
-        angle = self.random_float(0, 2 * math.pi)
+        angle = self.random_float(self.min_angle, self.max_angle)
         return (math.cos(angle), math.sin(angle))
 
     def random_float(self, min_value, max_value):
@@ -156,15 +158,15 @@ class ParticleSystem(object):
 
 class ExplosionParticleSystem(ParticleSystem):
     def __init__(self, *args, **kwargs):
-        super(ExplosionParticleSystem, self).__init__(max_particles=30,
-                                                      *args, **kwargs)
+        super(ExplosionParticleSystem, self).__init__(*args, **kwargs)
 
         self.particle_filename = 'explosion'
         self.min_lifetime = 0.3
-        self.max_lifetime = 0.5
+        self.max_lifetime = 1
         self.min_initial_speed = 200
         self.max_initial_speed = 300
         self.min_particles = 25
+        self.min_particles = 40
         self.min_scale = 0.3
         self.max_scale = 1.0
         self.min_rotation_speed = -360.0
@@ -176,3 +178,15 @@ class ExplosionParticleSystem(ParticleSystem):
         particle.acceleration = \
             (-particle.velocity[0] / particle.lifetime,
              -particle.velocity[1] / particle.lifetime)
+
+
+class FlameThrowerParticleSystem(ExplosionParticleSystem):
+    def __init__(self, *args, **kwargs):
+        super(FlameThrowerParticleSystem, self).__init__(*args, **kwargs)
+        self.min_particles = 20
+        self.max_particles = 20
+        self.min_lifetime = 0.7
+        self.max_lifetime = 1
+        self.max_scale = 0.6
+        self.min_angle = -(math.pi / 4)
+        self.max_angle = math.pi / 4

@@ -2,7 +2,8 @@ import pygame
 
 from foreverend.effects import FloatEffect
 from foreverend.levels.base import Area, Level, TimePeriod
-from foreverend.sprites import Box, Door, IceBoulder, Sprite, TiledSprite
+from foreverend.sprites import Box, Door, FlameThrower, IceBoulder, \
+                               Sprite, TiledSprite
 from foreverend.timer import Timer
 
 
@@ -61,6 +62,11 @@ class Outside12000BC(Level2OutsideArea):
         self.main_layer.add(self.ice_boulder)
         self.ice_boulder.move_to(
             2315, ground.rect.top - self.ice_boulder.rect.height)
+
+        self.main_layer.add(self.level.flamethrower)
+        self.level.flamethrower.move_to(
+            2000,
+            ground.rect.top - self.level.flamethrower.rect.height)
 
 
 class Outside1000AD(Level2OutsideArea):
@@ -261,9 +267,14 @@ class Pyramid2300AD(Level2PyramidArea):
         # Fall to your doom, probes!
         self.pit.remove()
 
-        wall = TiledSprite(self.wall_name, 4, 4)
+        wall = TiledSprite(self.wall_name, 4, 3)
         self.main_layer.add(wall)
         wall.move_to(*self.weapons_entrance_pos)
+
+#        self.main_layer.add(self.level.flamethrower)
+#        self.level.flamethrower.move_to(
+#            wall.rect.right + 100,
+#            wall.rect.bottom - self.level.flamethrower.rect.height)
 
 
 class Level2(Level):
@@ -273,6 +284,8 @@ class Level2(Level):
         self.setup()
 
     def setup(self):
+        self.flamethrower = FlameThrower()
+
         self.add(TimePeriod('12,000 BC', [Outside12000BC(self)]))
         self.add(TimePeriod('1000 AD', [
             Outside1000AD(self),

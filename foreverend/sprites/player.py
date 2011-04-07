@@ -90,6 +90,9 @@ class TractorBeam(Sprite):
                 self.freeze_item_y = False
                 y = mid_y
 
+            self.item.direction = self.direction
+            self.item.update_image()
+
             if self.direction == Direction.RIGHT:
                 self.item.move_to(self.rect.right + self.ITEM_OFFSET, y)
             elif self.direction == Direction.LEFT:

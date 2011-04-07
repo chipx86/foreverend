@@ -33,3 +33,9 @@ class Dynamite(Item):
         self.name = '1999ad/dynamite_lit'
         self.update_image()
         self.grabbable = False
+
+
+class FlameThrower(Item):
+    def __init__(self):
+        super(FlameThrower, self).__init__('2300ad/flamethrower')
+        self.flip_image = True
