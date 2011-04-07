@@ -15,21 +15,6 @@ class Level2OutsideArea(Area):
                           self.size[1] - 64 - self.engine.player.rect.height)
 
 
-class Level2PyramidArea(Area):
-    size = (4000, 800)
-
-    DOOR_X = 230
-    PLATFORM_X = DOOR_X + 600
-    PLATFORM_Y = 224
-    PIT_TILES_X = 65
-
-    def __init__(self, *args, **kwargs):
-        super(Level2PyramidArea, self).__init__(*args, **kwargs)
-        self.key = 'pyramid'
-        self.start_pos = (100,
-                          self.size[1] - 64 - self.engine.player.rect.height)
-
-
 class Outside12000BC(Level2OutsideArea):
     def setup(self):
         self.bg.fill((219, 228, 252))
@@ -123,72 +108,6 @@ class Outside1000AD(Level2OutsideArea):
         self.level.add_artifact(self, cactus.rect.right + 100, ground.rect.top)
 
 
-class Pyramid1000AD(Level2PyramidArea):
-    def __init__(self, *args, **kwargs):
-        super(Pyramid1000AD, self).__init__(*args, **kwargs)
-        self.door = Door('1000ad/pyramid_door')
-
-    def setup(self):
-        self.bg.fill((255, 251, 219))
-
-        area_width, area_height = self.size
-
-        tiles_y = area_height / 32
-        wall = TiledSprite('1000ad/pyramid_wall', 4, tiles_y)
-        self.main_layer.add(wall)
-        wall.move_to(0, 0)
-
-        ground = TiledSprite('1000ad/ground', 10, 1)
-        self.main_layer.add(ground)
-        ground.move_to(wall.rect.right, area_height - ground.rect.height)
-
-        pit = TiledSprite('1000ad/spike', self.PIT_TILES_X, 1)
-        pit.lethal = True
-        self.main_layer.add(pit)
-        pit.move_to(ground.rect.right, ground.rect.bottom - pit.rect.height)
-
-        self.door.destination = self.time_period.areas['default'].pyramid_door
-        self.main_layer.add(self.door)
-        self.door.move_to(self.DOOR_X, ground.rect.top - self.door.rect.height)
-
-        ground = TiledSprite('1000ad/ground', 5, 1)
-        self.main_layer.add(ground)
-        ground.move_to(pit.rect.right, area_height - ground.rect.height)
-
-        platform = TiledSprite('1000ad/pyramid_wall', 15, 2)
-        self.main_layer.add(platform)
-        platform.move_to(self.PLATFORM_X, 200)
-        x = platform.rect.left
-        y = platform.rect.top
-
-        for i in range(7):
-            step = TiledSprite('1000ad/pyramid_wall', 2, 2)
-            self.main_layer.add(step)
-            x -= step.rect.width
-            y += step.rect.height
-            step.move_to(x, y)
-
-        platform = TiledSprite('1000ad/pyramid_wall', 20, 2)
-        self.main_layer.add(platform)
-        platform.move_to(ground.rect.left, self.PLATFORM_Y)
-
-        tiles_y = (area_height - platform.rect.top) / 32 + 32
-        wall = TiledSprite('1000ad/pyramid_wall', 15, tiles_y)
-        self.main_layer.add(wall)
-        wall.move_to(platform.rect.right, platform.rect.top)
-
-        wall = TiledSprite('1000ad/pyramid_wall', 15, 4)
-        self.main_layer.add(wall)
-        wall.move_to(platform.rect.right, 0)
-        wall_right = wall.rect.right
-        wall_bottom = wall.rect.bottom
-
-        wall = TiledSprite('1000ad/pyramid_wall', 5, 3)
-        self.main_layer.add(wall)
-        wall.move_to(wall_right - wall.rect.width, wall_bottom)
-
-
-
 class Outside2300AD(Level2OutsideArea):
     def setup(self):
         self.bg.fill((89, 80, 67))
@@ -234,9 +153,107 @@ class Outside2300AD(Level2OutsideArea):
         float_effect.start()
 
 
+class Level2PyramidArea(Area):
+    size = (4000, 800)
+
+    DOOR_X = 230
+    PLATFORM_X = DOOR_X + 600
+    PLATFORM_Y = 224
+    PIT_TILES_X = 65
+
+    def __init__(self, *args, **kwargs):
+        super(Level2PyramidArea, self).__init__(*args, **kwargs)
+        self.key = 'pyramid'
+        self.wall_name = None
+        self.spike_name = None
+        self.ground_name = None
+        self.start_pos = (100,
+                          self.size[1] - 64 - self.engine.player.rect.height)
+
+    def setup(self):
+        area_width, area_height = self.size
+
+        tiles_y = area_height / 32
+        wall = TiledSprite(self.wall_name, 4, tiles_y)
+        self.main_layer.add(wall)
+        wall.move_to(0, 0)
+
+        ground = TiledSprite(self.ground_name, 10, 1)
+        self.main_layer.add(ground)
+        ground.move_to(wall.rect.right, area_height - ground.rect.height)
+        self.ground_top = ground.rect.top
+
+        pit = TiledSprite(self.spike_name, self.PIT_TILES_X, 1)
+        pit.lethal = True
+        self.main_layer.add(pit)
+        pit.move_to(ground.rect.right, ground.rect.bottom - pit.rect.height)
+
+        ground = TiledSprite(self.ground_name, 5, 1)
+        self.main_layer.add(ground)
+        ground.move_to(pit.rect.right, area_height - ground.rect.height)
+
+        self.topleft_platform = TiledSprite(self.wall_name, 15, 2)
+        self.main_layer.add(self.topleft_platform)
+        self.topleft_platform.move_to(self.PLATFORM_X, 200)
+
+        platform = TiledSprite(self.wall_name, 20, 2)
+        self.main_layer.add(platform)
+        platform.move_to(ground.rect.left, self.PLATFORM_Y)
+
+        tiles_y = (area_height - platform.rect.top) / 32 + 32
+        wall = TiledSprite(self.wall_name, 15, tiles_y)
+        self.main_layer.add(wall)
+        wall.move_to(platform.rect.right, platform.rect.top)
+
+        wall = TiledSprite(self.wall_name, 15, 4)
+        self.main_layer.add(wall)
+        wall.move_to(platform.rect.right, 0)
+        wall_right = wall.rect.right
+        wall_bottom = wall.rect.bottom
+
+        wall = TiledSprite(self.wall_name, 5, 3)
+        self.main_layer.add(wall)
+        wall.move_to(wall_right - wall.rect.width, wall_bottom)
+
+
+class Pyramid1000AD(Level2PyramidArea):
+    def __init__(self, *args, **kwargs):
+        super(Pyramid1000AD, self).__init__(*args, **kwargs)
+        self.door = Door('1000ad/pyramid_door')
+        self.ground_name = '1000ad/ground'
+        self.wall_name = '1000ad/pyramid_wall'
+        self.spike_name = '1000ad/spike'
+
+    def setup(self):
+        super(Pyramid1000AD, self).setup()
+
+        self.bg.fill((255, 251, 219))
+
+        self.door.destination = self.time_period.areas['default'].pyramid_door
+        self.main_layer.add(self.door)
+        self.door.move_to(self.DOOR_X, self.ground_top - self.door.rect.height)
+
+        x = self.topleft_platform.rect.left
+        y = self.topleft_platform.rect.top
+
+        for i in range(7):
+            step = TiledSprite(self.wall_name, 2, 2)
+            self.main_layer.add(step)
+            x -= step.rect.width
+            y += step.rect.height
+            step.move_to(x, y)
+
+
 class Pyramid2300AD(Level2PyramidArea):
+    def __init__(self, *args, **kwargs):
+        super(Pyramid2300AD, self).__init__(*args, **kwargs)
+        self.ground_name = '2300ad/ground'
+        self.wall_name = '2300ad/pyramid_wall'
+        self.spike_name = '2300ad/spike'
+
     def setup(self):
         self.bg.fill((89, 80, 67))
+        super(Pyramid2300AD, self).setup()
 
 
 class Level2(Level):
