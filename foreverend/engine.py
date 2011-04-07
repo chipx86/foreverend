@@ -201,6 +201,7 @@ class ForeverEndEngine(object):
             self.active_cutscene.draw(self.active_cutscene)
 
         if self.active_level:
+            self.surface.set_clip(self.camera.rect)
             self.active_level.draw(self.surface)
             self.screen.blit(self.surface.subsurface(self.camera.rect), (0, 0))
 
