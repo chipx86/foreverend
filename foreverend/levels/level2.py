@@ -183,14 +183,15 @@ class Level2PyramidArea(Area):
         ground.move_to(wall.rect.right, area_height - ground.rect.height)
         self.ground_top = ground.rect.top
 
-        pit = TiledSprite(self.spike_name, self.PIT_TILES_X, 1)
-        pit.lethal = True
-        self.main_layer.add(pit)
-        pit.move_to(ground.rect.right, ground.rect.bottom - pit.rect.height)
+        self.pit = TiledSprite(self.spike_name, self.PIT_TILES_X, 1)
+        self.pit.lethal = True
+        self.main_layer.add(self.pit)
+        self.pit.move_to(ground.rect.right,
+                         ground.rect.bottom - self.pit.rect.height)
 
         ground = TiledSprite(self.ground_name, 5, 1)
         self.main_layer.add(ground)
-        ground.move_to(pit.rect.right, area_height - ground.rect.height)
+        ground.move_to(self.pit.rect.right, area_height - ground.rect.height)
 
         self.topleft_platform = TiledSprite(self.wall_name, 15, 2)
         self.main_layer.add(self.topleft_platform)
@@ -210,6 +211,8 @@ class Level2PyramidArea(Area):
         wall.move_to(platform.rect.right, 0)
         wall_right = wall.rect.right
         wall_bottom = wall.rect.bottom
+
+        self.weapons_entrance_pos = (wall.rect.left, wall.rect.bottom)
 
         wall = TiledSprite(self.wall_name, 5, 3)
         self.main_layer.add(wall)
@@ -252,8 +255,15 @@ class Pyramid2300AD(Level2PyramidArea):
         self.spike_name = '2300ad/spike'
 
     def setup(self):
-        self.bg.fill((89, 80, 67))
         super(Pyramid2300AD, self).setup()
+        self.bg.fill((89, 80, 67))
+
+        # Fall to your doom, probes!
+        self.pit.remove()
+
+        wall = TiledSprite(self.wall_name, 4, 4)
+        self.main_layer.add(wall)
+        wall.move_to(*self.weapons_entrance_pos)
 
 
 class Level2(Level):
