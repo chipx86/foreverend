@@ -95,10 +95,10 @@ class ForeverEndEngine(object):
 
     def restart_level(self):
         self.paused = False
-        self.player.move_to(*self.active_level.start_pos)
         self.player.show()
         self.active_level.reset()
         self.active_level.switch_time_period(0)
+        self.player.move_to(*self.active_level.active_area.start_pos)
 
     def game_over(self):
         self.ui_manager.show_textbox('Game Over')
