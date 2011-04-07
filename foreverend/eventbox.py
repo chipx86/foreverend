@@ -14,7 +14,7 @@ class EventBox(object):
         self.object_exited = Signal()
 
     def watch_object_moves(self, obj):
-        obj.moved.connect(lambda: self.handle_object_move(obj))
+        obj.moved.connect(lambda dx, dy: self.handle_object_move(obj))
 
     def handle_event(self, event):
         return self.event_fired.emit(event)

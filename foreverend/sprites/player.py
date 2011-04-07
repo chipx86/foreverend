@@ -76,7 +76,7 @@ class TractorBeam(Sprite):
 
         return False
 
-    def on_moved(self):
+    def on_moved(self, dx, dy):
         if self.item:
             mid_y = self.rect.top + \
                     (self.rect.height - self.item.rect.height) / 2
@@ -99,7 +99,7 @@ class TractorBeam(Sprite):
                 self.item.move_to(self.rect.left - self.item.rect.width -
                                   self.ITEM_OFFSET, y)
 
-        super(TractorBeam, self).on_moved()
+        super(TractorBeam, self).on_moved(dx, dy)
 
     def on_added(self, layer):
         if self.item:
@@ -261,7 +261,7 @@ class Player(Sprite):
         for obj in (self.propulsion_below, self.tractor_beam):
             layer.remove(obj)
 
-    def on_moved(self):
+    def on_moved(self, dx, dy):
         if not self.last_safe_spot:
             self.last_safe_spot = self.rect.topleft
 
@@ -285,7 +285,7 @@ class Player(Sprite):
 
         self.calculate_collision_rects()
 
-        super(Player, self).on_moved()
+        super(Player, self).on_moved(dx, dy)
 
     def on_collision(self, dx, dy, obj, self_rect, obj_rect):
         if obj.lethal and not self.engine.god_mode and self_rect == self.rect:

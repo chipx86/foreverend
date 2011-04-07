@@ -43,8 +43,8 @@ class QuadTree(object):
     def add(self, sprite):
         if not self.parent:
             assert sprite not in self.moved_cnxs
-            self.moved_cnxs[sprite] = \
-                sprite.moved.connect(lambda: self._recompute_sprite(sprite))
+            self.moved_cnxs[sprite] = sprite.moved.connect(
+                lambda dx, dy: self._recompute_sprite(sprite))
 
         # If it's overlapping all regions, or we're a leaf, it
         # belongs in items. Otherwise, stick it in as many regions as

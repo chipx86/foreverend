@@ -115,7 +115,7 @@ class Sprite(pygame.sprite.DirtySprite):
         else:
             self.rect.move_ip(dx, dy)
 
-        self.on_moved()
+        self.on_moved(dx, dy)
 
     def _move(self, dx=0, dy=0):
         self.rect.move_ip(dx, dy)
@@ -265,8 +265,8 @@ class Sprite(pygame.sprite.DirtySprite):
         if self.velocity != (0, 0):
             self.move_by(*self.velocity)
 
-    def on_moved(self):
-        self.moved.emit()
+    def on_moved(self, dx, dy):
+        self.moved.emit(dx, dy)
 
     def on_collision(self, dx, dy, obj, self_rect, obj_rect):
         if self.obey_gravity and self.falling:
