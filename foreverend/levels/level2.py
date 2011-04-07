@@ -1,6 +1,6 @@
 import pygame
 
-from foreverend.levels.base import EventBox, Level, TimePeriod
+from foreverend.levels.base import Level, TimePeriod
 from foreverend.sprites import Artifact, Box, IceBoulder, Sprite, TiledSprite
 from foreverend.timer import Timer
 

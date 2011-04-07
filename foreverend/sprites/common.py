@@ -1,6 +1,6 @@
 import pygame
 
-from foreverend.levels.base import EventBox
+from foreverend.eventbox import EventBox
 from foreverend.sprites.base import Sprite
 from foreverend.sprites.player import Player
 

@@ -1,6 +1,7 @@
 import pygame
 
-from foreverend.levels.base import EventBox, Level, TimePeriod
+from foreverend.eventbox import EventBox
+from foreverend.levels.base import Level, TimePeriod
 from foreverend.particles import ExplosionParticleSystem
 from foreverend.sprites import Artifact, Box, Dynamite, Elevator, \
                                Mountain, Sprite, TiledSprite, Volcano
