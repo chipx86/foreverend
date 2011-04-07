@@ -262,7 +262,7 @@ class Level1(Level):
     def __init__(self, *args, **kwargs):
         super(Level1, self).__init__(*args, **kwargs)
         self.name = 'Level 1'
-        self.size = (10000, 1600)
+        self.size = (4200, 1600)
         self.start_pos = (10,
                           self.size[1] - 32 - self.engine.player.rect.height)
         self.setup()
