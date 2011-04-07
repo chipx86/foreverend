@@ -2,8 +2,8 @@ import pygame
 
 from foreverend.effects import FloatEffect
 from foreverend.levels.base import Area, Level, TimePeriod
-from foreverend.sprites import Box, Door, FlameThrower, IceBoulder, \
-                               Sprite, TiledSprite
+from foreverend.sprites import Box, Cactus, Door, FlameThrower, IceBoulder, \
+                               Snake, Sprite, TiledSprite
 from foreverend.timer import Timer
 
 
@@ -104,6 +104,11 @@ class Outside1000AD(Level2OutsideArea):
         self.pyramid_door.move_to(
             pyramid.rect.left + 621,
             pyramid.rect.bottom - self.pyramid_door.rect.height)
+
+        snake = Snake()
+        self.main_layer.add(snake)
+        snake.move_to(pyramid.rect.left - snake.rect.width,
+                      ground.rect.top - snake.rect.height)
 
         # Artifact
         self.level.add_artifact(self, cactus.rect.right + 100, ground.rect.top)

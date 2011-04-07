@@ -20,6 +20,7 @@ class Sprite(pygame.sprite.DirtySprite):
 
         # Signals
         self.moved = Signal()
+        self.direction_changed = Signal()
 
         # State
         self.rect = pygame.Rect(0, 0, 0, 0)
@@ -51,6 +52,7 @@ class Sprite(pygame.sprite.DirtySprite):
     def _set_direction(self, direction):
         if self.direction != direction:
             self._direction = direction
+            self.direction_changed.emit()
             self.update_image()
 
     direction = property(lambda self: self._direction, _set_direction)
