@@ -22,7 +22,6 @@ class TimePeriod12000BC(TimePeriod):
         ground = TiledSprite('12000bc/ground', tiles_x, 1)
         self.main_layer.add(ground)
         ground.move_to(x, level_height - ground.rect.height)
-        print ground.rect.right
 
         ice_hill = Sprite('12000bc/ice_hill_left')
         self.main_layer.add(ice_hill)
@@ -59,8 +58,24 @@ class TimePeriod12000BC(TimePeriod):
 class TimePeriod1000AD(TimePeriod):
     def __init__(self, *args, **kwargs):
         super(TimePeriod1000AD, self).__init__(*args, **kwargs)
-        self.bg.fill((254, 245, 208))
+        self.bg.fill((255, 251, 219))
         self.name = '1000 AD'
+
+        level_width, level_height = self.level.size
+
+        tiles_x = self.level.size[0] / 144
+        ground = TiledSprite('1000ad/ground', tiles_x, 1)
+        self.main_layer.add(ground)
+        ground.move_to(0, level_height - ground.rect.height)
+
+        pyramid = Sprite('1000ad/pyramid')
+        self.bg_layer.add(pyramid)
+        pyramid.move_to(922, ground.rect.top - pyramid.rect.height)
+
+        cactus = Sprite('1000ad/cactus')
+        cactus.lethal = True
+        self.main_layer.add(cactus)
+        cactus.move_to(1050, ground.rect.top - cactus.rect.height)
 
 
 class TimePeriod2300AD(TimePeriod):
