@@ -1,7 +1,7 @@
 import pygame
 
 from foreverend.levels.base import Level, TimePeriod
-from foreverend.sprites import Artifact, Box, IceBoulder, Sprite, TiledSprite
+from foreverend.sprites import Box, IceBoulder, Sprite, TiledSprite
 from foreverend.timer import Timer
 
 
@@ -76,6 +76,9 @@ class TimePeriod1000AD(TimePeriod):
         cactus.lethal = True
         self.main_layer.add(cactus)
         cactus.move_to(1050, ground.rect.top - cactus.rect.height)
+
+        # Artifact
+        self.level.add_artifact(self, cactus.rect.right + 100, ground.rect.top)
 
 
 class TimePeriod2300AD(TimePeriod):

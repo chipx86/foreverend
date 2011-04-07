@@ -3,6 +3,7 @@ from pygame.locals import *
 
 from foreverend.eventbox import EventBox
 from foreverend.signals import Signal
+from foreverend.sprites.items import Artifact
 
 
 class QuadTree(object):
@@ -180,6 +181,13 @@ class Level(object):
     def add(self, time_period):
         self.time_periods.append(time_period)
 
+    def add_artifact(self, time_period, x, y):
+        # Artifact
+        artifact = Artifact(time_period, 1)
+        time_period.main_layer.add(artifact)
+        artifact.move_to(x, y - artifact.rect.height - 50)
+        artifact.grab_changed.connect(self.on_artifact_grabbed)
+
     def reset(self):
         self.active_time_period = None
         self.time_periods = []
@@ -205,6 +213,12 @@ class Level(object):
 
     def draw(self, screen):
         self.active_time_period.draw(screen)
+
+    def on_artifact_grabbed(self):
+        self.engine.player.block_events = True
+        self.engine.player.velocity = (0, 0)
+        self.engine.player.fall()
+        print 'Level done!'
 
     def on_tick(self):
         if not self.engine.paused and self.engine.active_level == self:
