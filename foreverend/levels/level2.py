@@ -3,8 +3,9 @@ import pygame
 from foreverend.effects import FloatEffect
 from foreverend.levels.base import Area, Level, TimePeriod
 from foreverend.sprites import Box, Button, Cactus, Door, FlameThrower, \
-                               Hoverboard, IceBoulder, QuarantineSign, \
-                               Snake, Sprite, TiledSprite, TogglePlatform
+                               Hoverboard, IceBoulder, LightningPole, \
+                               QuarantineSign, Snake, Sprite, \
+                               TiledSprite, TogglePlatform
 from foreverend.timer import Timer
 
 
@@ -143,11 +144,14 @@ class Outside2300AD(Level2OutsideArea):
             pyramid.rect.left + (pyramid.rect.width - bubble.rect.width) / 2,
             ground.rect.top - bubble.rect.height)
 
-        pole = Sprite('2300ad/lightning_pole')
-        pole.use_pixel_collisions = True
+        pole = LightningPole()
         self.main_layer.add(pole)
         pole.move_to(pyramid.rect.left + 100,
                      ground.rect.top - pole.rect.height)
+
+        pole = LightningPole()
+        self.main_layer.add(pole)
+        pole.move_to(2600, ground.rect.top - pole.rect.height)
 
         self.main_layer.add(self.level.hoverboard)
         self.level.hoverboard.move_to(

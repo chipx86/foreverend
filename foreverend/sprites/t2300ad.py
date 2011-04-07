@@ -3,6 +3,12 @@ from foreverend.sprites.base import Sprite
 from foreverend.timer import Timer
 
 
+class LightningPole(Sprite):
+    def __init__(self):
+        super(LightningPole, self).__init__('2300ad/lightning_pole')
+        self.use_pixel_collisions = True
+
+
 class TogglePlatform(Sprite):
     OPENING_TIME = 1000
     CLOSING_TIME = 1000
