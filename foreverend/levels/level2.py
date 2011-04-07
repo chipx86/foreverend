@@ -374,6 +374,9 @@ class Pyramid2300AD(Level2PyramidArea):
         if self.platforms_on:
             return
 
+        for platform in self.platforms:
+            platform.power_on()
+
         self.platforms_on = True
         self.platforms_timer = Timer(self.PLATFORM_DELAY_TIME,
                                      self.next_platform)

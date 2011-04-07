@@ -8,12 +8,16 @@ class TogglePlatform(Sprite):
     CLOSING_TIME = 1000
 
     def __init__(self):
-        super(TogglePlatform, self).__init__('2300ad/platform_off')
+        super(TogglePlatform, self).__init__('2300ad/platform_unpowered')
         self.platform_off_name = '2300ad/platform_off'
         self.platform_on_name = '2300ad/platform_on'
         self.platform_opening_name = '2300ad/platform_opening'
         self.platform_closing_name = '2300ad/platform_closing'
         self.collidable = False
+
+    def power_on(self):
+        self.name = self.platform_off_name
+        self.update_image()
 
     def open(self):
         self.name = self.platform_opening_name
