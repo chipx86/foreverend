@@ -126,6 +126,19 @@ class TimePeriod2300AD(TimePeriod):
             pyramid.rect.left + (pyramid.rect.width - bubble.rect.width) / 2,
             ground.rect.top - bubble.rect.height)
 
+        sign = Sprite('2300ad/quarantine')
+        self.main_layer.add(sign)
+        sign.move_to(bubble.rect.left - sign.rect.width - 200,
+                     ground.rect.top - 300)
+        float_effect = FloatEffect(sign)
+        float_effect.start()
+
+        sign = Sprite('2300ad/quarantine')
+        self.main_layer.add(sign)
+        sign.move_to(bubble.rect.right + 200, ground.rect.top - 300)
+        float_effect = FloatEffect(sign)
+        float_effect.start()
+
 
 class Level2(Level):
     def __init__(self, *args, **kwargs):
