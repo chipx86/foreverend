@@ -52,13 +52,17 @@ class Snake(Item):
         self.velocity = (-self.MOVE_SPEED, 0)
         self.direction = Direction.LEFT
 
-        self.direction_changed.connect(self.on_direction_changed)
+        self.direction_changed.connect(self.update_velocity)
+        self.grab_changed.connect(self.update_velocity)
 
-    def on_direction_changed(self):
-        if self.direction == Direction.RIGHT:
-            self.velocity = (self.MOVE_SPEED, self.velocity[1])
-        elif self.direction == Direction.LEFT:
-            self.velocity = (-self.MOVE_SPEED, self.velocity[1])
+    def update_velocity(self):
+        if self.grabbed:
+            self.velocity = (0, 0)
+        else:
+            if self.direction == Direction.RIGHT:
+                self.velocity = (self.MOVE_SPEED, self.velocity[1])
+            elif self.direction == Direction.LEFT:
+                self.velocity = (-self.MOVE_SPEED, self.velocity[1])
 
     def on_collision(self, dx, dy, obj, self_rect, obj_rect):
         if dx != 0:
