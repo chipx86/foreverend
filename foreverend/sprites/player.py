@@ -9,6 +9,7 @@ from foreverend.sprites.items import Item, Vehicle
 
 class TractorBeam(Sprite):
     ITEM_OFFSET = -5
+    HORIZ_OFFSET_ALLOWANCE = -32
     VERT_OFFSET_ALLOWANCE = 6
 
     def __init__(self, player, name='tractor_beam'):
@@ -19,6 +20,7 @@ class TractorBeam(Sprite):
         self.freeze_item_y = 0
         self.collidable = False
         self.visible = 0
+        self.item_offset = 0
 
     def _check_for_items(self):
         if self.item:
@@ -39,6 +41,7 @@ class TractorBeam(Sprite):
         self.item.collidable = False
         self.item.grabbed = True
         self.freeze_item_y = False
+        self.item_offset = self.ITEM_OFFSET
         self.name = 'tractor_beam'
         self.update_image()
         self.item.grab_changed.emit()
@@ -69,15 +72,40 @@ class TractorBeam(Sprite):
         """Adjusts the position of the held item to not touch the rect."""
         assert self.item
 
+        new_x = self.item.rect.left
+        new_y = self.item.rect.top
+
+        adjusted = False
+
         if (collide_rect.top <= self.item.rect.bottom and
             collide_rect.top - self.item.rect.height >=
             self.item.rect.top - self.VERT_OFFSET_ALLOWANCE):
             self.freeze_item_y = True
-            self.item.move_to(self.item.rect.left,
-                              collide_rect.top - self.item.rect.height)
-            return True
+            adjusted = True
+            new_y = collide_rect.top - self.item.rect.height
 
-        return False
+        old_item_offset = self.item_offset
+
+        if (self.direction == Direction.RIGHT and
+            collide_rect.left <= self.item.rect.right):
+            self.item_offset = \
+                max(self.HORIZ_OFFSET_ALLOWANCE,
+                    collide_rect.left - self.rect.right - self.item.rect.width)
+            new_x = self.rect.right + self.item_offset
+        elif (self.direction == Direction.LEFT and
+              collide_rect.right >= self.item.rect.left):
+            self.item_offset = \
+                max(self.HORIZ_OFFSET_ALLOWANCE,
+                    self.rect.left - collide_rect.right - self.item.rect.width)
+            new_x = self.rect.left - self.item.rect.width + self.item_offset
+
+        if old_item_offset != self.item_offset:
+            adjusted = True
+
+        if adjusted:
+            self.item.move_to(new_x, new_y)
+
+        return adjusted
 
     def on_moved(self, dx, dy):
         if self.item:
@@ -97,10 +125,10 @@ class TractorBeam(Sprite):
             self.item.update_image()
 
             if self.direction == Direction.RIGHT:
-                self.item.move_to(self.rect.right + self.ITEM_OFFSET, y)
+                self.item.move_to(self.rect.right + self.item_offset, y)
             elif self.direction == Direction.LEFT:
                 self.item.move_to(self.rect.left - self.item.rect.width -
-                                  self.ITEM_OFFSET, y)
+                                  self.item_offset, y)
 
         super(TractorBeam, self).on_moved(dx, dy)
 
@@ -326,9 +354,8 @@ class Player(Sprite):
         if self.tractor_beam.item and self_rect == self.tractor_beam.item.rect:
             move_player = True
 
-            if dy != 0:
-                if self.tractor_beam.adjust_item_position(obj_rect):
-                    move_player = False
+            if self.tractor_beam.adjust_item_position(obj_rect):
+                move_player = False
 
             if move_player:
                 if self.direction == Direction.LEFT:
