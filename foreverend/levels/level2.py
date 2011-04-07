@@ -20,7 +20,7 @@ class Level2PyramidArea(Area):
 
     DOOR_X = 230
     PLATFORM_X = DOOR_X + 600
-    PLATFORM_Y = 200
+    PLATFORM_Y = 224
     PIT_TILES_X = 65
 
     def __init__(self, *args, **kwargs):
@@ -155,11 +155,6 @@ class Pyramid1000AD(Level2PyramidArea):
         self.main_layer.add(ground)
         ground.move_to(pit.rect.right, area_height - ground.rect.height)
 
-        tiles_y = area_height / 32
-        wall = TiledSprite('1000ad/pyramid_wall', 8, tiles_y)
-        self.main_layer.add(wall)
-        wall.move_to(ground.rect.right, 0)
-
         platform = TiledSprite('1000ad/pyramid_wall', 15, 2)
         self.main_layer.add(platform)
         platform.move_to(self.PLATFORM_X, 200)
@@ -172,6 +167,26 @@ class Pyramid1000AD(Level2PyramidArea):
             x -= step.rect.width
             y += step.rect.height
             step.move_to(x, y)
+
+        platform = TiledSprite('1000ad/pyramid_wall', 20, 2)
+        self.main_layer.add(platform)
+        platform.move_to(ground.rect.left, self.PLATFORM_Y)
+
+        tiles_y = (area_height - platform.rect.top) / 32 + 32
+        wall = TiledSprite('1000ad/pyramid_wall', 15, tiles_y)
+        self.main_layer.add(wall)
+        wall.move_to(platform.rect.right, platform.rect.top)
+
+        wall = TiledSprite('1000ad/pyramid_wall', 15, 4)
+        self.main_layer.add(wall)
+        wall.move_to(platform.rect.right, 0)
+        wall_right = wall.rect.right
+        wall_bottom = wall.rect.bottom
+
+        wall = TiledSprite('1000ad/pyramid_wall', 5, 3)
+        self.main_layer.add(wall)
+        wall.move_to(wall_right - wall.rect.width, wall_bottom)
+
 
 
 class Outside2300AD(Level2OutsideArea):
