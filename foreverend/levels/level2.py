@@ -23,10 +23,10 @@ class Outside12000BC(Level2OutsideArea):
 
         level_width, level_height = self.size
 
-        ground = TiledSprite('12000bc/ground', 6, 1)
+        ground = TiledSprite('12000bc/ground', 3, 1)
         self.main_layer.add(ground)
         ground.move_to(0, level_height - ground.rect.height)
-        x = ground.rect.right + 500
+        x = ground.rect.right + 800
 
         tiles_x = (self.size[0] - x) / 144
         ground = TiledSprite('12000bc/ground', tiles_x, 1)
@@ -142,6 +142,17 @@ class Outside2300AD(Level2OutsideArea):
         bubble.move_to(
             pyramid.rect.left + (pyramid.rect.width - bubble.rect.width) / 2,
             ground.rect.top - bubble.rect.height)
+
+        pole = Sprite('2300ad/lightning_pole')
+        pole.use_pixel_collisions = True
+        self.main_layer.add(pole)
+        pole.move_to(pyramid.rect.left + 100,
+                     ground.rect.top - pole.rect.height)
+
+        self.main_layer.add(self.level.hoverboard)
+        self.level.hoverboard.move_to(
+            bubble.rect.right + 200,
+            ground.rect.top - self.level.hoverboard.rect.height - 30)
 
         sign = QuarantineSign()
         self.main_layer.add(sign)
@@ -290,6 +301,11 @@ class Pyramid2300AD(Level2PyramidArea):
         self.main_layer.add(wall)
         wall.move_to(*self.weapons_entrance_pos)
 
+        self.main_layer.add(self.level.flamethrower)
+        self.level.flamethrower.move_to(
+            wall.rect.right + 100,
+            wall.rect.bottom - self.level.flamethrower.rect.height)
+
         wall = TiledSprite(self.wall_name, 2, 7)
         self.main_layer.add(wall)
         wall.move_to(self.topleft_platform.rect.left,
@@ -339,11 +355,6 @@ class Pyramid2300AD(Level2PyramidArea):
             self.main_layer.add(platform)
             platform.move_to(platform_x + x, platform_y + y)
             self.platforms.append(platform)
-
-        self.main_layer.add(self.level.flamethrower)
-        self.level.flamethrower.move_to(
-            wall.rect.right + 100,
-            wall.rect.bottom - self.level.flamethrower.rect.height)
 
     def on_platforms_button_pressed(self):
         if self.platforms_on:
