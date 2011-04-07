@@ -250,11 +250,25 @@ class Pyramid1000AD(Level2PyramidArea):
         x = self.topleft_platform.rect.left
         y = self.topleft_platform.rect.top
 
-        for i in range(7):
-            step = TiledSprite(self.wall_name, 2, 2)
+        flip_count = 0
+        flip = False
+
+        for i in range(8):
+            step = TiledSprite(self.wall_name, 4, 1)
             self.main_layer.add(step)
-            x -= step.rect.width
-            y += step.rect.height
+
+            if flip:
+                x += step.rect.width
+            else:
+                x -= step.rect.width
+
+            flip_count += 1
+
+            if flip_count == 3:
+                flip_count = 0
+                flip = not flip
+
+            y += 2 * step.rect.height
             step.move_to(x, y)
 
 
