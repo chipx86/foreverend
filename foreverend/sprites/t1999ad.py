@@ -11,16 +11,16 @@ class Elevator(Sprite):
         self.destination = None
 
     def on_added(self, layer):
-        layer.time_period.register_for_events(self)
+        layer.area.register_for_events(self)
 
     def on_removed(self, layer):
-        layer.time_period.unregister_for_events(self)
+        layer.area.unregister_for_events(self)
 
     def handle_event(self, event):
         if (event.type == KEYDOWN and
             event.key in (K_UP, K_DOWN) and
             self.destination):
-            player = self.layer.time_period.engine.player
+            player = self.layer.area.engine.player
             dest_rect = self.destination.rect
 
             player.move_to(

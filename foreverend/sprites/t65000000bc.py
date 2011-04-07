@@ -41,22 +41,22 @@ class Volcano(object):
                                 self.BASE_CAVERN_RECT.height +
                                 self.bottom_sprite.rect.height)
 
-    def add_to(self, time_period):
-        self.eventbox = EventBox(time_period)
+    def add_to(self, area):
+        self.eventbox = EventBox(area)
         self.eventbox.object_entered.connect(
             lambda x: self.cover_sprite.hide())
         self.eventbox.object_exited.connect(
             lambda x: self.cover_sprite.show())
-        self.eventbox.watch_object_moves(time_period.engine.player)
+        self.eventbox.watch_object_moves(area.engine.player)
 
-        time_period.main_layer.add(self.lava_puddle_blocker)
-        time_period.main_layer.add(self.cavern_blocker)
-        time_period.main_layer.add(self.lava_puddle)
-        time_period.main_layer.add(self.lava_pool)
-        time_period.main_layer.add(self.top_sprite)
-        time_period.main_layer.add(self.bottom_sprite)
-        time_period.main_layer.add(self.column_sprite)
-        time_period.fg_layer.add(self.cover_sprite)
+        area.main_layer.add(self.lava_puddle_blocker)
+        area.main_layer.add(self.cavern_blocker)
+        area.main_layer.add(self.lava_puddle)
+        area.main_layer.add(self.lava_pool)
+        area.main_layer.add(self.top_sprite)
+        area.main_layer.add(self.bottom_sprite)
+        area.main_layer.add(self.column_sprite)
+        area.fg_layer.add(self.cover_sprite)
 
     def move_to(self, x, y):
         self.rect.left = x

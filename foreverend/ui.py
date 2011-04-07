@@ -73,8 +73,9 @@ class TextBox(Widget):
 
                 line_height = max(line_height, column_height)
 
-            surfaces.append((line_height, column_surfaces))
-            total_height += line_height + self.line_spacing
+            if column_surfaces:
+                surfaces.append((line_height, column_surfaces))
+                total_height += line_height + self.line_spacing
 
         # Get rid of that last spacing.
         total_height -= self.line_spacing
@@ -124,18 +125,18 @@ class ControlPanel(Widget):
         player.lives_changed.connect(self.render)
         player.health_changed.connect(self.render)
 
-        self.time_period_changed_cnx = None
+        self.area_changed_cnx = None
 
     def _set_level(self, level):
-        if self.time_period_changed_cnx:
-            self.time_period_changed_cnx.disconnect()
+        if self.area_changed_cnx:
+            self.area_changed_cnx.disconnect()
 
         self._level = level
         self.render()
 
         if self._level:
-            self.time_period_changed_cnx = \
-                level.time_period_changed.connect(self.render)
+            self.area_changed_cnx = \
+                level.area_changed.connect(self.render)
 
     level = property(lambda self: self._level, _set_level)
 

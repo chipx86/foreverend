@@ -1,23 +1,31 @@
 import pygame
 
 from foreverend.eventbox import EventBox
-from foreverend.levels.base import Level, TimePeriod
+from foreverend.levels.base import Area, Level, TimePeriod
 from foreverend.particles import ExplosionParticleSystem
 from foreverend.sprites import Box, Dynamite, Elevator, \
                                Mountain, Sprite, TiledSprite, Volcano
 from foreverend.timer import Timer
 
 
-class TimePeriod600AD(TimePeriod):
+class Level1Area(Area):
+    size = (4200, 1600)
+
     def __init__(self, *args, **kwargs):
-        super(TimePeriod600AD, self).__init__(*args, **kwargs)
-        self.name = '600 AD'
+        super(Level1Area, self).__init__(*args, **kwargs)
+        self.start_pos = (10,
+                          self.size[1] - 32 - self.engine.player.rect.height)
+
+
+class Outside600AD(Level1Area):
+    def __init__(self, *args, **kwargs):
+        super(Outside600AD, self).__init__(*args, **kwargs)
         self.bg.fill((237, 243, 255))
 
-        tiles_x = self.level.size[0] / 32
+        tiles_x = self.size[0] / 32
         ground = TiledSprite('ground', tiles_x, 1)
         self.main_layer.add(ground)
-        ground.move_to(0, self.level.size[1] - ground.rect.height)
+        ground.move_to(0, self.size[1] - ground.rect.height)
 
         hills = Sprite('600ad/hills_1')
         self.bg_layer.add(hills)
@@ -64,7 +72,7 @@ class TimePeriod600AD(TimePeriod):
                          mountain.rect.bottom - platform.rect.height - 500)
 
 
-class TimePeriod1999AD(TimePeriod):
+class Outside1999AD(Level1Area):
     BUILDING_RECT = pygame.Rect(0, 0, 1300, 700)
     WALL_WIDTH = 15
     GROUND_HEIGHT = 32
@@ -72,17 +80,16 @@ class TimePeriod1999AD(TimePeriod):
     FLOOR_COLOR = (211, 215, 207)
 
     def __init__(self, *args, **kwargs):
-        super(TimePeriod1999AD, self).__init__(*args, **kwargs)
-        self.name = '1999 AD'
+        super(Outside1999AD, self).__init__(*args, **kwargs)
         self.bg.fill((199, 214, 251))
 
-        level_width, level_height = self.level.size
+        level_width, level_height = self.size
 
         # Ground
-        tiles_x = self.level.size[0] / 32
+        tiles_x = self.size[0] / 32
         ground = TiledSprite('ground', tiles_x, 1)
         self.main_layer.add(ground)
-        ground.move_to(0, self.level.size[1] - ground.rect.height)
+        ground.move_to(0, self.size[1] - ground.rect.height)
 
         building_rect = self.BUILDING_RECT.move(
             0, ground.rect.top - self.BUILDING_RECT.height)
@@ -160,16 +167,15 @@ class TimePeriod1999AD(TimePeriod):
                          mountain.rect.bottom - platform.rect.height - 450)
 
 
-class TimePeriod65000000BC(TimePeriod):
+class Outside65000000BC(Level1Area):
     def __init__(self, *args, **kwargs):
-        super(TimePeriod65000000BC, self).__init__(*args, **kwargs)
-        self.name = '65,000,000 BC'
+        super(Outside65000000BC, self).__init__(*args, **kwargs)
         self.exploding = False
         self.exploded = False
 
-        ground = TiledSprite('ground', self.level.size[0] / 32, 1)
+        ground = TiledSprite('ground', self.size[0] / 32, 1)
         self.main_layer.add(ground)
-        ground.move_to(0, self.level.size[1] - ground.rect.height)
+        ground.move_to(0, self.size[1] - ground.rect.height)
 
         hills = Sprite('65000000bc/hills_1')
         self.bg_layer.add(hills)
@@ -180,7 +186,7 @@ class TimePeriod65000000BC(TimePeriod):
         self.volcano.add_to(self)
         self.volcano.move_to(1400, ground.rect.top - self.volcano.rect.height)
 
-        blocker = Box(150, self.level.size[1] - self.volcano.rect.height - 20,
+        blocker = Box(150, self.size[1] - self.volcano.rect.height - 20,
                       (0, 0, 0, 0))
         self.main_layer.add(blocker)
         blocker.move_to(self.volcano.lava_pool.rect.right - 100, 0)
@@ -262,15 +268,12 @@ class Level1(Level):
     def __init__(self, *args, **kwargs):
         super(Level1, self).__init__(*args, **kwargs)
         self.name = 'Level 1'
-        self.size = (4200, 1600)
-        self.start_pos = (10,
-                          self.size[1] - 32 - self.engine.player.rect.height)
         self.setup()
 
     def setup(self):
         # Items that we'll make use of.
         self.dynamite = Dynamite()
 
-        self.add(TimePeriod600AD(self))
-        self.add(TimePeriod1999AD(self))
-        self.add(TimePeriod65000000BC(self))
+        self.add(TimePeriod('600 AD', [Outside600AD(self)]))
+        self.add(TimePeriod('1999 AD', [Outside1999AD(self)]))
+        self.add(TimePeriod('65,000,000 BC', [Outside65000000BC(self)]))

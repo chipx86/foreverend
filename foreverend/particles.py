@@ -42,7 +42,7 @@ class Particle(object):
 
 
 class ParticleSystem(object):
-    def __init__(self, time_period, max_particles):
+    def __init__(self, area, max_particles):
         # Settings
         self.particle_filename = None
         self.min_particles = 0
@@ -60,7 +60,7 @@ class ParticleSystem(object):
         self.repeat = False
 
         # State
-        self.time_period = time_period
+        self.area = area
         self.image = None
         self.particles = []
         self.free_particles = []
@@ -91,13 +91,13 @@ class ParticleSystem(object):
             if self.free_particles:
                 self.setup_particle(self.free_particles.pop())
 
-        self.time_period.particle_systems.append(self)
+        self.area.particle_systems.append(self)
         self.timer.start()
 
     def stop(self):
         self.timer.stop()
         self.pos = None
-        self.time_period.particle_systems.remove(self)
+        self.area.particle_systems.remove(self)
         self.particles = []
         self.free_particles = []
 

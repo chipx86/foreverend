@@ -56,27 +56,27 @@ class Mountain(object):
             sum([sprite.rect.height for sprite in self.right_sprites]) +
             self.top_sprite.rect.height + self.bottom_sprite.rect.height)
 
-    def add_to(self, time_period):
-        time_period.bg_layer.add(self.bg_sprite)
-        time_period.main_layer.add(self.bottom_sprite)
-        time_period.main_layer.add(self.top_sprite)
-        time_period.fg_layer.add(self.cover_sprite)
+    def add_to(self, area):
+        area.bg_layer.add(self.bg_sprite)
+        area.main_layer.add(self.bottom_sprite)
+        area.main_layer.add(self.top_sprite)
+        area.fg_layer.add(self.cover_sprite)
 
         for sprite in self.left_sprites:
-            time_period.main_layer.add(sprite)
+            area.main_layer.add(sprite)
 
         for sprite in self.right_sprites:
-            time_period.main_layer.add(sprite)
+            area.main_layer.add(sprite)
 
-        self.cave_eventbox = EventBox(time_period)
+        self.cave_eventbox = EventBox(area)
         self.cave_eventbox.object_moved.connect(
             self.on_cave_eventbox_moved)
-        self.cave_eventbox.watch_object_moves(time_period.engine.player)
+        self.cave_eventbox.watch_object_moves(area.engine.player)
 
-        self.floor_eventbox = EventBox(time_period)
+        self.floor_eventbox = EventBox(area)
         self.floor_eventbox.object_entered.connect(
             lambda x: self.cover_sprite.hide())
-        self.floor_eventbox.watch_object_moves(time_period.engine.player)
+        self.floor_eventbox.watch_object_moves(area.engine.player)
 
     def move_to(self, x, y):
         self.rect.left = x

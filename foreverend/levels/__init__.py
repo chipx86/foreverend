@@ -3,5 +3,4 @@ from foreverend.levels.level2 import Level2
 
 
 def get_levels():
-    #return [Level2]
     return [Level1, Level2]

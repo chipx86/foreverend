@@ -14,7 +14,7 @@ class IceBoulder(Sprite):
         self.use_pixel_collisions = True
 
     def melt(self):
-        self.explosion = ExplosionParticleSystem(self.layer.time_period)
+        self.explosion = ExplosionParticleSystem(self.layer.area)
         self.explosion.start(self.rect.centerx, self.rect.bottom - 80)
 
         self.timer = Timer(60, self.on_melt_timer)

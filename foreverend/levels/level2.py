@@ -1,25 +1,34 @@
 import pygame
 
 from foreverend.effects import FloatEffect
-from foreverend.levels.base import Level, TimePeriod
+from foreverend.levels.base import Area, Level, TimePeriod
 from foreverend.sprites import Box, IceBoulder, Sprite, TiledSprite
 from foreverend.timer import Timer
 
 
-class TimePeriod12000BC(TimePeriod):
+class Level2OutsideArea(Area):
+    size = (3956, 1600)
+
     def __init__(self, *args, **kwargs):
-        super(TimePeriod12000BC, self).__init__(*args, **kwargs)
+        super(Level2OutsideArea, self).__init__(*args, **kwargs)
+        self.start_pos = (1500,
+                          self.size[1] - 64 - self.engine.player.rect.height)
+
+
+class Outside12000BC(Level2OutsideArea):
+    def __init__(self, *args, **kwargs):
+        super(Outside12000BC, self).__init__(*args, **kwargs)
         self.bg.fill((219, 228, 252))
         self.name = '12,000 BC'
 
-        level_width, level_height = self.level.size
+        level_width, level_height = self.size
 
         ground = TiledSprite('12000bc/ground', 6, 1)
         self.main_layer.add(ground)
         ground.move_to(0, level_height - ground.rect.height)
         x = ground.rect.right + 500
 
-        tiles_x = (self.level.size[0] - x) / 144
+        tiles_x = (self.size[0] - x) / 144
         ground = TiledSprite('12000bc/ground', tiles_x, 1)
         self.main_layer.add(ground)
         ground.move_to(x, level_height - ground.rect.height)
@@ -56,15 +65,15 @@ class TimePeriod12000BC(TimePeriod):
             2315, ground.rect.top - self.ice_boulder.rect.height)
 
 
-class TimePeriod1000AD(TimePeriod):
+class Outside1000AD(Level2OutsideArea):
     def __init__(self, *args, **kwargs):
-        super(TimePeriod1000AD, self).__init__(*args, **kwargs)
+        super(Outside1000AD, self).__init__(*args, **kwargs)
         self.bg.fill((255, 251, 219))
         self.name = '1000 AD'
 
-        level_width, level_height = self.level.size
+        level_width, level_height = self.size
 
-        tiles_x = self.level.size[0] / 144
+        tiles_x = self.size[0] / 144
         ground = TiledSprite('1000ad/ground', tiles_x, 1)
         self.main_layer.add(ground)
         ground.move_to(0, level_height - ground.rect.height)
@@ -93,13 +102,13 @@ class TimePeriod1000AD(TimePeriod):
         self.level.add_artifact(self, cactus.rect.right + 100, ground.rect.top)
 
 
-class TimePeriod2300AD(TimePeriod):
+class Outside2300AD(Level2OutsideArea):
     def __init__(self, *args, **kwargs):
-        super(TimePeriod2300AD, self).__init__(*args, **kwargs)
+        super(Outside2300AD, self).__init__(*args, **kwargs)
         self.bg.fill((89, 80, 67))
         self.name = '2300 AD'
 
-        level_width, level_height = self.level.size
+        level_width, level_height = self.size
 
         toxicwaste = TiledSprite('2300ad/toxicwaste', 5, 1)
         toxicwaste.lethal = True
@@ -144,12 +153,9 @@ class Level2(Level):
     def __init__(self, *args, **kwargs):
         super(Level2, self).__init__(*args, **kwargs)
         self.name = 'Level 2'
-        self.size = (3956, 1600)
-        self.start_pos = (1500,
-                          self.size[1] - 64 - self.engine.player.rect.height)
         self.setup()
 
     def setup(self):
-        self.add(TimePeriod12000BC(self))
-        self.add(TimePeriod1000AD(self))
-        self.add(TimePeriod2300AD(self))
+        self.add(TimePeriod('12,000 BC', [Outside12000BC(self)]))
+        self.add(TimePeriod('1000 AD', [Outside1000AD(self)]))
+        self.add(TimePeriod('2300 AD', [Outside2300AD(self)]))

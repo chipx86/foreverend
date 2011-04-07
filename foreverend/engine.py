@@ -45,7 +45,7 @@ class Camera(object):
 
         if old_rect != self.rect:
             self.rect.clamp_ip(
-                pygame.Rect(0, 0, *self.engine.active_level.size))
+                pygame.Rect(0, 0, *self.engine.active_level.active_area.size))
 
 
 class ForeverEndEngine(object):
@@ -115,12 +115,16 @@ class ForeverEndEngine(object):
         assert num < len(self.levels)
         self.active_level = self.levels[num]
         self.active_level.reset()
+        self.active_level.area_changed.connect(self._on_area_changed)
         self.active_level.switch_time_period(0)
-        self.surface = pygame.Surface(self.active_level.size)
-        self.player.move_to(*self.active_level.start_pos)
+        self.player.move_to(*self.active_level.active_area.start_pos)
         self.player.show()
 
         self.level_changed.emit()
+
+    def _on_area_changed(self):
+        area = self.active_level.active_area
+        self.surface = pygame.Surface(area.size)
 
     def _mainloop(self):
         while 1:
@@ -171,9 +175,9 @@ class ForeverEndEngine(object):
                         pygame.quit()
                         return False
                 elif not self.player.handle_event(event):
-                    time_period = self.active_level.active_time_period
+                    area = self.active_level.active_area
 
-                    for box in time_period.event_handlers:
+                    for box in area.event_handlers:
                         if hasattr(box, 'rects'):
                             rects = box.rects
                         else:

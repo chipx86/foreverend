@@ -18,7 +18,7 @@ class Item(Sprite):
 
 
 class Artifact(Item):
-    def __init__(self, time_period, num):
+    def __init__(self, area, num):
         super(Artifact, self).__init__('artifact%s' % num)
         self.float_effect = FloatEffect(self)
         self.grab_changed.connect(self.float_effect.stop)

@@ -127,14 +127,13 @@ class QuadTree(object):
 
 
 class Layer(object):
-    def __init__(self, index, time_period):
-        self.time_period = time_period
+    def __init__(self, index, area):
+        self.area = area
         self.index = index
-        self.quad_tree = QuadTree(
-            pygame.Rect(0, 0, *self.time_period.level.size))
+        self.quad_tree = QuadTree(pygame.Rect(0, 0, *self.area.size))
 
     def __repr__(self):
-        return 'Layer %s on time period %s' % (self.index, self.time_period)
+        return 'Layer %s on time period %s' % (self.index, self.area)
 
     def add(self, *objs):
         for obj in objs:
@@ -155,9 +154,9 @@ class Layer(object):
         sprite.update_image()
 
         if sprite.visible:
-            self.time_period.group.add(sprite, layer=self.index)
+            self.area.group.add(sprite, layer=self.index)
         else:
-            self.time_period.group.remove(sprite)
+            self.area.group.remove(sprite)
 
     def __iter__(self):
         return iter(self.quad_tree)
@@ -169,50 +168,66 @@ class Layer(object):
 class Level(object):
     def __init__(self, engine):
         self.engine = engine
+        self.areas = []
         self.time_periods = []
-        self.active_time_period = None
-        self.size = None
+        self.active_area = None
 
         self.engine.tick.connect(self.on_tick)
 
         # Signals
+        self.area_changed = Signal()
         self.time_period_changed = Signal()
 
     def add(self, time_period):
         self.time_periods.append(time_period)
 
-    def add_artifact(self, time_period, x, y):
+    def add_artifact(self, area, x, y):
         # Artifact
-        artifact = Artifact(time_period, 1)
-        time_period.main_layer.add(artifact)
+        artifact = Artifact(area, 1)
+        area.main_layer.add(artifact)
         artifact.move_to(x, y - artifact.rect.height - 50)
         artifact.grab_changed.connect(self.on_artifact_grabbed)
 
     def reset(self):
+        self.active_area = None
         self.active_time_period = None
+        self.areas = []
         self.time_periods = []
         self.setup()
 
     def setup(self):
         pass
 
-    def switch_time_period(self, time_period_num):
+    def switch_area(self, area):
         player = self.engine.player
-        time_period = self.time_periods[time_period_num]
 
-        # First, make sure the player can be there.
-        if (not self.active_time_period or
-            not list(player.get_collisions(
-                tree=time_period.main_layer.quad_tree))):
-            if self.active_time_period:
-                self.active_time_period.main_layer.remove(player)
+        if self.active_area:
+            self.active_area.main_layer.remove(player)
 
+        self.active_area = area
+        self.active_area.main_layer.add(player)
+        self.area_changed.emit()
+
+    def switch_time_period(self, num):
+        time_period = self.time_periods[num]
+
+        if self.active_area:
+            key = self.active_area.key
+            area = time_period.areas.get(key, None)
+        else:
+            area = time_period.default_area
+
+        player = self.engine.player
+
+        if (area and
+            (not self.active_area or
+             not list(player.get_collisions(tree=area.main_layer.quad_tree)))):
             self.active_time_period = time_period
-            self.active_time_period.main_layer.add(player)
             self.time_period_changed.emit()
+            self.switch_area(area)
 
     def draw(self, screen):
-        self.active_time_period.draw(screen)
+        self.active_area.draw(screen)
 
     def on_artifact_grabbed(self):
         self.engine.player.block_events = True
@@ -222,12 +237,33 @@ class Level(object):
 
     def on_tick(self):
         if not self.engine.paused and self.engine.active_level == self:
-            self.active_time_period.tick()
+            self.active_area.tick()
 
 
 class TimePeriod(object):
+    def __init__(self, name, areas=[]):
+        self.name = name
+        self.default_area = None
+        self.active_area = None
+        self.areas = {}
+
+        for area in areas:
+            self.add_area(area)
+
+    def add_area(self, area):
+        if not self.default_area:
+            self.default_area = area
+
+        self.areas[area.key] = area
+
+    def draw(self, screen):
+        self.active_area.draw(screen)
+
+
+class Area(object):
     def __init__(self, level):
         assert isinstance(level, Level)
+        self.key = 'default'
         self.level = level
         self.engine = level.engine
         self.layers = []
@@ -243,7 +279,7 @@ class TimePeriod(object):
 
     def new_layer(self):
         layer = Layer(len(self.layers), self)
-        layer.time_period = self
+        layer.area = self
         self.layers.append(layer)
         return layer
 

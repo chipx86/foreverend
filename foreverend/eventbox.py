@@ -2,9 +2,9 @@ from foreverend.signals import Signal
 
 
 class EventBox(object):
-    def __init__(self, time_period):
+    def __init__(self, area):
         self.rects = []
-        time_period.register_for_events(self)
+        area.register_for_events(self)
         self.entered_objects = set()
 
         # Signals
