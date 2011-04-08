@@ -173,37 +173,38 @@ class Outside300NE(Level3OutsideArea):
         platform = FloatingPlatform1NE()
         self.main_layer.add(platform)
         platform.move_to(233, base_platforms_y)
-        bottom_ceiling_y = platform.rect.top - 150
 
         platform = FloatingPlatform1NE()
         self.main_layer.add(platform)
         platform.move_to(0, 255)
 
         # Ceiling
-        top_ceiling = Sprite('300ne/ceiling')
-        self.main_layer.add(top_ceiling)
-        top_ceiling.move_to(platform.rect.right + 100, 50)
+        ceiling = Sprite('300ne/ceiling')
+        self.main_layer.add(ceiling)
+        ceiling.move_to(platform.rect.right + 80, 0)
+
+        # Spikes
+        spikes = Sprite('300ne/ceiling_spikes')
+        spikes.lethal = True
+        self.main_layer.add(spikes)
+        spikes.move_to(ceiling.rect.left, ceiling.rect.bottom)
 
         # Reverse-gravity platforms
         for x, y in self.PLATFORM_POS:
             platform = FloatingSprite('300ne/small_platform')
             platform.reverse_gravity = True
             self.main_layer.add(platform)
-            platform.move_to(top_ceiling.rect.left + x,
-                             top_ceiling.rect.top + y)
+            platform.move_to(ceiling.rect.left + x,
+                             ceiling.rect.top + y)
 
-        # Ceiling
-        bottom_ceiling = Sprite('300ne/ceiling')
-        self.main_layer.add(bottom_ceiling)
-        bottom_ceiling.move_to(top_ceiling.rect.x, bottom_ceiling_y)
+        # Reverse gravity background
+        reverse_grav_bg = Sprite('300ne/reverse_gravity_bg')
+        self.bg_layer.add(reverse_grav_bg)
+        reverse_grav_bg.move_to(ceiling.rect.left, ceiling.rect.bottom)
 
         # Reverse gravity area
         gravity_eventbox = EventBox(self)
-        gravity_eventbox.rects.append(
-            pygame.Rect(top_ceiling.rect.left,
-                        top_ceiling.rect.bottom,
-                        top_ceiling.rect.width,
-                        bottom_ceiling.rect.top - top_ceiling.rect.bottom))
+        gravity_eventbox.rects.append(reverse_grav_bg.rect)
         gravity_eventbox.watch_object_moves(self.level.engine.player)
         gravity_eventbox.object_entered.connect(
             lambda obj: obj.set_reverse_gravity(True))
