@@ -21,6 +21,7 @@ class Sprite(pygame.sprite.DirtySprite):
         # Signals
         self.moved = Signal()
         self.direction_changed = Signal()
+        self.reverse_gravity_changed = Signal()
 
         # State
         self.rect = pygame.Rect(0, 0, 0, 0)
@@ -32,6 +33,7 @@ class Sprite(pygame.sprite.DirtySprite):
         self.dirty = 2
         self.velocity = (0, 0)
         self.obey_gravity = obey_gravity
+        self.reverse_gravity = False
         self.lethal = False
         self.falling = False
         self.collidable = True
@@ -51,12 +53,18 @@ class Sprite(pygame.sprite.DirtySprite):
                (self.name, self.rect.left, self.rect.top,
                 self.rect.width, self.rect.height)
 
+    def set_reverse_gravity(self, reverse_gravity):
+        if self.reverse_gravity != reverse_gravity:
+            self.reverse_gravity = reverse_gravity
+            self.velocity = (self.velocity[0], -self.velocity[1])
+            self.update_image()
+            self.reverse_gravity_changed.emit()
+
     def _set_direction(self, direction):
         if self.direction != direction:
             self._direction = direction
             self.direction_changed.emit()
             self.update_image()
-
     direction = property(lambda self: self._direction, _set_direction)
 
     def show(self):
@@ -80,7 +88,11 @@ class Sprite(pygame.sprite.DirtySprite):
             return
 
         self.falling = True
-        self.velocity = (self.velocity[0], self.FALL_SPEED)
+
+        if self.reverse_gravity:
+            self.velocity = (self.velocity[0], -self.FALL_SPEED)
+        else:
+            self.velocity = (self.velocity[0], self.FALL_SPEED)
 
     def stop_falling(self):
         if self.obey_gravity:
@@ -95,12 +107,18 @@ class Sprite(pygame.sprite.DirtySprite):
     def generate_image(self):
         image = load_image(self.name)
 
-        if self.flip_image and self._direction == Direction.LEFT:
-            if self.name not in self._flipped_images:
-                self._flipped_images[self.name] = \
-                    pygame.transform.flip(image, True, False)
+        if (self.flip_image and
+            (self._direction == Direction.LEFT or self.reverse_gravity)):
+            flip_h = (self.direction == Direction.LEFT)
+            flip_v = self.reverse_gravity
 
-            image = self._flipped_images[self.name]
+            key = (self.name, flip_h, flip_v)
+
+            if key not in self._flipped_images:
+                self._flipped_images[key] = \
+                    pygame.transform.flip(image, flip_h, flip_v)
+
+            image = self._flipped_images[key]
 
         return image
 

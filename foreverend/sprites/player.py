@@ -61,6 +61,7 @@ class TractorBeam(Sprite):
     def update_position(self, player):
         y = player.rect.top + \
             (player.rect.height - self.rect.height) / 2
+
         if self.direction == Direction.RIGHT:
             self.move_to(player.rect.right, y)
         elif self.direction == Direction.LEFT:
@@ -159,7 +160,7 @@ class Player(Sprite):
         self.should_check_collisions = True
 
         # Sprites
-        self.propulsion_below = Sprite("propulsion_below")
+        self.propulsion_below = Sprite("propulsion_below", flip_image=True)
         self.propulsion_below.collidable = False
         self.propulsion_below.visible = 0
         self.tractor_beam = TractorBeam(self)
@@ -181,6 +182,9 @@ class Player(Sprite):
         self.lives_changed = Signal()
 
         self.direction_changed.connect(self.on_direction_changed)
+        self.reverse_gravity_changed.connect(
+            lambda:
+            self.propulsion_below.set_reverse_gravity(self.reverse_gravity))
 
     def handle_event(self, event):
         if self.block_events:
@@ -247,7 +251,12 @@ class Player(Sprite):
         self.jump_origin = (self.rect.left, self.rect.top)
         self.jumping = True
         self.falling = False
-        self.velocity = (self.velocity[0], -self.JUMP_SPEED)
+
+        if self.reverse_gravity:
+            self.velocity = (self.velocity[0], self.JUMP_SPEED)
+        else:
+            self.velocity = (self.velocity[0], -self.JUMP_SPEED)
+
         self.propulsion_below.show()
 
         if self.vehicle:
@@ -321,7 +330,10 @@ class Player(Sprite):
 
         if (self.jumping and
             not self.engine.god_mode and
-            self.jump_origin[1] - self.rect.top >= self.MAX_JUMP_HEIGHT):
+            ((not self.reverse_gravity and
+              self.jump_origin[1] - self.rect.top >= self.MAX_JUMP_HEIGHT) or
+             (self.reverse_gravity and
+              self.rect.top - self.jump_origin[1] >= self.MAX_JUMP_HEIGHT))):
             self.hover()
 
         if self.propulsion_below.visible:
@@ -331,8 +343,12 @@ class Player(Sprite):
                 offset = self.rect.width - self.propulsion_below.rect.width - \
                          self.PROPULSION_BELOW_OFFSET
 
-            self.propulsion_below.move_to(self.rect.left + offset,
-                                          self.rect.bottom)
+            if self.reverse_gravity:
+                y = self.rect.top - self.propulsion_below.rect.height
+            else:
+                y = self.rect.bottom
+
+            self.propulsion_below.move_to(self.rect.left + offset, y)
 
         if self.tractor_beam.visible:
             self.tractor_beam.update_position(self)

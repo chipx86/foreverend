@@ -1,6 +1,7 @@
 import pygame
 
 from foreverend.effects import FloatEffect
+from foreverend.eventbox import EventBox
 from foreverend.levels.base import Area, Level, TimePeriod
 from foreverend.resources import load_image
 from foreverend.sprites import Door, FloatingSprite, Sprite, TiledSprite
@@ -153,11 +154,11 @@ class Outside1NE(Level3OutsideArea):
 class Outside300NE(Level3OutsideArea):
     PLATFORM_POS = [
         (2, 83),
-        (83, 323),
-        (277, 308),
-        (445, 213),
-        (608, 316),
-        (912, 322),
+        (83, 180),
+        (277, 238),
+        (445, 163),
+        (608, 186),
+        (912, 272),
     ]
 
     def setup(self):
@@ -177,23 +178,37 @@ class Outside300NE(Level3OutsideArea):
         platform = FloatingPlatform1NE()
         self.main_layer.add(platform)
         platform.move_to(0, 255)
-        ceiling_x = platform.rect.right + 100
 
         # Ceiling
-        ceiling = Sprite('300ne/ceiling')
-        self.main_layer.add(ceiling)
-        ceiling.move_to(ceiling_x, 50)
+        top_ceiling = Sprite('300ne/ceiling')
+        self.main_layer.add(top_ceiling)
+        top_ceiling.move_to(platform.rect.right + 100, 50)
 
         # Reverse-gravity platforms
         for x, y in self.PLATFORM_POS:
             platform = Sprite('300ne/small_platform')
+            platform.reverse_gravity = True
             self.main_layer.add(platform)
-            platform.move_to(ceiling.rect.left + x, ceiling.rect.top + y)
+            platform.move_to(top_ceiling.rect.left + x,
+                             top_ceiling.rect.top + y)
 
         # Ceiling
-        ceiling = Sprite('300ne/ceiling')
-        self.main_layer.add(ceiling)
-        ceiling.move_to(ceiling_x, bottom_ceiling_y)
+        bottom_ceiling = Sprite('300ne/ceiling')
+        self.main_layer.add(bottom_ceiling)
+        bottom_ceiling.move_to(top_ceiling.rect.x, bottom_ceiling_y)
+
+        # Reverse gravity area
+        gravity_eventbox = EventBox(self)
+        gravity_eventbox.rects.append(
+            pygame.Rect(top_ceiling.rect.left,
+                        top_ceiling.rect.bottom,
+                        top_ceiling.rect.width,
+                        bottom_ceiling.rect.top - top_ceiling.rect.bottom))
+        gravity_eventbox.watch_object_moves(self.level.engine.player)
+        gravity_eventbox.object_entered.connect(
+            lambda obj: obj.set_reverse_gravity(True))
+        gravity_eventbox.object_exited.connect(
+            lambda obj: obj.set_reverse_gravity(False))
 
         # Right-side floor
         floor = Sprite('300ne/floor')
