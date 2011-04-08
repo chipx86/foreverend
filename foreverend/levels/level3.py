@@ -186,7 +186,7 @@ class Outside300NE(Level3OutsideArea):
 
         # Reverse-gravity platforms
         for x, y in self.PLATFORM_POS:
-            platform = Sprite('300ne/small_platform')
+            platform = FloatingSprite('300ne/small_platform')
             platform.reverse_gravity = True
             self.main_layer.add(platform)
             platform.move_to(top_ceiling.rect.left + x,

@@ -24,6 +24,8 @@ class FloatEffect(object):
         self.float_timer = None
 
     def on_float(self):
+        dy = 0
+
         if self.float_paused:
             self.pause_count += 1
 
@@ -31,7 +33,7 @@ class FloatEffect(object):
                 self.float_paused = False
                 self.pause_count = 0
         elif self.direction == Direction.UP:
-            self.obj.move_by(0, -self.float_distance)
+            dy = -self.float_distance
             self.up_count += 1
 
             if self.up_count == self.max_movement:
@@ -39,9 +41,15 @@ class FloatEffect(object):
                 self.float_paused = True
                 self.up_count = 0
         elif self.direction == Direction.DOWN:
-            self.obj.move_by(0, self.float_distance)
+            dy = self.float_distance
             self.down_count += 1
 
             if self.down_count == self.max_movement:
                 self.direction = Direction.UP
                 self.down_count = 0
+
+        if self.obj.reverse_gravity:
+            dy = -dy
+
+        if dy != 0:
+            self.obj.move_by(0, dy)
