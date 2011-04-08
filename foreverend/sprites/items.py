@@ -24,6 +24,9 @@ class Artifact(Item):
         self.grab_changed.connect(self.float_effect.stop)
         self.float_effect.start()
 
+    def should_adjust_position_with(self, obj, dx, dy):
+        return False
+
 
 class Dynamite(Item):
     def __init__(self):

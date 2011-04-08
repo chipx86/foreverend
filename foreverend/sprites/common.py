@@ -1,6 +1,7 @@
 import pygame
 from pygame.locals import *
 
+from foreverend.effects import FloatEffect
 from foreverend.eventbox import EventBox
 from foreverend.signals import Signal
 from foreverend.sprites.base import Sprite
@@ -63,6 +64,15 @@ class Door(Sprite):
             return True
 
         return False
+
+
+class FloatingSprite(Sprite):
+    def __init__(self, name):
+        super(FloatingSprite, self).__init__(name)
+        self.float_effect = FloatEffect(self)
+
+    def on_added(self, layer):
+        self.float_effect.start()
 
 
 class Mountain(object):

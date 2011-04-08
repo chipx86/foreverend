@@ -291,7 +291,10 @@ class Player(Sprite):
         super(Player, self).check_collisions(*args, **kwargs)
 
     def should_adjust_position_with(self, obj, dx, dy):
-        return obj != self.vehicle
+        from foreverend.sprites.common import FloatingSprite
+
+        return (obj != self.vehicle and
+                (dx == 0 or not isinstance(obj, FloatingSprite)))
 
     def tick(self):
         if self.hovering:

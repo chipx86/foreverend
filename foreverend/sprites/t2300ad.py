@@ -1,5 +1,6 @@
 from foreverend.effects import FloatEffect
 from foreverend.sprites.base import Sprite
+from foreverend.sprites.common import FloatingSprite
 from foreverend.timer import Timer
 
 
@@ -50,10 +51,6 @@ class TogglePlatform(Sprite):
         self.update_image()
 
 
-class QuarantineSign(Sprite):
+class QuarantineSign(FloatingSprite):
     def __init__(self):
         super(QuarantineSign, self).__init__('2300ad/quarantine')
-        self.float_effect = FloatEffect(self)
-
-    def on_added(self, layer):
-        self.float_effect.start()
