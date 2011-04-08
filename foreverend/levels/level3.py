@@ -151,20 +151,49 @@ class Outside1NE(Level3OutsideArea):
 
 
 class Outside300NE(Level3OutsideArea):
+    PLATFORM_POS = [
+        (2, 83),
+        (83, 323),
+        (277, 308),
+        (445, 213),
+        (608, 316),
+        (912, 322),
+    ]
+
     def setup(self):
         self.bg.fill((200, 200, 200))
 
         level_width, level_height = self.size
 
+        base_platforms_y = \
+            self.start_pos[1] + self.engine.player.rect.height + 3
+
         # Left platforms
         platform = FloatingPlatform1NE()
         self.main_layer.add(platform)
-        platform.move_to(233, self.start_pos[1] +
-                             self.engine.player.rect.height + 3)
+        platform.move_to(233, base_platforms_y)
+        bottom_ceiling_y = platform.rect.top - 150
 
         platform = FloatingPlatform1NE()
         self.main_layer.add(platform)
         platform.move_to(0, 255)
+        ceiling_x = platform.rect.right + 100
+
+        # Ceiling
+        ceiling = Sprite('300ne/ceiling')
+        self.main_layer.add(ceiling)
+        ceiling.move_to(ceiling_x, 50)
+
+        # Reverse-gravity platforms
+        for x, y in self.PLATFORM_POS:
+            platform = Sprite('300ne/small_platform')
+            self.main_layer.add(platform)
+            platform.move_to(ceiling.rect.left + x, ceiling.rect.top + y)
+
+        # Ceiling
+        ceiling = Sprite('300ne/ceiling')
+        self.main_layer.add(ceiling)
+        ceiling.move_to(ceiling_x, bottom_ceiling_y)
 
         # Right-side floor
         floor = Sprite('300ne/floor')
