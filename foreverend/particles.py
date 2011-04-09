@@ -165,7 +165,7 @@ class ExplosionParticleSystem(ParticleSystem):
         self.min_initial_speed = 200
         self.max_initial_speed = 300
         self.min_particles = 25
-        self.min_particles = 40
+        self.max_particles = 40
         self.min_scale = 0.3
         self.max_scale = 1.0
         self.min_rotation_speed = -360.0
