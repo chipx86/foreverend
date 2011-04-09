@@ -297,7 +297,7 @@ class Sprite(pygame.sprite.DirtySprite):
         self.moved.emit(dx, dy)
 
     def on_collision(self, dx, dy, obj, self_rect, obj_rect):
-        if self.obey_gravity and self.falling:
+        if dy != 0 and self.obey_gravity and self.falling:
             self.falling = False
 
     def on_added(self, layer):
