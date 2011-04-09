@@ -411,6 +411,8 @@ class Player(Sprite):
         if self.tractor_beam.item:
             self.tractor_beam.item.set_reverse_gravity(self.reverse_gravity)
 
+        self.fall()
+
     def on_vehicle_moved(self, dx, dy):
         if dy != 0:
             self.move_by(0, dy)

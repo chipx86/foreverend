@@ -62,8 +62,7 @@ class Level3OutsideArea(Area):
 
     def __init__(self, *args, **kwargs):
         super(Level3OutsideArea, self).__init__(*args, **kwargs)
-        self.start_pos = (3800, 632)
-        #self.start_pos = (370, 623)
+        self.start_pos = (370, 623)
 
 
 class Outside40000000AD(Level3OutsideArea):
@@ -239,6 +238,11 @@ class Outside300NE(Level3OutsideArea):
         floor.move_to(level_width - floor.rect.width,
                       level_height - floor.rect.height)
 
+        step = FloatingSprite('300ne/step')
+        self.main_layer.add(step)
+        step.move_to(floor.rect.left + 20,
+                     floor.rect.top - step.rect.height - 40)
+
         monolith = Monolith300NE()
         self.main_layer.add(monolith)
         monolith.move_to(floor.rect.left + 200,
@@ -281,13 +285,6 @@ class Outside300NE(Level3OutsideArea):
         keyhole_eventbox.watch_object_moves(self.level.triangle_key)
         keyhole_eventbox.object_entered.connect(self.start_end_sequence)
 
-        # XXX
-        print self.keyhole.rect.topleft
-        self.main_layer.add(self.level.triangle_key)
-        self.level.triangle_key.move_to(
-            self.container.rect.right + 100,
-            self.container_base.rect.bottom -
-            self.level.triangle_key.rect.height)
 
     def start_end_sequence(self, *args, **kwargs):
         if self.in_end_sequence:
@@ -529,11 +526,11 @@ class BlueBoxArea(Area):
         teleporter1.destination = teleporter2
         teleporter2.destination = teleporter1
 
-#        self.main_layer.add(self.level.triangle_key)
-#        self.level.triangle_key.move_to(
-#            right_wall.rect.left - self.level.triangle_key.rect.width - 40,
-#            ceiling.rect.bottom)
-#        self.level.triangle_key.set_reverse_gravity(True)
+        self.main_layer.add(self.level.triangle_key)
+        self.level.triangle_key.move_to(
+            right_wall.rect.left - self.level.triangle_key.rect.width - 40,
+            ceiling.rect.bottom)
+        self.level.triangle_key.set_reverse_gravity(True)
 
 
 class Level3(Level):
@@ -549,5 +546,5 @@ class Level3(Level):
             Outside40000000AD(self),
             BlueBoxArea(self),
         ]))
-        self.add(TimePeriod('1NE', [Outside1NE(self)]))
-        self.add(TimePeriod('300NE', [Outside300NE(self)]))
+        self.add(TimePeriod('1 NE', [Outside1NE(self)]))
+        self.add(TimePeriod('300 NE', [Outside300NE(self)]))
