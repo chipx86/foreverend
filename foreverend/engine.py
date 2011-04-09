@@ -103,7 +103,6 @@ class ForeverEndEngine(object):
         self.paused = True
 
     def show_end_scene(self):
-        print 'show end scene'
         self.ui_manager.control_panel.close()
         self.active_level = None
         self.active_cutscene = ClosingCutscene()
