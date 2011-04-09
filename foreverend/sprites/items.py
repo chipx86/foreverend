@@ -12,6 +12,7 @@ class Item(Sprite):
         super(Item, self).__init__(obey_gravity=True, *args, **kwargs)
         self.should_check_collisions = True
         self.grabbable = True
+        self.flip_image = True
 
         # Signals
         self.grab_changed = Signal()
@@ -41,7 +42,6 @@ class Dynamite(Item):
 class FlameThrower(Item):
     def __init__(self):
         super(FlameThrower, self).__init__('2300ad/flamethrower')
-        self.flip_image = True
 
 
 class Vehicle(Item):
@@ -51,7 +51,6 @@ class Vehicle(Item):
 class Hoverboard(Vehicle):
     def __init__(self):
         super(Hoverboard, self).__init__('2300ad/hoverboard')
-        self.flip_image = True
         self.obey_gravity = False
         self.use_pixel_collisions = True
 
@@ -83,7 +82,6 @@ class Snake(Item):
 
     def __init__(self):
         super(Snake, self).__init__('1000ad/snake')
-        self.flip_image = True
         self.lethal = True
         self.velocity = (-self.MOVE_SPEED, 0)
         self.direction = Direction.LEFT
