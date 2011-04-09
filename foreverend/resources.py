@@ -23,7 +23,10 @@ def get_cached_image(name, create_func):
 
 def load_image(name):
     def _load_image_file():
-        filename = name + '.png'
+        if not name.endswith('.png') and not name.endswith('.jpg'):
+            filename = name + '.png'
+        else:
+            filename = name
 
         path = os.path.join(DATA_DIR, *filename.split('/'))
 
