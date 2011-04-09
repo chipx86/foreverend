@@ -181,7 +181,8 @@ class Outside65000000BC(Level1Area):
         # Volcano
         self.volcano = Volcano()
         self.volcano.add_to(self)
-        self.volcano.move_to(1400, ground.rect.top - self.volcano.rect.height)
+        self.volcano.move_to(
+            1400, ground.rect.top - self.volcano.rect.height + 1)
 
         blocker = Box(150, self.size[1] - self.volcano.rect.height - 20,
                       (0, 0, 0, 0))
