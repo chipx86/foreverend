@@ -1,3 +1,5 @@
+import sys
+
 import pygame
 from pygame.locals import *
 
@@ -84,6 +86,10 @@ class ForeverEndEngine(object):
         self.active_cutscene.start()
 
         self._mainloop()
+
+    def quit(self):
+        pygame.quit()
+        sys.exit(0)
 
     def dead(self):
         def on_timeout():
@@ -210,13 +216,14 @@ class ForeverEndEngine(object):
             self.clock.tick(self.FPS)
 
     def _handle_event(self, event):
+        if event.type == QUIT:
+            self.quit()
+            return False
+
         if (self.ui_manager and not self.active_cutscene and
             self.ui_manager.handle_event(event)):
             return True
 
-        if event.type == QUIT:
-            pygame.quit()
-            return False
         if event.type == KEYDOWN and event.key == K_F2:
             self.show_debug_info = not self.show_debug_info
         elif event.type == KEYDOWN and event.key == K_F3:

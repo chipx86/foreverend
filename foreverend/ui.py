@@ -269,7 +269,7 @@ class UIManager(object):
                     handled = True
                     self.engine.paused = False
                 elif event.key == K_q:
-                    pygame.quit()
+                    self.engine.quit()
                     handled = True
             elif event.key == K_ESCAPE:
                 for widget in self.widgets:
