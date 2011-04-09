@@ -46,12 +46,46 @@ class ScreenEffect(Effect):
         self.sprite = Sprite(None)
         self.sprite.image = pygame.Surface(rect.size).convert_alpha()
         self.sprite.move_to(*rect.topleft)
-        layer.add(self.sprite)
+
+        if layer:
+            layer.add(self.sprite)
+
+
+class ScreenFadeEffect(ScreenEffect):
+    def __init__(self, *args, **kwargs):
+        super(ScreenFadeEffect, self).__init__(*args, **kwargs)
+        self.color = (0, 0, 0)
+        self.fade_from_alpha = 0
+        self.fade_to_alpha = 255
+        self.fade_time_ms = 500
+        self.timer_ms = 30
+
+    def pre_start(self):
+        self.sprite.show()
+        self.alpha = self.fade_from_alpha
+        self.alpha_delta = ((self.fade_to_alpha - self.fade_from_alpha) /
+                            (self.fade_time_ms / self.timer_ms))
+        self.sprite.image.fill(
+            (self.color[0], self.color[1], self.color[2], self.alpha))
+
+    def on_tick(self):
+        self.sprite.image.fill(
+            (self.color[0], self.color[1], self.color[2], self.alpha))
+
+        self.alpha += self.alpha_delta
+
+        if ((self.fade_from_alpha > self.fade_to_alpha and
+             self.alpha <= self.fade_to_alpha) or
+            (self.fade_from_alpha < self.fade_to_alpha and
+             self.alpha >= self.fade_to_alpha)):
+            self.stop()
 
 
 class ScreenFlashEffect(ScreenEffect):
     def __init__(self, *args, **kwargs):
         super(ScreenFlashEffect, self).__init__(*args, **kwargs)
+        self.fade_out = True
+        self.color = (255, 255, 255)
 
         self.flash_peaked = Signal()
 
@@ -59,10 +93,15 @@ class ScreenFlashEffect(ScreenEffect):
         self.hit_peak = False
         self.alpha = 100
         self.sprite.show()
-        self.sprite.image.fill((255, 255, 255, 0))
+
+        self._fill(0)
+
+    def _fill(self, alpha):
+        self.sprite.image.fill((self.color[0], self.color[1], self.color[2],
+                                alpha))
 
     def on_tick(self):
-        self.sprite.image.fill((255, 255, 255, self.alpha))
+        self._fill(self.alpha)
 
         if self.hit_peak:
             self.alpha = max(self.alpha - 20, 0)
@@ -72,6 +111,9 @@ class ScreenFlashEffect(ScreenEffect):
         if self.alpha == 255:
             self.hit_peak = True
             self.flash_peaked.emit()
+
+            if not self.fade_out:
+                self.stop()
         elif self.alpha <= 0:
             self.stop()
 
@@ -228,9 +270,6 @@ class SlideShowEffect(TransitionEffect):
         self.orig_y = self.obj.rect.top
         num_steps = self.total_time_ms / self.timer_ms
 
-        print 'orig size: %s, %s' % \
-            (self.orig_image.get_width(), self.orig_image.get_height())
-
         self.dx = self.orig_image.get_width() / num_steps
         self.dy = self.orig_image.get_height()
         self.last_width = 0
@@ -249,10 +288,8 @@ class SlideShowEffect(TransitionEffect):
                                self.orig_image.get_width()),
                            min(self.last_height + self.dy,
                                self.orig_image.get_height()))
-        print rect.width, rect.height
 
         if not self.obj.visible:
-            print 'showing'
             self.obj.show()
 
         if self.direction == Direction.LEFT:

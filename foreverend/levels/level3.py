@@ -2,8 +2,9 @@ import math
 
 import pygame
 
-from foreverend.effects import ScreenFlashEffect, FloatEffect, MoveEffect, \
-                               ShakeEffect, SlideHideEffect, SlideShowEffect
+from foreverend.effects import FloatEffect, MoveEffect, ScreenFadeEffect, \
+                               ScreenFlashEffect, ShakeEffect, \
+                               SlideHideEffect, SlideShowEffect
 from foreverend.eventbox import EventBox
 from foreverend.levels.base import Area, Level, TimePeriod
 from foreverend.particles import ExplosionParticleSystem
@@ -244,21 +245,21 @@ class Outside300NE(Level3OutsideArea):
                          floor.rect.top - monolith.rect.height)
 
         # Container
-        container_base = Sprite('300ne/container_base')
-        self.main_layer.add(container_base)
-        container_base.move_to(
-            floor.rect.right - container_base.rect.width - 400,
-            floor.rect.top - container_base.rect.height)
+        self.container_base = Sprite('300ne/container_base')
+        self.main_layer.add(self.container_base)
+        self.container_base.move_to(
+            floor.rect.right - self.container_base.rect.width - 400,
+            floor.rect.top - self.container_base.rect.height)
 
         self.container_bg = Sprite('300ne/container_bg')
         self.bg_layer.add(self.container_bg)
         self.container_bg.move_to(
-            container_base.rect.left +
-            (container_base.rect.width - self.container_bg.rect.width) / 2,
-            container_base.rect.top - self.container_bg.rect.height)
+            self.container_base.rect.left +
+            (self.container_base.rect.width - self.container_bg.rect.width) / 2,
+            self.container_base.rect.top - self.container_bg.rect.height)
 
-        self.level.add_artifact(self, container_base.rect.centerx,
-                                container_base.rect.top)
+        self.level.add_artifact(self, self.container_base.rect.centerx,
+                                self.container_base.rect.top)
 
         self.container = Sprite('300ne/container')
         self.main_layer.add(self.container)
@@ -285,7 +286,8 @@ class Outside300NE(Level3OutsideArea):
         self.main_layer.add(self.level.triangle_key)
         self.level.triangle_key.move_to(
             self.container.rect.right + 100,
-            container_base.rect.bottom - self.level.triangle_key.rect.height)
+            self.container_base.rect.bottom -
+            self.level.triangle_key.rect.height)
 
     def start_end_sequence(self, *args, **kwargs):
         if self.in_end_sequence:
@@ -352,7 +354,8 @@ class Outside300NE(Level3OutsideArea):
         show_effect.timer_ms = 30
         show_effect.total_time_ms = 500
         show_effect.stopped.connect(self.on_container_added)
-        show_effect.start()
+        timer = Timer(700, show_effect.start, one_shot=True)
+        timer.start()
 
     def on_container_added(self):
         player = self.level.engine.player
@@ -405,17 +408,22 @@ class Outside300NE(Level3OutsideArea):
         self.container.rect.bottom = bottom
 
         self.level.artifact.remove()
-        player = self.level.engine.player
-        player.collidable = False
-        player.obey_gravity = False
-        player.velocity = (0, 0)
-        player.direction = Direction.LEFT
-        player.name = 'probe_large'
-        player.update_image()
-        player.move_to(
+        self.level.engine.player.remove()
+
+        self.large_probe = Sprite('probe_large')
+        self.main_layer.add(self.large_probe)
+        self.large_probe.collidable = False
+        self.large_probe.obey_gravity = False
+        self.large_probe.move_to(
             self.container.rect.left +
-            (self.container.rect.width - player.rect.width) / 2,
-            self.container.rect.bottom - 2 * player.rect.height)
+            (self.container.rect.width - self.large_probe.rect.width) / 2,
+            self.container.rect.bottom - 2 * self.large_probe.rect.height)
+
+        # We're going to force updates to get things in the right order.
+        self.container.hide()
+        self.container.show()
+        self.container_base.hide()
+        self.container_base.show()
 
     def prepare_launch(self):
         player = self.level.engine.player
@@ -428,28 +436,34 @@ class Outside300NE(Level3OutsideArea):
         self.explosion.min_angle = -(4 * math.pi) / 3
         self.explosion.max_angle = -(5 * math.pi) / 3
         self.explosion.repeat = True
-        self.explosion.start(self.container.rect.centerx, player.rect.bottom)
+        self.explosion.start(self.container.rect.centerx,
+                             self.large_probe.rect.bottom)
 
-        shake_effect = ShakeEffect(player)
+        shake_effect = ShakeEffect(self.large_probe)
         shake_effect.start()
 
-        timer = Timer(3000, self.launch_probe)
+        timer = Timer(3000, self.launch_probe, one_shot=True)
         timer.start()
 
     def launch_probe(self):
-        player = self.level.engine.player
-        player.velocity = (0, -15)
-        player.moved.connect(self.move_explosion)
+        self.large_probe.velocity = (0, -15)
+        self.large_probe.moved.connect(self.move_explosion)
 
-        timer = Timer(5000, self.probe_launched)
+        timer = Timer(4000, self.probe_launched, one_shot=True)
         timer.start()
 
     def move_explosion(self, dx, dy):
-        player = self.level.engine.player
-        self.explosion.pos = (self.container.rect.centerx, player.rect.bottom)
+        self.explosion.pos = (self.container.rect.centerx,
+                              self.large_probe.rect.bottom)
 
     def probe_launched(self):
-        self.level.engine.show_end_scene()
+        self.explosion.stop()
+        screen_flash_effect = ScreenFadeEffect(self.fg_layer,
+                                               self.level.engine.camera.rect)
+        screen_flash_effect.fade_time_ms = 3000
+        screen_flash_effect.stopped.connect(
+            self.level.engine.show_end_scene)
+        screen_flash_effect.start()
 
 
 class BlueBoxArea(Area):
@@ -535,5 +549,5 @@ class Level3(Level):
             Outside40000000AD(self),
             BlueBoxArea(self),
         ]))
-        self.add(TimePeriod('1NE AD', [Outside1NE(self)]))
-        self.add(TimePeriod('300NE AD', [Outside300NE(self)]))
+        self.add(TimePeriod('1NE', [Outside1NE(self)]))
+        self.add(TimePeriod('300NE', [Outside300NE(self)]))

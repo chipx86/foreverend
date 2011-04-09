@@ -2,7 +2,7 @@ import pygame
 from pygame.locals import *
 
 from foreverend import set_engine
-from foreverend.cutscenes import OpeningCutscene
+from foreverend.cutscenes import ClosingCutscene, OpeningCutscene
 from foreverend.levels import get_levels
 from foreverend.signals import Signal
 from foreverend.sprites import Player, TiledSprite
@@ -105,7 +105,11 @@ class ForeverEndEngine(object):
         self.paused = True
 
     def show_end_scene(self):
+        print 'show end scene'
+        self.ui_manager.control_panel.close()
         self.active_level = None
+        self.active_cutscene = ClosingCutscene()
+        self.active_cutscene.start()
 
     def _setup_game(self):
         self.active_cutscene = None
@@ -205,7 +209,8 @@ class ForeverEndEngine(object):
 
     def _paint(self):
         if self.active_cutscene:
-            self.active_cutscene.draw(self.active_cutscene)
+            self.screen.set_clip(None)
+            self.active_cutscene.draw(self.screen)
 
         if self.active_level:
             self.surface.set_clip(self.camera.rect)

@@ -1,6 +1,8 @@
+import pygame
 from pygame.locals import *
 
 from foreverend import get_engine
+from foreverend.resources import load_image
 from foreverend.signals import Signal
 from foreverend.timer import Timer
 
@@ -19,13 +21,25 @@ class Page(object):
         pass
 
 
-class TextPage(Page):
-    def __init__(self, delay_ms, text):
-        super(TextPage, self).__init__()
-        self.text = text
+class DelayPage(Page):
+    def __init__(self, delay_ms):
+        super(DelayPage, self).__init__()
         self.delay_ms = delay_ms
-        self.widget = None
         self.timer = None
+
+    def start(self):
+        self.timer = Timer(self.delay_ms, self.stop, one_shot=True)
+
+    def stop(self):
+        self.timer.stop()
+        self.done.emit()
+
+
+class TextPage(DelayPage):
+    def __init__(self, delay_ms, text):
+        super(TextPage, self).__init__(delay_ms)
+        self.text = text
+        self.widget = None
 
     def start(self):
         ui_manager = get_engine().ui_manager
@@ -34,12 +48,11 @@ class TextPage(Page):
             for line in self.text.split('\n')
         ])
 
-        self.timer = Timer(self.delay_ms, self.stop, one_shot=True)
+        super(TextPage, self).start()
 
     def stop(self):
-        self.timer.stop()
         self.widget.close()
-        self.done.emit()
+        super(TextPage, self).stop()
 
 
 class Cutscene(object):
@@ -118,3 +131,42 @@ class OpeningCutscene(Cutscene):
             TextPage(4000,
                      'But a probe...'),
         ]
+
+
+class ClosingCutscene(Cutscene):
+    def __init__(self):
+        super(ClosingCutscene, self).__init__()
+        self.earth = load_image('earth.jpg')
+        self.probe = load_image('crashing_probe')
+        self.fade_effect = None
+
+        self.pages = [
+            DelayPage(3000),
+            TextPage(3000, 'Irony.'),
+            TextPage(5000, 'We sought to prevent the greatest tragedy in '
+                           'history, and believed we were capable.'),
+            TextPage(5000, 'Yet, with all our arrogance and '
+                           'short-sightedness, our very creation was the '
+                           'cause of our downfall.'),
+            TextPage(5000, 'We thought we could fix the planet. Fix time.'),
+            TextPage(5000, 'And now we are all sons of bitches.'),
+        ]
+
+
+    def draw(self, surface):
+        if not self.fade_effect:
+            from foreverend.effects import ScreenFadeEffect
+            self.fade_effect = ScreenFadeEffect(
+                None,
+                pygame.Rect(0, 0, surface.get_width(), surface.get_height()))
+            self.fade_effect.fade_from_alpha = 255
+            self.fade_effect.fade_to_alpha = 0
+            self.fade_effect.fade_time_ms = 3000
+            self.fade_effect.start()
+            print 'start'
+
+        surface.fill((0, 0, 0))
+        surface.blit(self.earth,
+                     (surface.get_width() - self.earth.get_width(), 0))
+        surface.blit(self.probe, (150, 60))
+        surface.blit(self.fade_effect.sprite.image, (0, 0))
