@@ -137,6 +137,23 @@ class OpeningCutscene(Cutscene):
         ]
 
 
+class TutorialCutscene(Cutscene):
+    def __init__(self):
+        super(TutorialCutscene, self).__init__()
+
+        self.pages = [
+            TextPage(6000,
+                     'The goal of each level is to locate a piece of the '
+                     'unknown artifact.\n'
+                     'You will need to master time switching and platforming '
+                     'to accomplish this.'),
+            TextPage(6000,
+                     'Use arrow keys to move and spacebar to jump and hover.\n'
+                     'Shift will activate the tractor beam to pick up items.\n'
+                     'Press 1, 2 and 3 to switch time periods.')
+        ]
+
+
 class ClosingCutscene(Cutscene):
     def __init__(self):
         super(ClosingCutscene, self).__init__()

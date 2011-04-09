@@ -2,7 +2,8 @@ import pygame
 from pygame.locals import *
 
 from foreverend import set_engine
-from foreverend.cutscenes import ClosingCutscene, OpeningCutscene
+from foreverend.cutscenes import ClosingCutscene, OpeningCutscene, \
+                                 TutorialCutscene
 from foreverend.levels import get_levels
 from foreverend.signals import Signal
 from foreverend.sprites import Player, TiledSprite
@@ -74,6 +75,7 @@ class ForeverEndEngine(object):
         self.show_debug_info = False
 
         self.area_changed_cnx = None
+        self.ui_ready_cnx = None
 
     def run(self):
         self.active_cutscene = OpeningCutscene()
@@ -114,6 +116,24 @@ class ForeverEndEngine(object):
         self.player.update_image()
         self.levels = [level(self) for level in get_levels()]
         self.switch_level(0)
+
+        if self.ui_ready_cnx:
+            self.ui_ready_cnx.disconnect()
+
+        self.paused = True
+        self.ui_ready_cnx = self.ui_manager.ready.connect(self.show_tutorial)
+
+    def show_tutorial(self):
+        def on_done():
+            self.active_cutscene = False
+            self.paused = False
+
+        self.ui_ready_cnx.disconnect()
+        self.ui_ready_cnx = None
+
+        self.active_cutscene = TutorialCutscene()
+        self.active_cutscene.start()
+        self.active_cutscene.done.connect(on_done)
 
     def switch_level(self, num):
         assert num < len(self.levels)
@@ -175,6 +195,8 @@ class ForeverEndEngine(object):
             self.debug_rects = not self.debug_rects
         elif event.type == KEYDOWN and event.key == K_F4:
             self.god_mode = not self.god_mode
+        elif self.active_cutscene:
+            self.active_cutscene.handle_event(event)
         elif self.active_level:
             if event.type == KEYDOWN and event.key == K_TAB:
                 # Switch time periods
@@ -215,8 +237,6 @@ class ForeverEndEngine(object):
                         if (self.player.rect.collidelist(rects) != -1 and
                             box.handle_event(event)):
                             break
-        elif self.active_cutscene:
-            self.active_cutscene.handle_event(event)
 
         return True
 

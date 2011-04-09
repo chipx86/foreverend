@@ -242,9 +242,15 @@ class UIManager(object):
     def close(self, widget):
         try:
             self.widgets.remove(widget)
+            widget.closed.emit()
         except ValueError:
             # It was already closed
             pass
+
+        if len(self.widgets) == 1:
+            assert self.widgets[0] == self.control_panel
+
+            self.ready.emit()
 
     def draw(self, surface):
         self.surface.fill((0, 0, 0, 0))
