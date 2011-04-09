@@ -38,8 +38,8 @@ class TextBox(Widget):
     def __init__(self, ui_manager, text, line_spacing=10):
         super(TextBox, self).__init__(ui_manager)
         self.text = text
-        self.surface = None
         self.line_spacing = line_spacing
+        self.surface = None
 
     def _render_text(self):
         if isinstance(self.text, list):
@@ -272,7 +272,9 @@ class UIManager(object):
                 elif event.key == K_q:
                     self.engine.quit()
                     handled = True
-            elif event.key == K_ESCAPE:
+                else:
+                    return True
+            elif event.key in (K_ESCAPE, K_RIGHT, K_SPACE, K_RETURN):
                 for widget in self.widgets:
                     if (isinstance(widget, TextBox) and
                         widget != self.paused_textbox):
@@ -305,11 +307,8 @@ class UIManager(object):
         ])
 
     def draw(self, surface):
-        #self.surface.fill((0, 0, 0, 0))
         for element in self.widgets:
             element.draw(surface)
-
-        #surface.blit(self.surface, (0, 0))
 
     def on_level_changed(self):
         level = self.engine.active_level
