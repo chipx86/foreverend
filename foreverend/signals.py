@@ -4,7 +4,10 @@ class SignalConnection(object):
         self.cb = cb
 
     def disconnect(self):
-        self.signal.callbacks.remove(self.cb)
+        try:
+            self.signal.callbacks.remove(self.cb)
+        except ValueError:
+            pass
 
 
 class Signal(object):
@@ -14,6 +17,9 @@ class Signal(object):
     def connect(self, callback):
         self.callbacks.append(callback)
         return SignalConnection(self, callback)
+
+    def clear(self):
+        self.callbacks = []
 
     def emit(self, *args, **kwargs):
         result = False

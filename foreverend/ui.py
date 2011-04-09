@@ -215,9 +215,10 @@ class UIManager(object):
         self.confirm_quit_box = None
 
     def add_control_panel(self):
-        self.control_panel = ControlPanel(self)
-        self.control_panel.move_to(
-            0, self.size[1] - self.control_panel.rect.height)
+        if not self.control_panel:
+            self.control_panel = ControlPanel(self)
+            self.control_panel.move_to(
+                0, self.size[1] - self.control_panel.rect.height)
 
     def show_level(self, level):
         timeline_attrs = {

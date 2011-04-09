@@ -111,6 +111,7 @@ class ForeverEndEngine(object):
         def on_timeout():
             widget.close()
             self._setup_game()
+            sys.exit(0)
 
         widget = self.ui_manager.show_textbox('Game Over')
         self.paused = True
@@ -126,9 +127,12 @@ class ForeverEndEngine(object):
     def _setup_game(self):
         self.ui_manager.add_control_panel()
         self.camera = Camera(self)
+        self.tick.clear()
 
         self.active_cutscene = None
 
+        self.player.lives = self.player.MAX_LIVES
+        self.player.health = self.player.MAX_HEALTH
         self.player.update_image()
         self.levels = [level(self) for level in get_levels()]
         self.switch_level(0)
@@ -160,6 +164,7 @@ class ForeverEndEngine(object):
         self.player.reverse_gravity = False
         self.player.jumping = False
         self.player.falling = False
+        self.player.fall()
         self.active_level = self.levels[num]
         self.active_level.reset()
 
@@ -174,7 +179,7 @@ class ForeverEndEngine(object):
         self.camera.update()
         self.player.show()
 
-        if has_mixer:
+        if False and has_mixer:
             pygame.mixer.music.stop()
 
             if self.active_level.music:
