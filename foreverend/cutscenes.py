@@ -2,7 +2,7 @@ import pygame
 from pygame.locals import *
 
 from foreverend import get_engine
-from foreverend.resources import load_image
+from foreverend.resources import load_image, unload_image
 from foreverend.signals import Signal
 from foreverend.timer import Timer
 
@@ -138,6 +138,11 @@ class OpeningCutscene(Cutscene):
                      'But a probe...'),
         ]
 
+    def stop(self):
+        super(OpeningCutscene, self).stop()
+        unload_image('earth.jpg')
+        unload_image('earth_time_fractures')
+
     def draw(self, surface):
         surface.fill((0, 0, 0))
         surface.blit(self.earth,
@@ -185,6 +190,10 @@ class ClosingCutscene(Cutscene):
                            'Thanks for playing!'),
         ]
 
+    def stop(self):
+        super(ClosingCutscene, self).stop()
+        unload_image('earth.jpg')
+        unload_image('crashing_probe')
 
     def draw(self, surface):
         if not self.fade_effect:

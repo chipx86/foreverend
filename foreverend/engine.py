@@ -13,7 +13,7 @@ from foreverend import set_engine
 from foreverend.cutscenes import ClosingCutscene, OpeningCutscene, \
                                  TutorialCutscene
 from foreverend.levels import get_levels
-from foreverend.resources import get_music_filename
+from foreverend.resources import get_music_filename, unload_images
 from foreverend.signals import Signal
 from foreverend.sprites import Player, TiledSprite
 from foreverend.timer import Timer
@@ -187,6 +187,7 @@ class ForeverEndEngine(object):
     def next_level(self):
         def on_timeout():
             widget.close()
+            unload_images()
             self.switch_level(next_level)
 
         next_level = self.levels.index(self.active_level) + 1

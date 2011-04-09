@@ -39,6 +39,16 @@ def load_image(name):
     return get_cached_image(name, _load_image_file)
 
 
+def unload_image(name):
+    print 'unloading %s' % name
+    if name in image_cache:
+        del image_cache[name]
+
+
+def unload_images():
+    image_cache.clear()
+
+
 def get_font_filename():
     return os.path.join(DATA_DIR, 'DejaVuSans.ttf')
 
