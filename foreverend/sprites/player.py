@@ -59,8 +59,7 @@ class TractorBeam(Sprite):
         self.update_image()
 
     def update_position(self, player):
-        y = player.rect.top + \
-            (player.rect.height - self.rect.height) / 2
+        y = player.rect.top + (player.rect.height - self.rect.height) / 2
 
         if self.direction == Direction.RIGHT:
             self.move_to(player.rect.right, y)
@@ -83,7 +82,11 @@ class TractorBeam(Sprite):
             self.item.rect.top - self.VERT_OFFSET_ALLOWANCE):
             self.freeze_item_y = True
             adjusted = True
-            new_y = collide_rect.top - self.item.rect.height
+
+            if self.item.reverse_gravity:
+                new_y = collide_rect.bottom
+            else:
+                new_y = collide_rect.top - self.item.rect.height
 
         old_item_offset = self.item_offset
 
@@ -112,6 +115,9 @@ class TractorBeam(Sprite):
         if self.item:
             mid_y = self.rect.top + \
                     (self.rect.height - self.item.rect.height) / 2
+
+            if self.reverse_gravity:
+                mid_y = max(mid_y, self.player.rect.top)
 
             if self.freeze_item_y:
                 y = self.item.rect.top
@@ -182,9 +188,7 @@ class Player(Sprite):
         self.lives_changed = Signal()
 
         self.direction_changed.connect(self.on_direction_changed)
-        self.reverse_gravity_changed.connect(
-            lambda:
-            self.propulsion_below.set_reverse_gravity(self.reverse_gravity))
+        self.reverse_gravity_changed.connect(self.on_reverse_gravity_changed)
 
     def handle_event(self, event):
         if self.block_events:
@@ -294,9 +298,6 @@ class Player(Sprite):
             self.collision_rects.append(self.vehicle.rect)
 
     def check_collisions(self, *args, **kwargs):
-        if self.tractor_beam.item:
-            self.tractor_beam.update_position(self)
-
         super(Player, self).check_collisions(*args, **kwargs)
 
     def should_adjust_position_with(self, obj, dx, dy):
@@ -399,6 +400,13 @@ class Player(Sprite):
     def on_direction_changed(self):
         if self.vehicle:
             self.vehicle.direction = self.direction
+
+    def on_reverse_gravity_changed(self):
+        self.propulsion_below.set_reverse_gravity(self.reverse_gravity)
+        self.tractor_beam.set_reverse_gravity(self.reverse_gravity)
+
+        if self.tractor_beam.item:
+            self.tractor_beam.item.set_reverse_gravity(self.reverse_gravity)
 
     def on_vehicle_moved(self, dx, dy):
         if dy != 0:
