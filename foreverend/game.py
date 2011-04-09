@@ -9,6 +9,12 @@ from foreverend.engine import ForeverEndEngine
 def main():
     pygame.init()
 
+    version = pygame.__version__.split('.')
+
+    if int(version[0]) <= 1 and int(version[1]) < 9:
+        print 'This game requires pygame 1.9 or higher.'
+        return
+
     screen = pygame.display.set_mode((1024, 768))
     pygame.display.set_caption("Forever End")
 
