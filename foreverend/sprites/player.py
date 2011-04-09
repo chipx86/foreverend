@@ -334,6 +334,8 @@ class Player(Sprite):
         if not self.last_safe_spot:
             self.last_safe_spot = self.rect.topleft
 
+        self.rect.top = max(self.rect.top, 0)
+
         if self.rect.top > self.layer.area.size[1]:
             self.on_dead()
             return
