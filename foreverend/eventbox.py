@@ -3,6 +3,7 @@ from foreverend.signals import Signal
 
 class EventBox(object):
     def __init__(self, area):
+        self.area = area
         self.rects = []
         area.register_for_events(self)
         self.entered_objects = set()
@@ -20,6 +21,9 @@ class EventBox(object):
         return self.event_fired.emit(event)
 
     def handle_object_move(self, obj):
+        if obj.layer.area != self.area:
+            return
+
         if obj.rect.collidelist(self.rects) != -1:
             if obj not in self.entered_objects:
                 self.entered_objects.add(obj)
