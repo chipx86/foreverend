@@ -1,3 +1,3 @@
-recursive-include data *.png *.svg
+recursive-include data *.png *.svg *.ttf *.jpg
 include ez_setup.py
 include main.py
