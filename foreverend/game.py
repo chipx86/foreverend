@@ -15,7 +15,7 @@ def main():
         print 'This game requires pygame 1.9 or higher.'
         return
 
-    screen = pygame.display.set_mode((1024, 768))
+    screen = pygame.display.set_mode((960, 720))
     pygame.display.set_caption("Forever End")
 
     engine = ForeverEndEngine(screen)
