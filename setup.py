@@ -51,14 +51,12 @@ if cmd in ('build_exe', 'install_exe'):
 
     METADATA['executables'] = [Executable('main.py')]
 
-    #setup(**METADATA)
-
     exclude_modules = ['tcl', 'tk']
 
     dist_dir = os.path.join('dist', '%s_%s' % (PACKAGE_NAME, VERSION))
     data_dir = os.path.join(os.path.dirname(__file__), 'data')
-    os.system("cxfreeze --install-dir='%s' --target-name='%s' "
-              "--exclude-modules=%s main.py" %
+    os.system('cxfreeze --install-dir="%s" --target-name="%s.exe" '
+              '--exclude-modules=%s main.py' %
               (dist_dir, APP_NAME, ','.join(exclude_modules)))
 
     for dirname in exclude_modules:
