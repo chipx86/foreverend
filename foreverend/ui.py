@@ -305,11 +305,11 @@ class UIManager(object):
         ])
 
     def draw(self, surface):
-        self.surface.fill((0, 0, 0, 0))
+        #self.surface.fill((0, 0, 0, 0))
         for element in self.widgets:
-            element.draw(self.surface)
+            element.draw(surface)
 
-        surface.blit(self.surface, (0, 0))
+        #surface.blit(self.surface, (0, 0))
 
     def on_level_changed(self):
         level = self.engine.active_level

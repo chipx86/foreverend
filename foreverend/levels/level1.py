@@ -168,6 +168,9 @@ class Outside1999AD(Level1Area):
 
 
 class Outside65000000BC(Level1Area):
+    def draw_bg(self, surface):
+        surface.fill((0, 0, 0))
+
     def setup(self):
         self.exploding = False
         self.exploded = False
