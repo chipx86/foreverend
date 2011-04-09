@@ -73,6 +73,8 @@ class ForeverEndEngine(object):
         self.god_mode = False
         self.show_debug_info = False
 
+        self.area_changed_cnx = None
+
     def run(self):
         self.active_cutscene = OpeningCutscene()
         self.active_cutscene.done.connect(self._setup_game)
@@ -94,13 +96,7 @@ class ForeverEndEngine(object):
         timer = Timer(2000, on_timeout, one_shot=True)
 
     def restart_level(self):
-        self.paused = False
-        self.player.show()
-        self.active_level.reset()
-        self.active_level.switch_time_period(0)
-        self.player.stop_tractor_beam()
-        self.player.block_events = False
-        self.player.move_to(*self.active_level.active_area.start_pos)
+        self.switch_level(self.levels.index(self.active_level))
 
     def game_over(self):
         self.ui_manager.show_textbox('Game Over')
@@ -127,7 +123,13 @@ class ForeverEndEngine(object):
         self.player.block_events = False
         self.active_level = self.levels[num]
         self.active_level.reset()
-        self.active_level.area_changed.connect(self._on_area_changed)
+
+        if self.area_changed_cnx:
+            self.area_changed_cnx.disconnect()
+
+        self.area_changed_cnx = \
+            self.active_level.area_changed.connect(self._on_area_changed)
+
         self.active_level.switch_time_period(0)
         self.player.move_to(*self.active_level.active_area.start_pos)
         self.player.show()
