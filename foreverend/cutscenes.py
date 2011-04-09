@@ -176,7 +176,8 @@ class ClosingCutscene(Cutscene):
             TextPage(5000, 'We sought to prevent the greatest tragedy in '
                            'history, and believed we were capable.'),
             TextPage(5000, 'Yet, with all our arrogance and '
-                           'short-sightedness, our very creation was the '
+                           'short-sightedness,\n'
+                           'our very creation was the '
                            'cause of our downfall.'),
             TextPage(5000, 'We thought we could fix the planet. Fix time.'),
             TextPage(5000, 'Now we are all sons of bitches.'),
