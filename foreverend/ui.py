@@ -212,6 +212,7 @@ class UIManager(object):
 
         self.control_panel = None
         self.paused_textbox = None
+        self.confirm_quit_box = None
 
     def add_control_panel(self):
         self.control_panel = ControlPanel(self)
@@ -260,12 +261,22 @@ class UIManager(object):
     def handle_event(self, event):
         handled = False
 
-        if event.type == KEYDOWN and event.key == K_ESCAPE:
-            for widget in self.widgets:
-                if (isinstance(widget, TextBox) and
-                    widget != self.paused_textbox):
-                    widget.close()
+        if event.type == KEYDOWN:
+            if self.confirm_quit_box:
+                if event.key == K_ESCAPE:
+                    self.confirm_quit_box.close()
+                    self.confirm_quit_box = None
                     handled = True
+                    self.engine.paused = False
+                elif event.key == K_q:
+                    pygame.quit()
+                    handled = True
+            elif event.key == K_ESCAPE:
+                for widget in self.widgets:
+                    if (isinstance(widget, TextBox) and
+                        widget != self.paused_textbox):
+                        widget.close()
+                        handled = True
 
         return handled
 
@@ -277,6 +288,20 @@ class UIManager(object):
         if self.paused_textbox:
             self.paused_textbox.close()
             self.paused_textbox = None
+
+    def confirm_quit(self):
+        if self.confirm_quit_box:
+            self.confirm_quit_box.close()
+            return
+
+        self.engine.paused = True
+        self.confirm_quit_box = self.show_textbox([
+            "Do you want to quit?",
+            ({'font': self.small_font},
+             "Press 'Q' to quit."),
+            ({'font': self.small_font},
+             "Press 'Escape' to cancel.")
+        ])
 
     def draw(self, surface):
         self.surface.fill((0, 0, 0, 0))

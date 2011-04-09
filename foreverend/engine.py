@@ -250,9 +250,7 @@ class ForeverEndEngine(object):
                     else:
                         self.switch_level(i + 1)
                 elif event.type == KEYDOWN and event.key == K_ESCAPE:
-                    # XXX This should eventually bring up a confirmation
-                        pygame.quit()
-                        return False
+                    self.ui_manager.confirm_quit()
                 elif not self.player.handle_event(event):
                     area = self.active_level.active_area
 
