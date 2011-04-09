@@ -198,7 +198,7 @@ class UIManager(object):
         self.default_font = get_font_filename()
         #self.default_font = pygame.font.get_default_font()
         self.font = pygame.font.Font(self.default_font, 20)
-        self.small_font = pygame.font.Font(self.default_font, 14)
+        self.small_font = pygame.font.Font(self.default_font, 16)
 
         self.control_panel = ControlPanel(self)
         self.control_panel.move_to(
