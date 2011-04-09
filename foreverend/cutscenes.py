@@ -64,6 +64,7 @@ class Cutscene(object):
         self.pages = []
         self.next_page = 0
         self.current_page = None
+        self.allow_escape = True
 
         # Signals
         self.done = Signal()
@@ -93,7 +94,7 @@ class Cutscene(object):
 
     def handle_event(self, event):
         if event.type == KEYDOWN:
-            if event.key == K_ESCAPE:
+            if self.allow_escape and event.key == K_ESCAPE:
                 self.stop()
             elif event.key in (K_SPACE, K_RETURN, K_RIGHT):
                 self.current_page.stop()
@@ -174,6 +175,7 @@ class ClosingCutscene(Cutscene):
         self.earth = load_image('earth.jpg')
         self.probe = load_image('crashing_probe')
         self.fade_effect = None
+        self.allow_escape = False
 
         self.pages = [
             DelayPage(3000),
@@ -205,7 +207,6 @@ class ClosingCutscene(Cutscene):
             self.fade_effect.fade_to_alpha = 0
             self.fade_effect.fade_time_ms = 3000
             self.fade_effect.start()
-            print 'start'
 
         surface.fill((0, 0, 0))
         surface.blit(self.earth,
