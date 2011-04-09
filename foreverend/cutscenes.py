@@ -149,7 +149,7 @@ class ClosingCutscene(Cutscene):
                            'short-sightedness, our very creation was the '
                            'cause of our downfall.'),
             TextPage(5000, 'We thought we could fix the planet. Fix time.'),
-            TextPage(5000, 'And now we are all sons of bitches.'),
+            TextPage(5000, 'Now we are all sons of bitches.'),
         ]
 
 
