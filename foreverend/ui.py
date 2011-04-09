@@ -1,4 +1,5 @@
 import pygame
+from pygame.locals import *
 
 from foreverend.resources import get_font_filename, load_image
 from foreverend.signals import Signal
@@ -210,6 +211,7 @@ class UIManager(object):
         self.engine.level_changed.connect(self.on_level_changed)
 
         self.control_panel = None
+        self.paused_textbox = None
 
     def add_control_panel(self):
         self.control_panel = ControlPanel(self)
@@ -254,6 +256,27 @@ class UIManager(object):
             assert self.widgets[0] == self.control_panel
 
             self.ready.emit()
+
+    def handle_event(self, event):
+        handled = False
+
+        if event.type == KEYDOWN and event.key == K_ESCAPE:
+            for widget in self.widgets:
+                if (isinstance(widget, TextBox) and
+                    widget != self.paused_textbox):
+                    widget.close()
+                    handled = True
+
+        return handled
+
+    def pause(self):
+        assert not self.paused_textbox
+        self.paused_textbox = self.show_textbox('Paused')
+
+    def unpause(self):
+        if self.paused_textbox:
+            self.paused_textbox.close()
+            self.paused_textbox = None
 
     def draw(self, surface):
         self.surface.fill((0, 0, 0, 0))

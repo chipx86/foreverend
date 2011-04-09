@@ -210,6 +210,10 @@ class ForeverEndEngine(object):
             self.clock.tick(self.FPS)
 
     def _handle_event(self, event):
+        if (self.ui_manager and not self.active_cutscene and
+            self.ui_manager.handle_event(event)):
+            return True
+
         if event.type == QUIT:
             pygame.quit()
             return False
@@ -266,9 +270,11 @@ class ForeverEndEngine(object):
 
     def _pause(self):
         self.paused = True
+        self.ui_manager.pause()
 
     def _unpause(self):
         self.paused = False
+        self.ui_manager.unpause()
 
     def _show_time_periods(self):
         self._pause()
