@@ -40,7 +40,6 @@ def load_image(name):
 
 
 def unload_image(name):
-    print 'unloading %s' % name
     if name in image_cache:
         del image_cache[name]
 
