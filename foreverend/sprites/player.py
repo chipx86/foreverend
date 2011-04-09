@@ -40,6 +40,7 @@ class TractorBeam(Sprite):
         self.item.obey_gravity = False
         self.item.collidable = False
         self.item.grabbed = True
+        self.item.set_reverse_gravity(self.reverse_gravity)
         self.freeze_item_y = False
         self.item_offset = self.ITEM_OFFSET
         self.name = 'tractor_beam'
