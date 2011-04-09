@@ -152,6 +152,8 @@ class ForeverEndEngine(object):
         self.player.stop_riding()
         self.player.block_events = False
         self.player.reverse_gravity = False
+        self.player.jumping = False
+        self.player.falling = False
         self.active_level = self.levels[num]
         self.active_level.reset()
 
