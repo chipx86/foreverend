@@ -98,6 +98,8 @@ class ForeverEndEngine(object):
         self.player.show()
         self.active_level.reset()
         self.active_level.switch_time_period(0)
+        self.player.stop_tractor_beam()
+        self.player.block_events = False
         self.player.move_to(*self.active_level.active_area.start_pos)
 
     def game_over(self):
@@ -120,6 +122,9 @@ class ForeverEndEngine(object):
 
     def switch_level(self, num):
         assert num < len(self.levels)
+        self.paused = False
+        self.player.stop_tractor_beam()
+        self.player.block_events = False
         self.active_level = self.levels[num]
         self.active_level.reset()
         self.active_level.area_changed.connect(self._on_area_changed)
@@ -128,6 +133,20 @@ class ForeverEndEngine(object):
         self.player.show()
 
         self.level_changed.emit()
+
+    def next_level(self):
+        def on_timeout():
+            widget.close()
+            self.switch_level(next_level)
+
+        next_level = self.levels.index(self.active_level) + 1
+        widget = self.ui_manager.show_textbox([
+            'You got the artifact! %s left to go.'
+            % (len(self.levels) - next_level),
+        ])
+
+        timer = Timer(2000, on_timeout, one_shot=True)
+        timer.start()
 
     def _on_area_changed(self):
         area = self.active_level.active_area

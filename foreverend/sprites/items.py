@@ -21,9 +21,16 @@ class Item(Sprite):
 class Artifact(Item):
     def __init__(self, area, num):
         super(Artifact, self).__init__('artifact%s' % num)
+        self.obey_gravity = False
         self.float_effect = FloatEffect(self)
-        self.grab_changed.connect(self.float_effect.stop)
+        self.grab_changed.connect(self.on_grab_changed)
         self.float_effect.start()
+        self.floating = True
+
+    def on_grab_changed(self):
+        if self.floating:
+            self.float_effect.stop()
+            self.floating = False
 
     def should_adjust_position_with(self, obj, dx, dy):
         return False

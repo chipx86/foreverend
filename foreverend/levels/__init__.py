@@ -4,5 +4,4 @@ from foreverend.levels.level3 import Level3
 
 
 def get_levels():
-    return [Level3]
-    #return [Level1, Level2, Level3]
+    return [Level1, Level2, Level3]

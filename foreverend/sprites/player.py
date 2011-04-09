@@ -49,12 +49,14 @@ class TractorBeam(Sprite):
 
     def ungrab(self):
         if self.item:
-            self.item.obey_gravity = self.old_item_obey_gravity
-            self.item.collidable = True
-            self.item.grabbed = False
-            self.item.fall()
-            self.item.grab_changed.emit()
+            item = self.item
             self.item = None
+
+            item.obey_gravity = self.old_item_obey_gravity
+            item.collidable = True
+            item.grabbed = False
+            item.fall()
+            item.grab_changed.emit()
 
         self.name = 'tractor_beam_wide'
         self.update_image()

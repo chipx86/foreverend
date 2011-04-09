@@ -4,6 +4,7 @@ from pygame.locals import *
 from foreverend.eventbox import EventBox
 from foreverend.signals import Signal
 from foreverend.sprites.items import Artifact
+from foreverend.timer import Timer
 
 
 class QuadTree(object):
@@ -235,10 +236,14 @@ class Level(object):
         self.active_area.draw(screen)
 
     def on_artifact_grabbed(self):
-        self.engine.player.block_events = True
-        self.engine.player.velocity = (0, 0)
-        self.engine.player.fall()
-        print 'Level done!'
+        if self.artifact.grabbed:
+            player = self.engine.player
+            player.block_events = True
+            player.velocity = (0, 0)
+            player.fall()
+
+            timer = Timer(1000, self.engine.next_level, one_shot=True)
+            timer.start()
 
     def on_tick(self):
         if not self.engine.paused and self.engine.active_level == self:
