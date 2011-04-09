@@ -182,11 +182,11 @@ class Level(object):
 
     def add_artifact(self, area, x, y):
         # Artifact
-        artifact = Artifact(area, 1)
-        area.main_layer.add(artifact)
-        artifact.move_to(x - artifact.rect.width / 2,
-                         y - artifact.rect.height - 50)
-        artifact.grab_changed.connect(self.on_artifact_grabbed)
+        self.artifact = Artifact(area, 1)
+        area.main_layer.add(self.artifact)
+        self.artifact.move_to(x - self.artifact.rect.width / 2,
+                              y - self.artifact.rect.height - 50)
+        self.artifact.grab_changed.connect(self.on_artifact_grabbed)
 
     def reset(self):
         self.active_area = None

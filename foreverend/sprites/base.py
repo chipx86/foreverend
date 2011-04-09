@@ -105,6 +105,10 @@ class Sprite(pygame.sprite.DirtySprite):
         self.rect.size = self.image.get_rect().size
 
     def generate_image(self):
+        if not self.name:
+            # Must be a custom sprite.
+            return self.image
+
         image = load_image(self.name)
 
         if (self.flip_image and

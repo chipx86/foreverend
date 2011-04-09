@@ -104,6 +104,9 @@ class ForeverEndEngine(object):
         self.ui_manager.show_textbox('Game Over')
         self.paused = True
 
+    def show_end_scene(self):
+        self.active_level = None
+
     def _setup_game(self):
         self.active_cutscene = None
 

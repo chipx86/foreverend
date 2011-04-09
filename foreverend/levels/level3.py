@@ -1,10 +1,14 @@
+import math
+
 import pygame
 
-from foreverend.effects import FloatEffect, MoveEffect
+from foreverend.effects import ScreenFlashEffect, FloatEffect, MoveEffect, \
+                               ShakeEffect, SlideHideEffect, SlideShowEffect
 from foreverend.eventbox import EventBox
 from foreverend.levels.base import Area, Level, TimePeriod
+from foreverend.particles import ExplosionParticleSystem
 from foreverend.resources import load_image
-from foreverend.sprites import Box, Door, FloatingSprite, Sprite, \
+from foreverend.sprites import Box, Direction, Door, FloatingSprite, Sprite, \
                                TiledSprite, TriangleKey
 from foreverend.timer import Timer
 
@@ -57,7 +61,8 @@ class Level3OutsideArea(Area):
 
     def __init__(self, *args, **kwargs):
         super(Level3OutsideArea, self).__init__(*args, **kwargs)
-        self.start_pos = (370, 623)
+        self.start_pos = (3800, 632)
+        #self.start_pos = (370, 623)
 
 
 class Outside40000000AD(Level3OutsideArea):
@@ -245,37 +250,48 @@ class Outside300NE(Level3OutsideArea):
             floor.rect.right - container_base.rect.width - 400,
             floor.rect.top - container_base.rect.height)
 
-        container = Sprite('300ne/container')
-        self.main_layer.add(container)
-        container.move_to(
+        self.container_bg = Sprite('300ne/container_bg')
+        self.bg_layer.add(self.container_bg)
+        self.container_bg.move_to(
             container_base.rect.left +
-            (container_base.rect.width - container.rect.width) / 2,
-            container_base.rect.top - container.rect.height)
+            (container_base.rect.width - self.container_bg.rect.width) / 2,
+            container_base.rect.top - self.container_bg.rect.height)
 
         self.level.add_artifact(self, container_base.rect.centerx,
                                 container_base.rect.top)
 
+        self.container = Sprite('300ne/container')
+        self.main_layer.add(self.container)
+        self.container.move_to(self.container_bg.rect.left,
+                               self.container_bg.rect.top)
+
         self.keyhole = Sprite('300ne/keyhole')
         self.main_layer.add(self.keyhole)
         self.keyhole.move_to(
-            container.rect.right - self.keyhole.rect.width - 10,
-            container.rect.bottom - self.keyhole.rect.height - 10)
+            self.container.rect.right - self.keyhole.rect.width - 10,
+            self.container.rect.bottom - self.keyhole.rect.height - 10)
 
         keyhole_eventbox = EventBox(self)
         keyhole_eventbox.rects.append(
-            pygame.Rect(container.rect.right,
+            pygame.Rect(self.container.rect.right,
                         self.keyhole.rect.top,
                         40,
                         self.keyhole.rect.height))
         keyhole_eventbox.watch_object_moves(self.level.triangle_key)
         keyhole_eventbox.object_entered.connect(self.start_end_sequence)
 
+        # XXX
+        print self.keyhole.rect.topleft
+        self.main_layer.add(self.level.triangle_key)
+        self.level.triangle_key.move_to(
+            self.container.rect.right + 100,
+            container_base.rect.bottom - self.level.triangle_key.rect.height)
+
     def start_end_sequence(self, *args, **kwargs):
         if self.in_end_sequence:
             return
 
         self.in_end_sequence = True
-        print 'end sequence'
         player = self.level.engine.player
         player.stop_tractor_beam()
         player.block_events = True
@@ -292,6 +308,148 @@ class Outside300NE(Level3OutsideArea):
     def on_key_inserted(self):
         self.level.triangle_key.remove()
         self.keyhole.remove()
+
+        hide_effect = SlideHideEffect(self.container)
+        hide_effect.direction = Direction.DOWN
+        hide_effect.timer_ms = 30
+        hide_effect.total_time_ms = 500
+        hide_effect.stopped.connect(self.on_container_removed)
+        hide_effect.start()
+
+        hide_effect = SlideHideEffect(self.container_bg)
+        hide_effect.direction = Direction.DOWN
+        hide_effect.timer_ms = 30
+        hide_effect.total_time_ms = 500
+        hide_effect.start()
+
+    def on_container_removed(self):
+        self.container.collidable = False
+
+        # Go collect the artifact!
+        player = self.level.engine.player
+        player.jump()
+
+        timer = Timer(200, self.hop_onto_platform, one_shot=True)
+        timer.start()
+
+    def hop_onto_platform(self):
+        player = self.level.engine.player
+        player.velocity = (-player.MOVE_SPEED, player.velocity[1])
+        timer = Timer(700, self.stop_moving, one_shot=True)
+        timer.start()
+
+    def stop_moving(self):
+        timer = Timer(300, self.show_container, one_shot=True)
+        timer.start()
+
+    def show_container(self):
+        player = self.level.engine.player
+        player.velocity = (0, player.velocity[1])
+        player.fall()
+
+        show_effect = SlideShowEffect(self.container)
+        show_effect.direction = Direction.UP
+        show_effect.timer_ms = 30
+        show_effect.total_time_ms = 500
+        show_effect.stopped.connect(self.on_container_added)
+        show_effect.start()
+
+    def on_container_added(self):
+        player = self.level.engine.player
+        self.questionmark = Sprite('questionmark')
+        self.questionmark.collidable = False
+        self.main_layer.add(self.questionmark)
+        self.questionmark.move_to(
+            player.rect.left +
+            (player.rect.width - self.questionmark.rect.width) / 2,
+            player.rect.top - self.questionmark.rect.height - 10)
+
+        timer = Timer(300, self.hide_questionmark, one_shot=True)
+        timer.start()
+
+    def hide_questionmark(self):
+        self.questionmark.remove()
+        self.level.engine.player.direction = Direction.RIGHT
+
+        timer = Timer(500, self.absorb_artifact, one_shot=True)
+        timer.start()
+
+    def absorb_artifact(self):
+        player = self.level.engine.player
+        player.direction = Direction.LEFT
+
+        self.level.artifact.collidable = False
+
+        move_effect = MoveEffect(self.level.artifact)
+        move_effect.collidable = False
+        move_effect.total_time_ms = 1500
+        move_effect.timer_ms = 30
+        move_effect.destination = player.rect.center
+        move_effect.start()
+
+        screen_flash_effect = ScreenFlashEffect(self.fg_layer,
+                                                self.level.engine.camera.rect)
+        screen_flash_effect.flash_peaked.connect(self.grow_probe)
+        screen_flash_effect.stopped.connect(self.prepare_launch)
+        screen_flash_effect.start()
+
+    def grow_probe(self):
+        bottom = self.container_bg.rect.bottom
+        self.container_bg.name = '300ne/broken_container_bg'
+        self.container_bg.update_image()
+        self.container_bg.rect.bottom = bottom
+
+        bottom = self.container.rect.bottom
+        self.container.name = '300ne/broken_container'
+        self.container.update_image()
+        self.container.rect.bottom = bottom
+
+        self.level.artifact.remove()
+        player = self.level.engine.player
+        player.collidable = False
+        player.obey_gravity = False
+        player.velocity = (0, 0)
+        player.direction = Direction.LEFT
+        player.name = 'probe_large'
+        player.update_image()
+        player.move_to(
+            self.container.rect.left +
+            (self.container.rect.width - player.rect.width) / 2,
+            self.container.rect.bottom - 2 * player.rect.height)
+
+    def prepare_launch(self):
+        player = self.level.engine.player
+        self.explosion = ExplosionParticleSystem(self)
+        self.explosion.max_lifetime = 1
+        self.explosion.min_lifetime = 0.5
+        self.explosion.min_particles = 30
+        self.explosion.max_particles = 40
+        self.explosion.max_scale = 0.4
+        self.explosion.min_angle = -(4 * math.pi) / 3
+        self.explosion.max_angle = -(5 * math.pi) / 3
+        self.explosion.repeat = True
+        self.explosion.start(self.container.rect.centerx, player.rect.bottom)
+
+        shake_effect = ShakeEffect(player)
+        shake_effect.start()
+
+        timer = Timer(3000, self.launch_probe)
+        timer.start()
+
+    def launch_probe(self):
+        player = self.level.engine.player
+        player.velocity = (0, -15)
+        player.moved.connect(self.move_explosion)
+
+        timer = Timer(5000, self.probe_launched)
+        timer.start()
+
+    def move_explosion(self, dx, dy):
+        player = self.level.engine.player
+        self.explosion.pos = (self.container.rect.centerx, player.rect.bottom)
+
+    def probe_launched(self):
+        self.level.engine.show_end_scene()
 
 
 class BlueBoxArea(Area):
@@ -357,11 +515,11 @@ class BlueBoxArea(Area):
         teleporter1.destination = teleporter2
         teleporter2.destination = teleporter1
 
-        self.main_layer.add(self.level.triangle_key)
-        self.level.triangle_key.move_to(
-            right_wall.rect.left - self.level.triangle_key.rect.width - 40,
-            ceiling.rect.bottom)
-        self.level.triangle_key.set_reverse_gravity(True)
+#        self.main_layer.add(self.level.triangle_key)
+#        self.level.triangle_key.move_to(
+#            right_wall.rect.left - self.level.triangle_key.rect.width - 40,
+#            ceiling.rect.bottom)
+#        self.level.triangle_key.set_reverse_gravity(True)
 
 
 class Level3(Level):
