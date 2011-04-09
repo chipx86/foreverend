@@ -4,7 +4,8 @@ from foreverend.effects import FloatEffect
 from foreverend.eventbox import EventBox
 from foreverend.levels.base import Area, Level, TimePeriod
 from foreverend.resources import load_image
-from foreverend.sprites import Door, FloatingSprite, Sprite, TiledSprite
+from foreverend.sprites import Box, Door, FloatingSprite, Sprite, \
+                               TiledSprite, TriangleKey
 from foreverend.timer import Timer
 
 
@@ -18,6 +19,12 @@ class Monolith300NE(Sprite):
     def __init__(self):
         super(Monolith300NE, self).__init__('300ne/monolith')
         self.collidable = False
+
+
+class BlueBoxTeleporter(Door):
+    def __init__(self):
+        super(BlueBoxTeleporter, self).__init__('1ne/blue_teleporter')
+        self.flip_image = True
 
 
 class FloatingPlatform1NE(FloatingSprite):
@@ -35,14 +42,14 @@ class Teleporter1NE(Door):
         self.float_effect.start()
 
 
-class RedTeleporterNE(Teleporter1NE):
+class RedTeleporter1NE(Teleporter1NE):
     def __init__(self):
-        super(RedTeleporterNE, self).__init__('1ne/red_teleporter')
+        super(RedTeleporter1NE, self).__init__('1ne/red_teleporter')
 
 
-class BlueTeleporterNE(Teleporter1NE):
+class BlueTeleporter1NE(Teleporter1NE):
     def __init__(self):
-        super(BlueTeleporterNE, self).__init__('1ne/blue_teleporter')
+        super(BlueTeleporter1NE, self).__init__('1ne/blue_teleporter')
 
 
 class Level3OutsideArea(Area):
@@ -54,6 +61,10 @@ class Level3OutsideArea(Area):
 
 
 class Outside40000000AD(Level3OutsideArea):
+    def __init__(self, *args, **kwargs):
+        super(Outside40000000AD, self).__init__(*args, **kwargs)
+        self.bluebox = Door('40000000ad/bluebox')
+
     def setup(self):
         self.bg.fill((209, 186, 151))
 
@@ -70,6 +81,10 @@ class Outside40000000AD(Level3OutsideArea):
         cliff.use_pixel_collisions = True
         self.main_layer.add(cliff)
         cliff.move_to(0, level_height - cliff.rect.height)
+
+        self.main_layer.add(self.bluebox)
+        self.bluebox.move_to(60, cliff.rect.top - self.bluebox.rect.height)
+        self.bluebox.destination = self.time_period.areas['bluebox'].door
 
         cliff = Sprite('40000000ad/cliff_middle')
         cliff.use_pixel_collisions = True
@@ -97,7 +112,7 @@ class Outside1NE(Level3OutsideArea):
         self.main_layer.add(platform)
         platform.move_to(platform_x, bottom_platforms_y)
 
-        red_teleporter_1 = RedTeleporterNE()
+        red_teleporter_1 = RedTeleporter1NE()
         self.main_layer.add(red_teleporter_1)
         red_teleporter_1.move_to(
             platform.rect.right - red_teleporter_1.rect.width - 30,
@@ -112,7 +127,7 @@ class Outside1NE(Level3OutsideArea):
         self.main_layer.add(cage)
         cage.move_to(2000, 53)
 
-        red_teleporter_2 = RedTeleporterNE()
+        red_teleporter_2 = RedTeleporter1NE()
         self.main_layer.add(red_teleporter_2)
         red_teleporter_2.move_to(cage.rect.left + 60, cage.rect.top + 57)
 
@@ -124,7 +139,7 @@ class Outside1NE(Level3OutsideArea):
         self.main_layer.add(platform)
         platform.move_to(2000, bottom_platforms_y)
 
-        blue_teleporter_1 = BlueTeleporterNE()
+        blue_teleporter_1 = BlueTeleporter1NE()
         self.main_layer.add(blue_teleporter_1)
         blue_teleporter_1.move_to(
             platform.rect.left + 60,
@@ -141,7 +156,7 @@ class Outside1NE(Level3OutsideArea):
         platform.move_to(level_width - platform.rect.width - 50,
                          bottom_platforms_y)
 
-        blue_teleporter_2 = BlueTeleporterNE()
+        blue_teleporter_2 = BlueTeleporter1NE()
         self.main_layer.add(blue_teleporter_2)
         blue_teleporter_2.move_to(
             platform.rect.right - blue_teleporter_2.rect.width - 60,
@@ -192,7 +207,7 @@ class Outside300NE(Level3OutsideArea):
         # Reverse-gravity platforms
         for x, y in self.PLATFORM_POS:
             platform = FloatingSprite('300ne/small_platform')
-            platform.reverse_gravity = True
+            platform.set_reverse_gravity(True)
             self.main_layer.add(platform)
             platform.move_to(ceiling.rect.left + x,
                              ceiling.rect.top + y)
@@ -240,6 +255,75 @@ class Outside300NE(Level3OutsideArea):
                                 container_base.rect.top)
 
 
+class BlueBoxArea(Area):
+    size = (1024, 768)
+    def __init__(self, *args, **kwargs):
+        super(BlueBoxArea, self).__init__(*args, **kwargs)
+        self.key = 'bluebox'
+        self.door = Door('40000000ad/bluebox_door')
+
+    def setup(self):
+        self.bg.fill((193, 198, 251))
+
+        area_width, area_height = self.size
+
+        ground = Box(area_width, 60, (83, 107, 143))
+        self.main_layer.add(ground)
+        ground.move_to(0, area_height - ground.rect.height)
+
+        ceiling = Box(area_width, 60, (83, 107, 143))
+        self.main_layer.add(ceiling)
+        ceiling.move_to(0, 0)
+
+        wall_height = area_height - ground.rect.height - ceiling.rect.height + 2
+        wall_y = ceiling.rect.bottom - 1
+
+        left_wall = Box(60, wall_height, (83, 107, 143))
+        self.main_layer.add(left_wall)
+        left_wall.move_to(0, wall_y)
+
+        right_wall = Box(60, wall_height, (83, 107, 143))
+        self.main_layer.add(right_wall)
+        right_wall.move_to(area_width - right_wall.rect.width, wall_y)
+
+        self.main_layer.add(self.door)
+        self.door.move_to(left_wall.rect.right + 100,
+                          ground.rect.top - self.door.rect.height)
+        self.door.destination = self.time_period.areas['default'].bluebox
+
+        # Reverse gravity background
+        reverse_grav_bg = Sprite('300ne/bluebox_reverse_gravity_bg')
+        self.bg_layer.add(reverse_grav_bg)
+        reverse_grav_bg.move_to(left_wall.rect.right, ceiling.rect.bottom)
+
+        # Reverse gravity area
+        gravity_eventbox = EventBox(self)
+        gravity_eventbox.rects.append(reverse_grav_bg.rect)
+        gravity_eventbox.watch_object_moves(self.level.engine.player)
+        gravity_eventbox.object_entered.connect(
+            lambda obj: obj.set_reverse_gravity(True))
+        gravity_eventbox.object_exited.connect(
+            lambda obj: obj.set_reverse_gravity(False))
+
+        teleporter1 = BlueBoxTeleporter()
+        self.main_layer.add(teleporter1)
+        teleporter1.move_to(right_wall.rect.left - teleporter1.rect.width - 20,
+                            ground.rect.top - teleporter1.rect.height)
+
+        teleporter2 = BlueBoxTeleporter()
+        teleporter2.reverse_gravity = True
+        self.main_layer.add(teleporter2)
+        teleporter2.move_to(left_wall.rect.right + 20, ceiling.rect.bottom)
+
+        teleporter1.destination = teleporter2
+        teleporter2.destination = teleporter1
+
+        self.main_layer.add(self.level.triangle_key)
+        self.level.triangle_key.move_to(
+            right_wall.rect.left - self.level.triangle_key.rect.width - 40,
+            ceiling.rect.bottom)
+        self.level.triangle_key.set_reverse_gravity(True)
+
 
 class Level3(Level):
     def __init__(self, *args, **kwargs):
@@ -248,6 +332,11 @@ class Level3(Level):
         self.setup()
 
     def setup(self):
-        self.add(TimePeriod('40,000,000 AD', [Outside40000000AD(self)]))
+        self.triangle_key = TriangleKey()
+
+        self.add(TimePeriod('40,000,000 AD', [
+            Outside40000000AD(self),
+            BlueBoxArea(self),
+        ]))
         self.add(TimePeriod('1NE AD', [Outside1NE(self)]))
         self.add(TimePeriod('300NE AD', [Outside300NE(self)]))

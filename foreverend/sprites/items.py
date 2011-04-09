@@ -106,3 +106,11 @@ class Snake(Item):
                 self.direction = Direction.LEFT
 
         super(Snake, self).on_collision(dx, dy, obj, self_rect, obj_rect)
+
+
+class TriangleKey(Item):
+    def __init__(self):
+        super(TriangleKey, self).__init__('300ne/triangle_key')
+
+        # We want this to always match the keyhole.
+        self.flip_image = False
