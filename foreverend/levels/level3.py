@@ -72,6 +72,8 @@ class Outside40000000AD(Level3OutsideArea):
 
     def setup(self):
         self.bg.fill((209, 186, 151))
+        moon = load_image('40000000ad/moon')
+        self.bg.blit(moon, (self.bg.get_width() - 150, 40))
 
         level_width, level_height = self.size
 
