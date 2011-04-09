@@ -146,6 +146,7 @@ class ForeverEndEngine(object):
         assert num < len(self.levels)
         self.paused = False
         self.player.stop_tractor_beam()
+        self.player.stop_riding()
         self.player.block_events = False
         self.player.reverse_gravity = False
         self.active_level = self.levels[num]
