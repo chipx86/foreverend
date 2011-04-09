@@ -3,7 +3,7 @@ import pygame
 from foreverend.eventbox import EventBox
 from foreverend.levels.base import Area, Level, TimePeriod
 from foreverend.particles import ExplosionParticleSystem
-from foreverend.sprites import Box, Dynamite, Elevator, \
+from foreverend.sprites import Box, Dynamite, Elevator, FloatingSprite, \
                                Mountain, Sprite, TiledSprite, Volcano
 from foreverend.timer import Timer
 
@@ -196,15 +196,15 @@ class Outside65000000BC(Level1Area):
                           ground.rect.top - 18)
 
         # Platforms
-        platform = Sprite('65000000bc/platform')
+        platform = FloatingSprite('65000000bc/platform')
         self.main_layer.add(platform)
         platform.move_to(lava_pool.rect.left + 250, lava_pool.rect.top - 10)
 
-        platform = Sprite('65000000bc/platform')
+        platform = FloatingSprite('65000000bc/platform')
         self.main_layer.add(platform)
         platform.move_to(lava_pool.rect.left + 500, lava_pool.rect.top - 8)
 
-        platform = Sprite('65000000bc/platform')
+        platform = FloatingSprite('65000000bc/platform')
         self.main_layer.add(platform)
         platform.move_to(lava_pool.rect.left + 750, lava_pool.rect.top - 12)
 
