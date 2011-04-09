@@ -332,6 +332,10 @@ class Player(Sprite):
         if not self.last_safe_spot:
             self.last_safe_spot = self.rect.topleft
 
+        if self.rect.top > self.layer.area.size[1]:
+            self.on_dead()
+            return
+
         if (self.jumping and
             not self.engine.god_mode and
             ((not self.reverse_gravity and

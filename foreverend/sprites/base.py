@@ -143,10 +143,9 @@ class Sprite(pygame.sprite.DirtySprite):
 
     def _move(self, dx=0, dy=0):
         self.rect.move_ip(dx, dy)
-
-        if self.rect.left < 0:
-            self.rect.left = 0
-
+        self.rect.left = max(self.rect.left, 0)
+        self.rect.right = min(self.rect.right, self.layer.area.size[0])
+        self.rect.top = max(self.rect.top, 0)
         self.check_collisions(dx, dy)
 
     def check_collisions(self, dx=0, dy=0):
