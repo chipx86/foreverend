@@ -180,6 +180,8 @@ class ClosingCutscene(Cutscene):
                            'cause of our downfall.'),
             TextPage(5000, 'We thought we could fix the planet. Fix time.'),
             TextPage(5000, 'Now we are all sons of bitches.'),
+            TextPage(2000, 'Development and artwork by Christian Hammond.\n'
+                           'Thanks for playing!'),
         ]
 
 
