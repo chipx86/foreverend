@@ -1,3 +1,5 @@
+import random
+
 import pygame
 from pygame.locals import *
 
@@ -47,9 +49,38 @@ class Crossover(Sprite):
 
     def update_image(self):
         if not self.image:
-            self.crossover_area.draw(None, bg=self.layer.area.bg)
-            self.image = self.crossover_area.surface.subsurface(self.rect)
-            #self.image.set_alpha(100)
+            possible_sprites = []
+            new_rect = pygame.Rect(0, 0, 0, 0)
+
+            for layer in self.crossover_area.layers:
+                if layer.index == self.layer.index:
+                    for sprite in layer.quad_tree.get_sprites(self.rect):
+                        if new_rect.width == 0:
+                            new_rect = sprite.rect
+                        else:
+                            new_rect = new_rect.union(sprite.rect)
+
+                    break
+
+            if new_rect.width == 0:
+                self.remove()
+                return
+
+            w = random.randint(300, 600)
+            h = random.randint(300, 600)
+            x = random.randint(max(new_rect.left, self.rect.left),
+                               min(new_rect.right, self.rect.right))
+            y = random.randint(max(new_rect.top, self.rect.top),
+                               min(new_rect.bottom, self.rect.bottom))
+            self.rect = pygame.Rect(x, y, w, h)
+
+            self.image = pygame.Surface(self.rect.size).convert_alpha()
+            self.image.fill((0, 0, 0, 0))
+
+            for sprite in layer.quad_tree.get_sprites(self.rect):
+                pos = (sprite.rect.left - self.rect.left,
+                       sprite.rect.top - self.rect.top)
+                self.image.blit(sprite.image, pos)
 
 
 class Door(Sprite):

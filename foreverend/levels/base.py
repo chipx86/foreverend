@@ -170,8 +170,8 @@ class Layer(object):
 
 
 class Level(object):
-    CROSSOVER_TIME_INTERVAL = (6000, 10000)
-    MAX_CROSSOVERS = 1
+    CROSSOVER_TIME_INTERVAL = (4000, 10000)
+    MAX_CROSSOVERS = 3
 
     def __init__(self, engine):
         self.engine = engine
@@ -180,7 +180,8 @@ class Level(object):
         self.music = None
         self.crossover_timer = None
         self.crossovers = []
-        self.pending_crossovers = 0
+        self.pending_crossovers = {}
+        self.next_crossover_id = 0
 
         self.engine.tick.connect(self.on_tick)
 
@@ -228,9 +229,11 @@ class Level(object):
             timer.stop()
             crossover.remove()
 
-        self.crossovers = []
-        self.pending_crossovers = 0
+        for pending_timer in self.pending_crossovers.itervalues():
+            pending_timer.stop()
 
+        self.crossovers = []
+        self.pending_crossovers = {}
 
     def switch_time_period(self, num):
         time_period = self.time_periods[num]
@@ -267,20 +270,24 @@ class Level(object):
         if not self.engine.paused and self.engine.active_level == self:
             self.active_area.tick()
 
-            if (len(self.crossovers) + self.pending_crossovers <
+            if (len(self.crossovers) + len(self.pending_crossovers) <
                 self.MAX_CROSSOVERS):
-                self.pending_crossovers += 1
-                crossover_timer = Timer(
+                crossover_id = self.next_crossover_id
+                self.next_crossover_id += 1
+                timer = Timer(
                     random.randint(*self.CROSSOVER_TIME_INTERVAL),
-                    self.show_crossover,
+                    lambda: self.show_crossover(crossover_id),
                     one_shot=True)
+                self.pending_crossovers[crossover_id] = timer
 
-    def show_crossover(self):
+    def show_crossover(self, crossover_id):
         def hide_crossover():
             crossover_sprite.remove()
             self.crossovers.remove((crossover_sprite, timer))
 
-        self.pending_crossovers -= 1
+        self.pending_crossovers[crossover_id].stop()
+        del self.pending_crossovers[crossover_id]
+
         key = self.active_area.key
 
         time_periods = [
@@ -292,16 +299,16 @@ class Level(object):
 
         i = random.randint(0, len(time_periods) - 1)
 
-        w = random.randint(300, 500)
-        h = random.randint(300, 500)
-        x = random.randint(self.engine.camera.rect.left,
-                           self.engine.camera.rect.right - w)
-        y = random.randint(self.engine.camera.rect.top,
-                           self.engine.camera.rect.bottom - h)
 
         crossover_sprite = Crossover(time_periods[i])
-        crossover_sprite.rect = pygame.Rect(x, y, w, h)
-        self.active_area.bg_layer.add(crossover_sprite)
+        crossover_sprite.rect = self.engine.camera.rect
+
+        if random.randint(0, 5) <= 3:
+            layer = self.active_area.bg_layer
+        else:
+            layer = self.active_area.main_layer
+
+        layer.add(crossover_sprite)
 
         timer = Timer(500, hide_crossover, one_shot=True)
         timer.start()
