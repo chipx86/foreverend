@@ -131,14 +131,29 @@ class Outside1NE(Level3OutsideArea):
         self.main_layer.add(platform)
         platform.move_to(934, bottom_platforms_y)
 
-        cage = FloatingSprite('1ne/cage')
-        cage.use_pixel_collisions = True
-        self.main_layer.add(cage)
-        cage.move_to(2000, 53)
+        cage_left = FloatingSprite('1ne/cage_wall_left')
+        self.main_layer.add(cage_left)
+        cage_left.move_to(2000, 53)
+
+        cage_top = FloatingSprite('1ne/cage_wall_top')
+        self.main_layer.add(cage_top)
+        cage_top.move_to(cage_left.rect.left, cage_left.rect.top)
+
+        cage_right = FloatingSprite('1ne/cage_wall_right')
+        self.main_layer.add(cage_right)
+        cage_right.move_to(cage_top.rect.right - cage_right.rect.width,
+                           cage_top.rect.top)
+
+        cage_bottom = FloatingSprite('1ne/cage_wall_bottom')
+        self.main_layer.add(cage_bottom)
+        cage_bottom.move_to(cage_left.rect.left,
+                            cage_left.rect.bottom - cage_bottom.rect.height)
 
         red_teleporter_2 = RedTeleporter1NE()
         self.main_layer.add(red_teleporter_2)
-        red_teleporter_2.move_to(cage.rect.left + 60, cage.rect.top + 57)
+        red_teleporter_2.move_to(
+            cage_left.rect.right + 20,
+            cage_bottom.rect.top - red_teleporter_2.rect.height)
 
         red_teleporter_1.destination = red_teleporter_2
         red_teleporter_2.destination = red_teleporter_1
