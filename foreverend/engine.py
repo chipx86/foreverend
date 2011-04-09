@@ -27,8 +27,6 @@ class Camera(object):
         self.rect.height -= self.engine.ui_manager.control_panel.rect.height
         self.old_player_rect = None
 
-        self.engine.tick.connect(self.update)
-
     def update(self):
         if self.engine.paused or not self.engine.active_level:
             return
@@ -37,9 +35,6 @@ class Camera(object):
 
         if player_rect == self.old_player_rect:
             return
-
-        self.old_player_rect = player_rect.copy()
-        old_rect = self.rect.copy()
 
         if player_rect.centerx > self.rect.centerx + self.SCREEN_PAD:
             self.rect.centerx = player_rect.centerx - self.SCREEN_PAD
@@ -51,9 +46,8 @@ class Camera(object):
         elif player_rect.centery < self.rect.centery - self.SCREEN_PAD:
             self.rect.centery = player_rect.centery + self.SCREEN_PAD
 
-        if old_rect != self.rect:
-            self.rect.clamp_ip(
-                pygame.Rect(0, 0, *self.engine.active_level.active_area.size))
+        self.rect.clamp_ip(
+            pygame.Rect(0, 0, *self.engine.active_level.active_area.size))
 
 
 class ForeverEndEngine(object):
@@ -194,6 +188,9 @@ class ForeverEndEngine(object):
         area = self.active_level.active_area
         self.surface = pygame.Surface(area.size)
 
+        if self.camera:
+            self.camera.update()
+
     def _mainloop(self):
         while 1:
             for event in pygame.event.get():
@@ -269,6 +266,9 @@ class ForeverEndEngine(object):
         self._pause()
 
     def _paint(self):
+        if self.camera:
+            self.camera.update()
+
         if self.active_cutscene:
             self.screen.set_clip(None)
             self.active_cutscene.draw(self.screen)
