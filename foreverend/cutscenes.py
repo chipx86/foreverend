@@ -103,6 +103,7 @@ class OpeningCutscene(Cutscene):
     def __init__(self):
         super(OpeningCutscene, self).__init__()
         self.earth = load_image('earth.jpg')
+        self.time_fractures = load_image('earth_time_fractures')
 
         self.pages = [
             TextPage(4000,
@@ -141,6 +142,8 @@ class OpeningCutscene(Cutscene):
         surface.fill((0, 0, 0))
         surface.blit(self.earth,
                      (surface.get_width() - self.earth.get_width(), 0))
+        surface.blit(self.time_fractures,
+                     (surface.get_width() - self.earth.get_width() + 50, 20))
 
 
 class TutorialCutscene(Cutscene):
