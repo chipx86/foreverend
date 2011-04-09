@@ -132,6 +132,7 @@ class ForeverEndEngine(object):
 
         self.active_level.switch_time_period(0)
         self.player.move_to(*self.active_level.active_area.start_pos)
+        self.camera.update()
         self.player.show()
 
         self.level_changed.emit()
