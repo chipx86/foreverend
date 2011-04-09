@@ -1,6 +1,7 @@
 import pygame
 
 from foreverend.resources import get_font_filename, load_image
+from foreverend.signals import Signal
 from foreverend.sprites.player import Player
 from foreverend.timer import Timer
 
@@ -10,6 +11,8 @@ class Widget(object):
         self.ui_manager = ui_manager
         self.ui_manager.widgets.append(self)
         self.rect = pygame.Rect(0, 0, 0, 0)
+
+        self.closed = Signal()
 
     def move_to(self, x, y):
         self.rect.left = x
@@ -71,11 +74,13 @@ class TextBox(Widget):
                 if 'padding_top' in attrs:
                     column_height += attrs['padding_top']
 
+                column_height += self.line_spacing
+
                 line_height = max(line_height, column_height)
 
             if column_surfaces:
                 surfaces.append((line_height, column_surfaces))
-                total_height += line_height + self.line_spacing
+                total_height += line_height
 
         # Get rid of that last spacing.
         total_height -= self.line_spacing
@@ -189,6 +194,8 @@ class UIManager(object):
     def __init__(self, engine):
         pygame.font.init()
 
+        self.ready = Signal()
+
         self.engine = engine
         self.size = engine.screen.get_size()
         self.surface = pygame.Surface(self.size).convert_alpha()
@@ -220,6 +227,8 @@ class UIManager(object):
 
         timer = Timer(2000, lambda: self.close(widget), one_shot=True)
         timer.start()
+
+        return widget
 
     def show_textbox(self, text, **kwargs):
         textbox = TextBox(self, text, **kwargs)

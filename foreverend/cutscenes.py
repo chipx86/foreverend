@@ -43,8 +43,12 @@ class TextPage(DelayPage):
 
     def start(self):
         ui_manager = get_engine().ui_manager
+        attrs = {
+            'font': ui_manager.small_font,
+        }
+
         self.widget = ui_manager.show_textbox([
-            ({'font': ui_manager.small_font}, line)
+            (attrs, line)
             for line in self.text.split('\n')
         ])
 
