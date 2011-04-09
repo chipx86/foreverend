@@ -270,7 +270,8 @@ class Level(object):
         if not self.engine.paused and self.engine.active_level == self:
             self.active_area.tick()
 
-            if (len(self.crossovers) + len(self.pending_crossovers) <
+            if (len(self.time_periods) > 1 and
+                len(self.crossovers) + len(self.pending_crossovers) <
                 self.MAX_CROSSOVERS):
                 crossover_id = self.next_crossover_id
                 self.next_crossover_id += 1
@@ -296,6 +297,9 @@ class Level(object):
             if (time_period != self.active_time_period and
                 key in time_period.areas)
         ]
+
+        if len(time_periods) - 1 <= 0:
+            return
 
         i = random.randint(0, len(time_periods) - 1)
 

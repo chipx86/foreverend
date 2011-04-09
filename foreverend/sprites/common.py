@@ -63,15 +63,21 @@ class Crossover(Sprite):
                     break
 
             if new_rect.width == 0:
-                self.remove()
+                self.hide()
                 return
 
             w = random.randint(300, 600)
             h = random.randint(300, 600)
-            x = random.randint(max(new_rect.left, self.rect.left),
-                               min(new_rect.right, self.rect.right))
-            y = random.randint(max(new_rect.top, self.rect.top),
-                               min(new_rect.bottom, self.rect.bottom))
+
+            try:
+                x = random.randint(max(new_rect.left, self.rect.left),
+                                   min(new_rect.right, self.rect.right))
+                y = random.randint(max(new_rect.top, self.rect.top),
+                                   min(new_rect.bottom, self.rect.bottom))
+            except ValueError:
+                self.hide()
+                return
+
             self.rect = pygame.Rect(x, y, w, h)
 
             self.image = pygame.Surface(self.rect.size).convert_alpha()
