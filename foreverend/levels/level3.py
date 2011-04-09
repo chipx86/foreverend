@@ -1,6 +1,6 @@
 import pygame
 
-from foreverend.effects import FloatEffect
+from foreverend.effects import FloatEffect, MoveEffect
 from foreverend.eventbox import EventBox
 from foreverend.levels.base import Area, Level, TimePeriod
 from foreverend.resources import load_image
@@ -177,6 +177,7 @@ class Outside300NE(Level3OutsideArea):
     ]
 
     def setup(self):
+        self.in_end_sequence = False
         self.bg.fill((200, 200, 200))
 
         level_width, level_height = self.size
@@ -253,6 +254,44 @@ class Outside300NE(Level3OutsideArea):
 
         self.level.add_artifact(self, container_base.rect.centerx,
                                 container_base.rect.top)
+
+        self.keyhole = Sprite('300ne/keyhole')
+        self.main_layer.add(self.keyhole)
+        self.keyhole.move_to(
+            container.rect.right - self.keyhole.rect.width - 10,
+            container.rect.bottom - self.keyhole.rect.height - 10)
+
+        keyhole_eventbox = EventBox(self)
+        keyhole_eventbox.rects.append(
+            pygame.Rect(container.rect.right,
+                        self.keyhole.rect.top,
+                        40,
+                        self.keyhole.rect.height))
+        keyhole_eventbox.watch_object_moves(self.level.triangle_key)
+        keyhole_eventbox.object_entered.connect(self.start_end_sequence)
+
+    def start_end_sequence(self, *args, **kwargs):
+        if self.in_end_sequence:
+            return
+
+        self.in_end_sequence = True
+        print 'end sequence'
+        player = self.level.engine.player
+        player.stop_tractor_beam()
+        player.block_events = True
+        player.velocity = (0, 0)
+        player.fall()
+
+        move_effect = MoveEffect(self.level.triangle_key)
+        move_effect.total_time_ms = 1500
+        move_effect.timer_ms = 30
+        move_effect.destination = self.keyhole.rect.topleft
+        move_effect.stopped.connect(self.on_key_inserted)
+        move_effect.start()
+
+    def on_key_inserted(self):
+        self.level.triangle_key.remove()
+        self.keyhole.remove()
 
 
 class BlueBoxArea(Area):
