@@ -233,6 +233,8 @@ class Outside300NE(Level3OutsideArea):
             lambda obj: obj.set_reverse_gravity(True))
         gravity_eventbox.object_exited.connect(
             lambda obj: obj.set_reverse_gravity(False))
+        gravity_eventbox.object_moved.connect(
+            lambda obj: obj.set_reverse_gravity(True))
 
         # Right-side floor
         floor = Sprite('300ne/floor')
@@ -514,6 +516,8 @@ class BlueBoxArea(Area):
             lambda obj: obj.set_reverse_gravity(True))
         gravity_eventbox.object_exited.connect(
             lambda obj: obj.set_reverse_gravity(False))
+        gravity_eventbox.object_moved.connect(
+            lambda obj: obj.set_reverse_gravity(True))
 
         teleporter1 = BlueBoxTeleporter()
         self.main_layer.add(teleporter1)

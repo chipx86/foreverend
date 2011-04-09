@@ -216,6 +216,9 @@ class Level(object):
             time_period.setup()
 
     def switch_area(self, area):
+        if area == self.active_area:
+            return
+
         player = self.engine.player
 
         if self.active_area:
@@ -224,6 +227,7 @@ class Level(object):
         self.active_area = area
         self.active_area.main_layer.add(player)
         self.area_changed.emit()
+        player.reset_gravity()
 
         for crossover, timer in self.crossovers:
             timer.stop()

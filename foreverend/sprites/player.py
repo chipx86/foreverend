@@ -267,6 +267,17 @@ class Player(Sprite):
         self.propulsion_below.show()
         self.stop_riding()
 
+    def reset_gravity(self):
+        if self.reverse_gravity:
+            self.reverse_gravity = False
+
+            if self.falling:
+                # Reset the fall
+                self.falling = False
+                self.fall()
+
+            self.update_image()
+
     def stop_riding(self):
         if self.vehicle:
             self.vehicle_moved_cnx.disconnect()
