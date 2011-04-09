@@ -1,8 +1,11 @@
+import random
+
 import pygame
 from pygame.locals import *
 
 from foreverend.eventbox import EventBox
 from foreverend.signals import Signal
+from foreverend.sprites.common import Crossover
 from foreverend.sprites.items import Artifact
 from foreverend.timer import Timer
 
@@ -167,11 +170,17 @@ class Layer(object):
 
 
 class Level(object):
+    CROSSOVER_TIME_INTERVAL = (6000, 10000)
+    MAX_CROSSOVERS = 1
+
     def __init__(self, engine):
         self.engine = engine
         self.time_periods = []
         self.active_area = None
         self.music = None
+        self.crossover_timer = None
+        self.crossovers = []
+        self.pending_crossovers = 0
 
         self.engine.tick.connect(self.on_tick)
 
@@ -215,6 +224,14 @@ class Level(object):
         self.active_area.main_layer.add(player)
         self.area_changed.emit()
 
+        for crossover, timer in self.crossovers:
+            timer.stop()
+            crossover.remove()
+
+        self.crossovers = []
+        self.pending_crossovers = 0
+
+
     def switch_time_period(self, num):
         time_period = self.time_periods[num]
 
@@ -249,6 +266,46 @@ class Level(object):
     def on_tick(self):
         if not self.engine.paused and self.engine.active_level == self:
             self.active_area.tick()
+
+            if (len(self.crossovers) + self.pending_crossovers <
+                self.MAX_CROSSOVERS):
+                self.pending_crossovers += 1
+                crossover_timer = Timer(
+                    random.randint(*self.CROSSOVER_TIME_INTERVAL),
+                    self.show_crossover,
+                    one_shot=True)
+
+    def show_crossover(self):
+        def hide_crossover():
+            crossover_sprite.remove()
+            self.crossovers.remove((crossover_sprite, timer))
+
+        self.pending_crossovers -= 1
+        key = self.active_area.key
+
+        time_periods = [
+            time_period.areas[key]
+            for time_period in self.time_periods
+            if (time_period != self.active_time_period and
+                key in time_period.areas)
+        ]
+
+        i = random.randint(0, len(time_periods) - 1)
+
+        w = random.randint(300, 500)
+        h = random.randint(300, 500)
+        x = random.randint(self.engine.camera.rect.left,
+                           self.engine.camera.rect.right - w)
+        y = random.randint(self.engine.camera.rect.top,
+                           self.engine.camera.rect.bottom - h)
+
+        crossover_sprite = Crossover(time_periods[i])
+        crossover_sprite.rect = pygame.Rect(x, y, w, h)
+        self.active_area.bg_layer.add(crossover_sprite)
+
+        timer = Timer(500, hide_crossover, one_shot=True)
+        timer.start()
+        self.crossovers.append((crossover_sprite, timer))
 
 
 class TimePeriod(object):
@@ -292,6 +349,7 @@ class Area(object):
         self.event_handlers = []
         self.timers = []
         self.particle_systems = []
+        self.surface = pygame.Surface(self.size).convert()
 
     def new_layer(self):
         layer = Layer(len(self.layers), self)
@@ -299,9 +357,14 @@ class Area(object):
         self.layers.append(layer)
         return layer
 
-    def draw(self, screen):
-        screen.blit(self.bg, self.engine.camera.rect.topleft)
-        self.group.draw(screen)
+    def draw(self, screen, bg=None):
+        self.surface.set_clip(self.engine.camera.rect)
+
+        if not bg:
+            bg = self.bg
+
+        self.surface.blit(bg, self.engine.camera.rect.topleft)
+        self.group.draw(self.surface)
 
         if self.engine.debug_rects:
             for sprite in self.group:
@@ -317,7 +380,10 @@ class Area(object):
                         pygame.draw.rect(screen, (255, 0, 0), rect, 1)
 
         for particle_system in self.particle_systems:
-            particle_system.draw(screen)
+            particle_system.draw(self.surface)
+
+        if screen:
+            screen.blit(self.surface, (0, 0))
 
     def register_for_events(self, obj):
         self.event_handlers.append(obj)

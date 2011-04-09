@@ -1,7 +1,7 @@
 import pygame
 from pygame.locals import *
 
-from foreverend.effects import FloatEffect
+from foreverend.effects import FloatEffect, ShakeEffect
 from foreverend.eventbox import EventBox
 from foreverend.signals import Signal
 from foreverend.sprites.base import Sprite
@@ -29,6 +29,27 @@ class Button(Sprite):
 
     def handle_collision(self, *args, **kwargs):
         self.pressed.emit()
+
+
+class Crossover(Sprite):
+    def __init__(self, area):
+        super(Crossover, self).__init__(None)
+        self.collidable = False
+        self.obey_gravity = False
+        self.crossover_area = area
+
+    def on_added(self, layer):
+        self.effect = ShakeEffect(self)
+        self.effect.start()
+
+    def on_removed(self, layer):
+        self.effect.stop()
+
+    def update_image(self):
+        if not self.image:
+            self.crossover_area.draw(None, bg=self.layer.area.bg)
+            self.image = self.crossover_area.surface.subsurface(self.rect)
+            #self.image.set_alpha(100)
 
 
 class Door(Sprite):

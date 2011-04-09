@@ -265,7 +265,9 @@ class Player(Sprite):
             self.velocity = (self.velocity[0], -self.JUMP_SPEED)
 
         self.propulsion_below.show()
+        self.stop_riding()
 
+    def stop_riding(self):
         if self.vehicle:
             self.vehicle_moved_cnx.disconnect()
             self.vehicle = None
