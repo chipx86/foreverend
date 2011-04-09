@@ -102,8 +102,14 @@ class ForeverEndEngine(object):
         self.switch_level(self.levels.index(self.active_level))
 
     def game_over(self):
-        self.ui_manager.show_textbox('Game Over')
+        def on_timeout():
+            widget.close()
+            self._setup_game()
+
+        widget = self.ui_manager.show_textbox('Game Over')
         self.paused = True
+
+        timer = Timer(2000, on_timeout, one_shot=True)
 
     def show_end_scene(self):
         self.ui_manager.control_panel.close()
