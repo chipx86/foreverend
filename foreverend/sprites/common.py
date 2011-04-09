@@ -98,7 +98,12 @@ class Mountain(object):
 
         for i in range(1, 6):
             sprite = Sprite('mountain_left_%s' % i)
-            sprite.use_pixel_collisions = True
+
+            if i != 3:
+                # Sort of a hack. We need a blocker so you can't
+                # climb the mountain.
+                sprite.use_pixel_collisions = True
+
             sprite.update_image()
             self.left_sprites.append(sprite)
 
