@@ -19,9 +19,10 @@ class Level2OutsideArea(Area):
 
 
 class Outside12000BC(Level2OutsideArea):
-    def setup(self):
-        self.bg.fill((219, 228, 252))
+    def draw_bg(self, surface):
+        surface.fill((219, 228, 252))
 
+    def setup(self):
         level_width, level_height = self.size
 
         ground = TiledSprite('12000bc/ground', 3, 1)
@@ -71,9 +72,10 @@ class Outside1000AD(Level2OutsideArea):
         super(Outside1000AD, self).__init__(*args, **kwargs)
         self.pyramid_door = Door('1000ad/pyramid_door')
 
-    def setup(self):
-        self.bg.fill((255, 251, 219))
+    def draw_bg(self, surface):
+        surface.fill((255, 251, 219))
 
+    def setup(self):
         level_width, level_height = self.size
 
         tiles_x = self.size[0] / 144
@@ -114,9 +116,10 @@ class Outside1000AD(Level2OutsideArea):
 
 
 class Outside2300AD(Level2OutsideArea):
-    def setup(self):
-        self.bg.fill((89, 80, 67))
+    def draw_bg(self, surface):
+        surface.fill((89, 80, 67))
 
+    def setup(self):
         level_width, level_height = self.size
 
         toxicwaste = TiledSprite('2300ad/toxicwaste', 5, 1)
@@ -242,10 +245,11 @@ class Pyramid1000AD(Level2PyramidArea):
         self.wall_name = '1000ad/pyramid_wall'
         self.spike_name = '1000ad/spike'
 
+    def draw_bg(self, surface):
+        surface.fill((255, 251, 219))
+
     def setup(self):
         super(Pyramid1000AD, self).setup()
-
-        self.bg.fill((255, 251, 219))
 
         self.door.destination = self.time_period.areas['default'].pyramid_door
         self.main_layer.add(self.door)
@@ -308,9 +312,11 @@ class Pyramid2300AD(Level2PyramidArea):
         self.next_platform_num = 0
         self.last_platform = None
 
+    def draw_bg(self, surface):
+        surface.fill((89, 80, 67))
+
     def setup(self):
         super(Pyramid2300AD, self).setup()
-        self.bg.fill((89, 80, 67))
 
         # Fall to your doom, probes!
         self.pit.remove()

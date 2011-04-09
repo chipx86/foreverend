@@ -70,11 +70,12 @@ class Outside40000000AD(Level3OutsideArea):
         super(Outside40000000AD, self).__init__(*args, **kwargs)
         self.bluebox = Door('40000000ad/bluebox')
 
-    def setup(self):
-        self.bg.fill((209, 186, 151))
+    def draw_bg(self, surface):
+        surface.fill((209, 186, 151))
         moon = load_image('40000000ad/moon')
-        self.bg.blit(moon, (self.bg.get_width() - 150, 40))
+        surface.blit(moon, (surface.get_width() - 150, 40))
 
+    def setup(self):
         level_width, level_height = self.size
 
         lava_name = '65000000bc/lava_pool'
@@ -100,9 +101,10 @@ class Outside40000000AD(Level3OutsideArea):
 
 
 class Outside1NE(Level3OutsideArea):
-    def setup(self):
-        self.bg.fill((50, 50, 50))
+    def draw_bg(self, surface):
+        surface.fill((50, 50, 50))
 
+    def setup(self):
         level_width, level_height = self.size
 
         bottom_platforms_y = self.start_pos[1] + \
@@ -183,9 +185,11 @@ class Outside300NE(Level3OutsideArea):
         (912, 272),
     ]
 
+    def draw_bg(self, surface):
+        surface.fill((200, 200, 200))
+
     def setup(self):
         self.in_end_sequence = False
-        self.bg.fill((200, 200, 200))
 
         level_width, level_height = self.size
 
@@ -474,9 +478,10 @@ class BlueBoxArea(Area):
         self.key = 'bluebox'
         self.door = Door('40000000ad/bluebox_door')
 
-    def setup(self):
-        self.bg.fill((193, 198, 251))
+    def draw_bg(self, surface):
+        surface.fill((193, 198, 251))
 
+    def setup(self):
         area_width, area_height = self.size
 
         ground = Box(area_width, 60, (83, 107, 143))

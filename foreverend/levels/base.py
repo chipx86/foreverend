@@ -360,11 +360,10 @@ class Area(object):
         self.bg_layer = self.new_layer()
         self.main_layer = self.new_layer()
         self.fg_layer = self.new_layer()
-        self.bg = pygame.Surface(self.engine.screen.get_size()).convert()
+        self.layers = [self.bg_layer, self.main_layer, self.fg_layer]
         self.event_handlers = []
         self.timers = []
         self.particle_systems = []
-        self.surface = pygame.Surface(self.size).convert()
 
     def new_layer(self):
         layer = Layer(len(self.layers), self)
@@ -372,14 +371,12 @@ class Area(object):
         self.layers.append(layer)
         return layer
 
-    def draw(self, screen, bg=None):
-        self.surface.set_clip(self.engine.camera.rect)
+    def draw_bg(self, surface):
+        pass
 
-        if not bg:
-            bg = self.bg
-
-        self.surface.blit(bg, self.engine.camera.rect.topleft)
-        self.group.draw(self.surface)
+    def draw(self, screen):
+        self.draw_bg(screen)
+        self.group.draw(screen)
 
         if self.engine.debug_rects:
             for sprite in self.group:
@@ -395,10 +392,7 @@ class Area(object):
                         pygame.draw.rect(screen, (255, 0, 0), rect, 1)
 
         for particle_system in self.particle_systems:
-            particle_system.draw(self.surface)
-
-        if screen:
-            screen.blit(self.surface, (0, 0))
+            particle_system.draw(screen)
 
     def register_for_events(self, obj):
         self.event_handlers.append(obj)

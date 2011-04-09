@@ -18,9 +18,10 @@ class Level1Area(Area):
 
 
 class Outside600AD(Level1Area):
-    def setup(self):
-        self.bg.fill((237, 243, 255))
+    def draw_bg(self, surface):
+        surface.fill((237, 243, 255))
 
+    def setup(self):
         tiles_x = self.size[0] / 32
         ground = TiledSprite('ground', tiles_x, 1)
         self.main_layer.add(ground)
@@ -78,9 +79,10 @@ class Outside1999AD(Level1Area):
     WALL_COLOR = (211, 215, 207)
     FLOOR_COLOR = (211, 215, 207)
 
-    def setup(self):
-        self.bg.fill((199, 214, 251))
+    def draw_bg(self, surface):
+        surface.fill((199, 214, 251))
 
+    def setup(self):
         level_width, level_height = self.size
 
         # Ground

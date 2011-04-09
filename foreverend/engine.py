@@ -111,7 +111,7 @@ class ForeverEndEngine(object):
         def on_timeout():
             widget.close()
             self._setup_game()
-            sys.exit(0)
+            #sys.exit(0)
 
         widget = self.ui_manager.show_textbox('Game Over')
         self.paused = True
