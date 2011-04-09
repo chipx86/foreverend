@@ -1,10 +1,17 @@
 import pygame
 from pygame.locals import *
 
+try:
+    import pygame.mixer
+    has_mixer = True
+except:
+    has_mixer = False
+
 from foreverend import set_engine
 from foreverend.cutscenes import ClosingCutscene, OpeningCutscene, \
                                  TutorialCutscene
 from foreverend.levels import get_levels
+from foreverend.resources import get_music_filename
 from foreverend.signals import Signal
 from foreverend.sprites import Player, TiledSprite
 from foreverend.timer import Timer
@@ -154,6 +161,14 @@ class ForeverEndEngine(object):
         self.player.move_to(*self.active_level.active_area.start_pos)
         self.camera.update()
         self.player.show()
+
+        if has_mixer:
+            pygame.mixer.music.stop()
+
+            if self.active_level.music:
+                pygame.mixer.music.load(
+                    get_music_filename(self.active_level.music))
+                pygame.mixer.music.play(-1)
 
         self.level_changed.emit()
 

@@ -171,6 +171,7 @@ class Level(object):
         self.engine = engine
         self.time_periods = []
         self.active_area = None
+        self.music = None
 
         self.engine.tick.connect(self.on_tick)
 

@@ -41,3 +41,7 @@ def load_image(name):
 
 def get_font_filename():
     return os.path.join(DATA_DIR, 'DejaVuSans.ttf')
+
+
+def get_music_filename(name):
+    return os.path.join(DATA_DIR, 'sound', name)
