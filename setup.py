@@ -17,7 +17,7 @@ except:
 
 PACKAGE_NAME = 'forever_end'
 APP_NAME = 'foreverend'
-VERSION = '0.2'
+VERSION = '0.3'
 
 METADATA = dict(
     name=PACKAGE_NAME,
