@@ -23,7 +23,7 @@ class TractorBeam(Sprite):
         self.item_offset = 0
 
     def _check_for_items(self):
-        if self.item:
+        if self.item or not self.visible:
             return
 
         for obj, _, _ in self.get_collisions(ignore_collidable_flag=True):
