@@ -121,6 +121,7 @@ class ForeverEndEngine(object):
         self.paused = False
         self.player.stop_tractor_beam()
         self.player.block_events = False
+        self.player.reverse_gravity = False
         self.active_level = self.levels[num]
         self.active_level.reset()
 
