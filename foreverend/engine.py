@@ -74,7 +74,7 @@ class ForeverEndEngine(object):
         self.clock = pygame.time.Clock()
         self.player = Player()
         self.ui_manager = UIManager(self)
-        self.camera = Camera(self)
+        self.camera = None
 
         # Debug flags
         self.debug_rects = False
@@ -118,6 +118,9 @@ class ForeverEndEngine(object):
         self.active_cutscene.start()
 
     def _setup_game(self):
+        self.ui_manager.add_control_panel()
+        self.camera = Camera(self)
+
         self.active_cutscene = None
 
         self.player.update_image()

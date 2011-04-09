@@ -102,6 +102,7 @@ class Cutscene(object):
 class OpeningCutscene(Cutscene):
     def __init__(self):
         super(OpeningCutscene, self).__init__()
+        self.earth = load_image('earth.jpg')
 
         self.pages = [
             TextPage(4000,
@@ -135,6 +136,11 @@ class OpeningCutscene(Cutscene):
             TextPage(4000,
                      'But a probe...'),
         ]
+
+    def draw(self, surface):
+        surface.fill((0, 0, 0))
+        surface.blit(self.earth,
+                     (surface.get_width() - self.earth.get_width(), 0))
 
 
 class TutorialCutscene(Cutscene):

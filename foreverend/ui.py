@@ -207,11 +207,14 @@ class UIManager(object):
         self.font = pygame.font.Font(self.default_font, 20)
         self.small_font = pygame.font.Font(self.default_font, 16)
 
+        self.engine.level_changed.connect(self.on_level_changed)
+
+        self.control_panel = None
+
+    def add_control_panel(self):
         self.control_panel = ControlPanel(self)
         self.control_panel.move_to(
             0, self.size[1] - self.control_panel.rect.height)
-
-        self.engine.level_changed.connect(self.on_level_changed)
 
     def show_level(self, level):
         timeline_attrs = {
